@@ -6,79 +6,86 @@ The main goal of Tasktrone is to provide a simpler way for every worker or emplo
 
 **Requirements:**
 
-1- <h5>User</h5> can create a <h5>Project , set all project essential data, add other <h5>User</h5>s, each <h5>Project</h5> contains a main <h5>Dashboard</h5> displays main toolbar, Text Announcement space, and Kanban board.
-2- Once <h5>Task</h5> created, <h5>User</h5> could be either an <h5>Admin</h5> , <h5>Reviewer</h5> or <h5>Worker</h5> .
-3- Each <h5>Task</h5> has 3 phases <h5>Story , <h5>Processing</h5> , <h5>ToBeReviewed</h5> , <h5>Approval , <h5>Done .
-4- <h5>Admin</h5> can create, edit, and delete <h5>Task s also can add <h5>Worker s to join this <h5>Task instance.
-5- <h5>Worker</h5> can download <h5>Task</h5> files and upload back required files.
-6- <h5>Admin</h5> can set any <h5>Worker</h5> as a <h5>Reviewer</h5> who can make approval to the whole task.
-
+<ul>
+<li> <h5>User</h5> can create a <h5>Project , set all project essential data, add other <h5>User</h5>s, each <h5>Project</h5> contains a main <h5>Dashboard</h5> displays main toolbar, Text Announcement space, and Kanban board.
+<li> Once <h5>Task</h5> created, <h5>User</h5> could be either an <h5>Admin</h5> , <h5>Reviewer</h5> or <h5>Worker</h5> .
+<li> Each <h5>Task</h5> has 3 phases <h5>Story , <h5>Processing</h5> , <h5>ToBeReviewed</h5> , <h5>Approval , <h5>Done .
+<li> <h5>Admin</h5> can create, edit, and delete <h5>Task s also can add <h5>Worker s to join this <h5>Task instance.
+<li> <h5>Worker</h5> can download <h5>Task</h5> files and upload back required files.
+<li> <h5>Admin</h5> can set any <h5>Worker</h5> as a <h5>Reviewer</h5> who can make approval to the whole task.
+</ul>
 **Acronyms and abbreviations:**
-
-1- UID:user ID
-2- PID: project ID
-3- projectName
-4- projectStartDate
-5- projectEndDate
-6- Story
-7- requirementsMaterial
+<ul>
+<li> UID:user ID
+<li> PID: project ID
+<li> projectName
+<li> projectStartDate
+<li> projectEndDate
+<li> Story
+<li> requirementsMaterial
+</ul>
 
 **Functions:**
 
 **Main domain:**
 
-1- createUser(userName, password, email, phone)
-2- Login()
+<ul>
+<li> createUser(userName, password, email, phone)
+<li> Login()
+</ul>
 
 **Project domain**
 
-3- createProject(UID, projectName,projectStartDate, projectEndDate )
-4- terminateProject()
+<ul>
+<li> createProject(UID, projectName,projectStartDate, projectEndDate )
+<li> terminateProject()
+</ul>
 
 **User domain**
 
-5- addWorker(UID,PID)
+<ul>
+<li> addWorker(UID,PID)
 
-6- confirmJoin()
+<li> confirmJoin()
 
-7- declineJoin()
+<li> declineJoin()
 
-8- removeWorker()
+<li> removeWorker()
 
-9- createTask(taskName,UID[],story, requirementsMaterial) 10- editTask()
+<li> createTask(taskName,UID[],story, requirementsMaterial) 1<li> editTask()
 
-11- deleteTask()
+<li> deleteTask()
 
-12- createPost()
+<li> createPost()
 
-13- editPost()
+<li> editPost()
 
-14- deletePost()
+<li> deletePost()
 
-15- uploadWork()
+<li> uploadWork()
 
-16- review()
+<li> review()
 
-17- approve()
-
+<li> approve()
+</ul>
 **Classes and objects:**
+<ul>
+<li> <h5>User</h5>
 
-1- <h5>User</h5>
+<li> <h5>Project</h5>
 
-2- <h5>Project</h5>
+<li> <h5>Admin</h5>
 
-3- <h5>Admin</h5>
+<li> <h5>Worker</h5>
 
-4- <h5>Worker</h5>
+<li> <h5>Reviewer</h5>
 
-5- <h5>Reviewer</h5>
+<li> <h5>Task</h5>
 
-6- <h5>Task</h5>
+<li> <h5>Post</h5>
 
-7- <h5>Post</h5>
-
-8- <h5>Material</h5>
-
+<li> <h5>Material</h5>
+</ul>
 **UseCases:**
 
 **ERD: DFD:**
