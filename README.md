@@ -6,15 +6,15 @@ The main goal of Tasktrone is to provide a simpler way for every worker or emplo
 
 **Requirements:**
 
-1- <<User>> can create a <<Project>>, set all project essential data, add other <<User>>s, each <<Project>> contains a main <<Dashboard>> displays main toolbar, Text Announcement space, and Kanban board
+1- ##User can create a ##Project , set all project essential data, add other ##User s, each ##Project contains a main ##Dashboard displays main toolbar, Text Announcement space, and Kanban board
 
-2- Once <<Task>> created, <<User>> could be either an <<Admin>>, <<Reviewer>> or <<Worker>>. 3- Each <<Task>> has 3 phases <<Story>> , <<Processing>> , <<ToBeReviewed>>, <<Approval>> , <<Done>>.
+2- Once ##Task created, ##User could be either an ##Admin , ##Reviewer or ##Worker . 3- Each ##Task has 3 phases ##Story , ##Processing , ##ToBeReviewed , ##Approval , ##Done .
 
-4- <<Admin>> can create, edit, and delete <<Task>>s also can add <<Worker>>s to join this <<Task>> instance.
+4- ##Admin can create, edit, and delete ##Task s also can add ##Worker s to join this ##Task instance.
 
-5- <<Worker>> can download <<Task>> files and upload back required files.
+5- ##Worker can download ##Task files and upload back required files.
 
-6- <<Admin>> can set any <<Worker>> as a <<Reviewer>> who can make approval to the whole task.
+6- ##Admin can set any ##Worker as a ##Reviewer who can make approval to the whole task.
 
 **Acronyms and abbreviations:**
 
@@ -70,13 +70,13 @@ The main goal of Tasktrone is to provide a simpler way for every worker or emplo
 
 **Classes and objects:**
 
-1- <<User>>
+1- ##User
 
-2- <<Project>> 3- <<Admin>> 4- <<Worker>> 5- <<Reviewer>> 6- <<Task>>
+2- ##Project 3- ##Admin 4- ##Worker 5- ##Reviewer 6- ##Task
 
-7- <<Post>>
+7- ##Post
 
-8- << Material>>
+8- ##Material
 
 **UseCases:**
 
