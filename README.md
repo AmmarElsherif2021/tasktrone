@@ -1,17 +1,17 @@
 ﻿**Purpose**
 
-<h3>Tasktrone</h3> leverages Kanban boards to help managers in assembly industries create, assign, visualize, and complete tasks collaboratively. This app, based on the Kanban approach, allows managers to create, schedule, edit, and delete collaborative tasks. Each task serves as a distinct platform where users can view instructional documents and multimedia, upload completed tasks, and review and approve tasks according to their roles. For each project, collaborators can preview the entire project board, including public data and project status.
+<h5>Tasktrone</h5> leverages Kanban boards to help managers in assembly industries create, assign, visualize, and complete tasks collaboratively. This app, based on the Kanban approach, allows managers to create, schedule, edit, and delete collaborative tasks. Each task serves as a distinct platform where users can view instructional documents and multimedia, upload completed tasks, and review and approve tasks according to their roles. For each project, collaborators can preview the entire project board, including public data and project status.
 
 The main goal of Tasktrone is to provide a simpler way for every worker or employer to interact with tasks and responsibilities displayed on the board.
 
 **Requirements:**
 
-1- <h3>User</h3> can create a <h3>Project , set all project essential data, add other <h3>User</h3>s, each <h3>Project</h3> contains a main <h3>Dashboard</h3> displays main toolbar, Text Announcement space, and Kanban board.
-2- Once <h3>Task</h3> created, <h3>User</h3> could be either an <h3>Admin</h3> , <h3>Reviewer</h3> or <h3>Worker</h3> .
-3- Each <h3>Task</h3> has 3 phases <h3>Story , <h3>Processing</h3> , <h3>ToBeReviewed</h3> , <h3>Approval , <h3>Done .
-4- <h3>Admin</h3> can create, edit, and delete <h3>Task s also can add <h3>Worker s to join this <h3>Task instance.
-5- <h3>Worker</h3> can download <h3>Task</h3> files and upload back required files.
-6- <h3>Admin</h3> can set any <h3>Worker</h3> as a <h3>Reviewer</h3> who can make approval to the whole task.
+1- <h5>User</h5> can create a <h5>Project , set all project essential data, add other <h5>User</h5>s, each <h5>Project</h5> contains a main <h5>Dashboard</h5> displays main toolbar, Text Announcement space, and Kanban board.
+2- Once <h5>Task</h5> created, <h5>User</h5> could be either an <h5>Admin</h5> , <h5>Reviewer</h5> or <h5>Worker</h5> .
+3- Each <h5>Task</h5> has 3 phases <h5>Story , <h5>Processing</h5> , <h5>ToBeReviewed</h5> , <h5>Approval , <h5>Done .
+4- <h5>Admin</h5> can create, edit, and delete <h5>Task s also can add <h5>Worker s to join this <h5>Task instance.
+5- <h5>Worker</h5> can download <h5>Task</h5> files and upload back required files.
+6- <h5>Admin</h5> can set any <h5>Worker</h5> as a <h5>Reviewer</h5> who can make approval to the whole task.
 
 **Acronyms and abbreviations:**
 
@@ -63,21 +63,21 @@ The main goal of Tasktrone is to provide a simpler way for every worker or emplo
 
 **Classes and objects:**
 
-1- <h3>User</h3>
+1- <h5>User</h5>
 
-2- <h3>Project</h3>
+2- <h5>Project</h5>
 
-3- <h3>Admin</h3>
+3- <h5>Admin</h5>
 
-4- <h3>Worker</h3>
+4- <h5>Worker</h5>
 
-5- <h3>Reviewer</h3>
+5- <h5>Reviewer</h5>
 
-6- <h3>Task</h3>
+6- <h5>Task</h5>
 
-7- <h3>Post</h3>
+7- <h5>Post</h5>
 
-8- <h3>Material</h3>
+8- <h5>Material</h5>
 
 **UseCases:**
 
