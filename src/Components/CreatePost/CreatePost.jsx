@@ -1,19 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query' // Import hooks from react-query
 import { useState } from 'react' // Import useState hook from React
 import { createPost } from '../../API/posts' // Import the createPost function from API file
+import { useAuth } from '../../contexts/AuthContext'
 
 export function CreatePost() {
   // State hooks to manage the form inputs
   const [title, setTitle] = useState('') // State for the post title
-  const [author, setAuthor] = useState('') // State for the post author
-  const [contents, setContents] = useState('') // State for the post contents
 
+  const [contents, setContents] = useState('') // State for the post contents
+  const [token] = useAuth()
   // Initialize the query client
   const queryClient = useQueryClient()
 
   // Define the mutation for creating a post
   const createPostMutation = useMutation({
-    mutationFn: () => createPost({ title, author, contents }), // Function to call the createPost API
+    mutationFn: () => createPost(token, { title, contents }), // Function to call the createPost API
     onSuccess: () => queryClient.invalidateQueries(['posts']), // Invalidate the 'posts' query on success to refetch the posts
   })
 
@@ -22,7 +23,7 @@ export function CreatePost() {
     e.preventDefault() // Prevent the default form submission behavior
     createPostMutation.mutate() // Trigger the mutation to create a post
   }
-
+  if (!token) return <div>Please log in to create new posts.</div>
   return (
     <form onSubmit={handleSubmit}>
       <div>
@@ -36,16 +37,7 @@ export function CreatePost() {
         />
       </div>
       <br />
-      <div>
-        <label htmlFor='create-author'>Author: </label>
-        <input
-          type='text'
-          name='create-author'
-          id='create-author'
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-        />
-      </div>
+
       <br />
       <textarea
         value={contents}
