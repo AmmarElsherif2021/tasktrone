@@ -9,6 +9,7 @@ export function User({ id }) {
   const userInfo = userInfoQuery.data ?? {}
   return <strong>{userInfo?.username ?? id}</strong>
 }
+
 User.propTypes = {
   id: PropTypes.string.isRequired,
 }
