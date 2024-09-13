@@ -16,7 +16,7 @@ export function Header() {
     )
   }
   return (
-    <div style={{ backgroundColor: 'orange' }}>
+    <div style={{ height: '7vh', backgroundColor: 'black' }}>
       <Link to='/login'>Log In</Link> | <Link to='/signup'>Sign Up</Link>
     </div>
   )

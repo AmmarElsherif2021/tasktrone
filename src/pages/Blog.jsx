@@ -11,8 +11,6 @@ import { getPosts } from '../API/posts.js'
 //use state
 import { useState } from 'react'
 
-import { Header } from '../Components/Header/Header.jsx'
-
 export function Blog() {
   //Filters State
   const [author, setAuthor] = useState('')
@@ -26,8 +24,7 @@ export function Blog() {
 
   const posts = postsQuery.data ?? []
   return (
-    <div style={{ padding: 8 }}>
-      <Header />
+    <div style={{ padding: 8, background: 'white' }}>
       <CreatePost />
       <br />
       <hr />
