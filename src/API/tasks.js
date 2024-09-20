@@ -1,21 +1,37 @@
-//get tasks
+// Get tasks
 export const listTasks = async (queryParams) => {
-  const res = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/tasks?` +
-      new URLSearchParams(queryParams),
-  )
-  return await res.json()
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/tasks?` +
+        new URLSearchParams(queryParams),
+    )
+    if (!res.ok) {
+      throw new Error(`Error fetching tasks: ${res.statusText}`)
+    }
+    return await res.json()
+  } catch (error) {
+    console.error('Error listing tasks:', error)
+    throw error
+  }
 }
 
-// create new one
+// Create new task
 export const createTask = async (token, task) => {
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/tasks`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(task),
-  })
-  return await res.json()
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/tasks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(task),
+    })
+    if (!res.ok) {
+      throw new Error(`Error creating task: ${res.statusText}`)
+    }
+    return await res.json()
+  } catch (error) {
+    console.error('Error creating task:', error)
+    throw error
+  }
 }

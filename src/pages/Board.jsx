@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { CreateTask } from '../Components/CreateTask/CreateTask'
 import { TaskCard } from '../Components/TaskCard/TaskCard'
 import { listTasks } from '../API/tasks'
@@ -49,7 +49,12 @@ Column.propTypes = {
 }
 
 export function Board() {
-  const { data: tasks = [] } = useQuery('tasks', () => listTasks({}))
+  const tasksQuery = useQuery({
+    queryKey: ['tasks', {}],
+    queryFn: () => listTasks({}),
+  })
+
+  const tasks = tasksQuery.data ?? []
 
   const tasksByPhase = tasks.reduce(
     (acc, task) => {

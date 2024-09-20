@@ -13,7 +13,7 @@ export function CreateTask() {
 
   const [leadTime, setLeadTime] = useState('') // State for the task leadTime
 
-  const [attachments, setAttachments] = useState('') // State for the task attachments
+  const [attachments, setAttachments] = useState([]) // State for the task attachments
 
   //use auth
   const [token] = useAuth()
