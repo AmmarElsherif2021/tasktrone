@@ -1,16 +1,25 @@
 import PropTypes from 'prop-types'
-import { User } from '../User/User'
-export function TaskCard({
-  title,
-  author,
-  // project,
-  //requirements,
-  //phase,
-  leadTime,
-  cycleTime,
-  //users,
-  //attachments
-}) {
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { changeTaskPhase } from '../../API/tasks'
+import { useAuth } from '../../contexts/AuthContext'
+import { User } from '../User/User.jsx'
+export function TaskCard({ taskId, title, author, leadTime, cycleTime }) {
+  const [token] = useAuth()
+  const queryClient = useQueryClient()
+
+  const updateTaskPhaseMutation = useMutation(
+    ({ taskId, phase }) => changeTaskPhase(token, taskId, phase),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['tasks'])
+      },
+    },
+  )
+
+  const handlePhaseChange = (taskId, newPhase) => {
+    updateTaskPhaseMutation.mutate({ taskId, phase: newPhase })
+  }
+
   return (
     <article style={{ margin: '1vw', width: '15vw', border: 'solid' }}>
       <h3>{title}</h3>
@@ -22,17 +31,17 @@ export function TaskCard({
       )}
       <div>{leadTime}</div>
       <div>{cycleTime}</div>
+      <button onClick={() => handlePhaseChange(taskId, 'inProgress')}>
+        Forward
+      </button>
     </article>
   )
 }
+
 TaskCard.propTypes = {
+  taskId: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   author: PropTypes.string,
-  // project: projectId,
-  // requirements: PropTypes.arrayOf(PropTypes.string).isRequired,
-  // phase: PropTypes.string,
   leadTime: PropTypes.number,
   cycleTime: PropTypes.number,
-  // users: PropTypes.arrayOf(PropTypes.string),
-  // attachments: PropTypes.string,
 }

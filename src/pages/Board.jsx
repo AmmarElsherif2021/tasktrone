@@ -25,6 +25,7 @@ const Column = ({ columnTitle, tasks }) => {
         {tasks.map((task, index) => (
           <TaskCard
             key={index}
+            taskId={task._id}
             title={task.title}
             author={task.author}
             leadTime={task.leadTime}

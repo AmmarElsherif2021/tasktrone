@@ -35,3 +35,27 @@ export const createTask = async (token, task) => {
     throw error
   }
 }
+
+// Update task phase
+export const changeTaskPhase = async (token, taskId, phase) => {
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/tasks/${taskId}/phase`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ phase }),
+      },
+    )
+    if (!res.ok) {
+      throw new Error(`Error patching task: ${res.statusText}`)
+    }
+    return await res.json()
+  } catch (error) {
+    console.error('Error patching task:', error)
+    throw error
+  }
+}
