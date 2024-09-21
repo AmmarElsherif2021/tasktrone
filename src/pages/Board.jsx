@@ -58,6 +58,9 @@ export function Board() {
 
   const tasksByPhase = tasks.reduce(
     (acc, task) => {
+      if (!acc[task.phase]) {
+        acc[task.phase] = []
+      }
       acc[task.phase].push(task)
       return acc
     },

@@ -22,8 +22,7 @@ export function CreateTask() {
 
   // Define the mutation for creating a task
   const createTaskMutation = useMutation({
-    mutationFn: () =>
-      createTask(token, { title, requirements, leadTime, attachments }), // Function to call the createTask API
+    mutationFn: () => createTask(token, { title, requirements, leadTime }), // Function to call the createTask API
     onSuccess: () => queryClient.invalidateQueries(['tasks']), // Invalidate the 'tasks' query on success to refetch the tasks
   })
 
@@ -79,7 +78,7 @@ export function CreateTask() {
           name='create-attachment'
           id='create-attachment'
           value={attachments}
-          onChange={(e) => setAttachments(e.target.value)} // Update the title state on input change
+          onChange={(e) => setAttachments([e.target.value])} // Update the title state on input change
         />
       </div>
       <br />
