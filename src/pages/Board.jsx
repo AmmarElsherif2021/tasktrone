@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { CreateTask } from '../Components/CreateTask/CreateTask'
 import { TaskCard } from '../Components/TaskCard/TaskCard'
@@ -22,15 +23,17 @@ const Column = ({ columnTitle, tasks }) => {
           flexDirection: 'column',
         }}
       >
-        {tasks.map((task, index) => (
-          <TaskCard
-            key={index}
-            taskId={task._id}
-            title={task.title}
-            author={task.author}
-            leadTime={task.leadTime}
-            cycleTime={task.cycleTime}
-          />
+        {tasks.map((task) => (
+          <Fragment key={task._id}>
+            <TaskCard
+              key={task._id}
+              taskId={task._id}
+              title={task.title}
+              author={task.author}
+              leadTime={task.leadTime}
+              cycleTime={task.cycleTime}
+            />
+          </Fragment>
         ))}
       </div>
     </div>
@@ -41,10 +44,11 @@ Column.propTypes = {
   columnTitle: PropTypes.string.isRequired,
   tasks: PropTypes.arrayOf(
     PropTypes.shape({
-      title: PropTypes.string,
-      author: PropTypes.string,
-      leadTime: PropTypes.number,
-      cycleTime: PropTypes.number,
+      _id: PropTypes.string.isRequired, // Corrected to PropTypes.string
+      title: PropTypes.string.isRequired,
+      author: PropTypes.string.isRequired,
+      leadTime: PropTypes.number.isRequired,
+      cycleTime: PropTypes.number.isRequired,
     }),
   ).isRequired,
 }
@@ -72,7 +76,7 @@ export function Board() {
     <div style={{ background: 'wheat', display: 'flex', flexDirection: 'row' }}>
       <CreateTask />
       <Column columnTitle='story' tasks={tasksByPhase.story} />
-      <Column columnTitle='In progress' tasks={tasksByPhase['In progress']} />
+      <Column columnTitle='In progress' tasks={tasksByPhase.inProgress} />
       <Column columnTitle='Done' tasks={tasksByPhase.Done} />
     </div>
   )

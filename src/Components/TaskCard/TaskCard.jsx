@@ -3,26 +3,27 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { changeTaskPhase } from '../../API/tasks'
 import { useAuth } from '../../contexts/AuthContext'
 import { User } from '../User/User.jsx'
+
 export function TaskCard({ taskId, title, author, leadTime, cycleTime }) {
   const [token] = useAuth()
   const queryClient = useQueryClient()
 
-  const updateTaskPhaseMutation = useMutation(
-    ({ taskId, phase }) => changeTaskPhase(token, taskId, phase),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['tasks'])
-      },
+  const mutation = useMutation({
+    mutationFn: ({ token, taskId, newPhase }) =>
+      changeTaskPhase(token, taskId, newPhase),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['tasks', taskId])
     },
-  )
+  })
 
-  const handlePhaseChange = (taskId, newPhase) => {
-    updateTaskPhaseMutation.mutate({ taskId, phase: newPhase })
+  const handlePhaseChange = (newPhase) => {
+    mutation.mutate({ token, taskId, newPhase })
   }
 
   return (
     <article style={{ margin: '1vw', width: '15vw', border: 'solid' }}>
       <h3>{title}</h3>
+      <p>{taskId}</p>
       {author && (
         <em>
           <br />
@@ -31,9 +32,7 @@ export function TaskCard({ taskId, title, author, leadTime, cycleTime }) {
       )}
       <div>{leadTime}</div>
       <div>{cycleTime}</div>
-      <button onClick={() => handlePhaseChange(taskId, 'inProgress')}>
-        Forward
-      </button>
+      <button onClick={() => handlePhaseChange('inProgress')}>Forward</button>
     </article>
   )
 }
