@@ -6,16 +6,12 @@ import { useAuth } from '../../contexts/AuthContext'
 export function CreateTask() {
   // State hooks to manage the form inputs
   const [title, setTitle] = useState('') // State for the task title
-
-  const [newReq, setNewReq] = useState('') //  State of new req.
-
-  const [requirements, setRequirements] = useState([]) // State for the task reqs.
-
-  const [leadTime, setLeadTime] = useState('') // State for the task leadTime
-
+  const [newReq, setNewReq] = useState('') // State for the new requirement
+  const [requirements, setRequirements] = useState([]) // State for the task requirements
+  const [leadTime, setLeadTime] = useState('') // State for the task lead time
   const [attachments, setAttachments] = useState([]) // State for the task attachments
 
-  //use auth
+  // Use auth
   const [token] = useAuth()
   // Initialize the query client
   const queryClient = useQueryClient()
@@ -26,12 +22,29 @@ export function CreateTask() {
     onSuccess: () => queryClient.invalidateQueries(['tasks']), // Invalidate the 'tasks' query on success to refetch the tasks
   })
 
+  // Handle click add requirement button
+  const clickPromise = async () => {
+    return new Promise((resolve, reject) => {
+      setRequirements((prevRequirements) => {
+        const updatedRequirements = [...prevRequirements, newReq]
+        if (updatedRequirements[updatedRequirements.length - 1] === newReq) {
+          resolve('New requirement added')
+        } else {
+          reject('Last requirement not added')
+        }
+        return updatedRequirements
+      })
+    })
+  }
+
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault() // Prevent the default form submission behavior
     createTaskMutation.mutate() // Trigger the mutation to create a task
   }
+
   if (!token) return <div>Please log in to create new tasks.</div>
+
   return (
     <form onSubmit={handleSubmit}>
       <div>
@@ -48,18 +61,24 @@ export function CreateTask() {
       <br />
       <textarea
         value={newReq}
-        onChange={(e) => setNewReq(e.target.value)} // Update the requirements state on textarea change
-      />{' '}
+        onChange={(e) => setNewReq(e.target.value)} // Update the new requirement state on textarea change
+      />
       <button
+        type='button'
         onClick={() => {
-          setRequirements((prevRequirements) => [...prevRequirements, newReq])
-          setNewReq('')
+          clickPromise()
+            .then(() => setNewReq(''))
+            .catch((error) => {
+              console.log('Error adding new requirement to task: ' + error)
+            })
         }}
       >
         +
       </button>
       <br />
-      {requirements}
+      {requirements.map((req, index) => (
+        <div key={index}>{req}</div>
+      ))}
       <div>
         <label htmlFor='create-leadtime'>Lead time: </label>
         <input
@@ -78,7 +97,7 @@ export function CreateTask() {
           name='create-attachment'
           id='create-attachment'
           value={attachments}
-          onChange={(e) => setAttachments([e.target.value])} // Update the title state on input change
+          onChange={(e) => setAttachments([e.target.value])} // Update the attachments state on input change
         />
       </div>
       <br />
@@ -90,7 +109,7 @@ export function CreateTask() {
       {createTaskMutation.isSuccess ? (
         <>
           <br />
-          task created successfully! successful
+          Task created successfully!
         </>
       ) : null}
     </form>

@@ -4,7 +4,14 @@ import { changeTaskPhase } from '../../API/tasks'
 import { useAuth } from '../../contexts/AuthContext'
 import { User } from '../User/User.jsx'
 
-export function TaskCard({ taskId, title, author, leadTime, cycleTime }) {
+export function TaskCard({
+  taskId,
+  title,
+  author,
+  leadTime,
+  cycleTime,
+  phase,
+}) {
   const [token] = useAuth()
   const queryClient = useQueryClient()
 
@@ -32,7 +39,19 @@ export function TaskCard({ taskId, title, author, leadTime, cycleTime }) {
       )}
       <div>{leadTime}</div>
       <div>{cycleTime}</div>
-      <button onClick={() => handlePhaseChange('inProgress')}>Forward</button>
+      {phase != 'done' && (
+        <button
+          onClick={() => {
+            if (phase == 'story') {
+              handlePhaseChange('inProgress')
+            } else if (phase == 'inProgress') {
+              handlePhaseChange('done')
+            }
+          }}
+        >
+          Forward
+        </button>
+      )}
     </article>
   )
 }
@@ -43,4 +62,5 @@ TaskCard.propTypes = {
   author: PropTypes.string,
   leadTime: PropTypes.number,
   cycleTime: PropTypes.number,
+  phase: PropTypes.string,
 }
