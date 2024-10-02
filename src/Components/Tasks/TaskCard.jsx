@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { changeTaskPhase } from '../../API/tasks'
-import { useAuth } from '../../contexts/AuthContext'
+import { changeTaskPhase } from '../../API/tasks.js'
+import { useAuth } from '../../contexts/AuthContext.jsx'
 import { User } from '../User/User.jsx'
 
 export function TaskCard({

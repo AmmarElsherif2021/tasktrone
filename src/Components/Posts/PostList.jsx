@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
 import PropTypes from 'prop-types'
-import { Post } from '../Post/Post'
+import { Post } from '../../Post/Post'
 export function PostList({ posts = [] }) {
   return (
     <div>

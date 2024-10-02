@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { TaskCard } from '../TaskCard/TaskCard'
+import { TaskCard } from './TaskCard'
 import { Fragment } from 'react'
 export const Column = ({ columnTitle, tasks }) => {
   return (

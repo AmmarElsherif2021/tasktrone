@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createTask } from '../../API/tasks'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -23,18 +23,15 @@ export function CreateTask() {
   })
 
   // Handle click add requirement button
-  const clickPromise = async () => {
-    return new Promise((resolve, reject) => {
+  const handleAddReq = async () => {
+    try {
       setRequirements((prevRequirements) => {
         const updatedRequirements = [...prevRequirements, newReq]
-        if (updatedRequirements[updatedRequirements.length - 1] === newReq) {
-          resolve('New requirement added')
-        } else {
-          reject('Last requirement not added')
-        }
         return updatedRequirements
       })
-    })
+    } catch (error) {
+      console.error('error adding new req' + error)
+    }
   }
 
   // Handle form submission
@@ -42,6 +39,15 @@ export function CreateTask() {
     e.preventDefault() // Prevent the default form submission behavior
     createTaskMutation.mutate() // Trigger the mutation to create a task
   }
+  // Reset form fields on successful task creation
+  useEffect(() => {
+    if (createTaskMutation.isSuccess) {
+      setAttachments([])
+      setRequirements([])
+      setLeadTime(0)
+      setTitle('')
+    }
+  }, [createTaskMutation.isSuccess])
 
   if (!token) return <div>Please log in to create new tasks.</div>
 
@@ -66,7 +72,7 @@ export function CreateTask() {
       <button
         type='button'
         onClick={() => {
-          clickPromise()
+          handleAddReq()
             .then(() => setNewReq(''))
             .catch((error) => {
               console.log('Error adding new requirement to task: ' + error)
@@ -107,10 +113,10 @@ export function CreateTask() {
         disabled={!title || createTaskMutation.isPending} // Disable button if title is empty or mutation is pending
       />
       {createTaskMutation.isSuccess ? (
-        <>
+        <div>
           <br />
           Task created successfully!
-        </>
+        </div>
       ) : null}
     </form>
   )
