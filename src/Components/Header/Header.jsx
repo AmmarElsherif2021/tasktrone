@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext'
 
 import { Link } from 'react-router-dom'
 import { User } from '../User/User'
+
 export function Header() {
   const [token, setToken] = useAuth()
   if (token) {
@@ -11,6 +12,7 @@ export function Header() {
       <div>
         Logged in as <User id={sub} />
         <br />
+        <Link to='/dashboard'> Dashboard </Link>
         <button onClick={() => setToken(null)}>Logout</button>
       </div>
     )

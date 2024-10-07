@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { CreateTask } from '../Components/CreateTask/CreateTask'
+import { CreateTask } from '../Components/Tasks/CreateTask'
 import { listTasks } from '../API/tasks'
-import { Column } from '../Components/Column/Column'
-
+import { Column } from '../Components/Tasks/Column'
 export function Board() {
   const tasksQuery = useQuery({
     queryKey: ['tasks', {}],

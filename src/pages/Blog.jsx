@@ -2,10 +2,10 @@
 //tanstack
 import { useQuery } from '@tanstack/react-query'
 //import './App.css'
-import { PostList } from '../Components/PostList/PostList.jsx'
-import { CreatePost } from '../Components/CreatePost/CreatePost.jsx'
-import { PostFilter } from '../Components/PostFilter/PostFilter.jsx'
-import { PostSorting } from '../Components/PostSorting/PostSorting.jsx'
+import { PostList } from '../Components/Posts/PostList.jsx'
+import { CreatePost } from '../Components/Posts/CreatePost.jsx'
+import { PostFilter } from '../Components/Posts/PostFilter.jsx'
+import { PostSorting } from '../Components/Posts/PostSorting.jsx'
 //Api
 import { getPosts } from '../API/posts.js'
 //use state

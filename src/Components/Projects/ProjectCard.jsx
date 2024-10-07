@@ -19,10 +19,10 @@ export function ProjectCard({ projectId, title, subtitle, admin, members }) {
       {subtitle && (
         <em>
           <br />
-          Written by <User id={subtitle} />
+          Written by <User id={admin} />
         </em>
       )}
-      <div>{admin}</div>
+
       <div>{members}</div>
     </article>
   )
