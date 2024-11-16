@@ -1,61 +1,92 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query' // Import hooks from react-query
-import { useState } from 'react' // Import useState hook from React
-import { createPost } from '../../API/posts' // Import the createPost function from API file
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { Form, Button, Alert, Card, Collapse } from 'react-bootstrap'
+import { createPost } from '../../API/posts'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function CreatePost() {
-  // State hooks to manage the form inputs
-  const [title, setTitle] = useState('') // State for the post title
-
-  const [contents, setContents] = useState('') // State for the post contents
+  const [title, setTitle] = useState('')
+  const [contents, setContents] = useState('')
   const [token] = useAuth()
-  // Initialize the query client
   const queryClient = useQueryClient()
+  const [open, setOpen] = useState(false)
 
-  // Define the mutation for creating a post
   const createPostMutation = useMutation({
-    mutationFn: () => createPost(token, { title, contents }), // Function to call the createPost API
-    onSuccess: () => queryClient.invalidateQueries(['posts']), // Invalidate the 'posts' query on success to refetch the posts
+    mutationFn: () => createPost(token, { title, contents }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['posts'])
+      setTitle('')
+      setContents('')
+      setOpen(false)
+    },
   })
 
-  // Handle form submission
   const handleSubmit = (e) => {
-    e.preventDefault() // Prevent the default form submission behavior
-    createPostMutation.mutate() // Trigger the mutation to create a post
+    e.preventDefault()
+    createPostMutation.mutate()
   }
-  if (!token) return <div>Please log in to create new posts.</div>
-  return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor='create-title'>Title: </label>
-        <input
-          type='text'
-          name='create-title'
-          id='create-title'
-          value={title}
-          onChange={(e) => setTitle(e.target.value)} // Update the title state on input change
-        />
-      </div>
-      <br />
 
-      <br />
-      <textarea
-        value={contents}
-        onChange={(e) => setContents(e.target.value)} // Update the contents state on textarea change
-      />
-      <br />
-      <br />
-      <input
-        type='submit'
-        value={createPostMutation.isPending ? 'Creating...' : 'Create'} // Change button text based on mutation state
-        disabled={!title || createPostMutation.isPending} // Disable button if title is empty or mutation is pending
-      />
-      {createPostMutation.isSuccess ? (
-        <>
-          <br />
-          Post created successfully! successful
-        </>
-      ) : null}
-    </form>
+  if (!token) {
+    return <Alert variant='warning'>Please log in to create new posts.</Alert>
+  }
+
+  return (
+    <>
+      <Button
+        variant='primary'
+        onClick={() => setOpen(!open)}
+        aria-controls='create-post-collapse'
+        aria-expanded={open}
+        className='mb-4'
+      >
+        {open ? 'Hide Create Post' : 'Create New Post'}
+      </Button>
+
+      <Collapse in={open}>
+        <div id='create-post-collapse'>
+          <Card className='mb-4'>
+            <Card.Body>
+              <Form onSubmit={handleSubmit}>
+                <Form.Group className='mb-3'>
+                  <Form.Label htmlFor='create-title'>Title</Form.Label>
+                  <Form.Control
+                    type='text'
+                    id='create-title'
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder='Enter post title'
+                  />
+                </Form.Group>
+
+                <Form.Group className='mb-3'>
+                  <Form.Label>Contents</Form.Label>
+                  <Form.Control
+                    as='textarea'
+                    rows={3}
+                    value={contents}
+                    onChange={(e) => setContents(e.target.value)}
+                    placeholder='Write your post content here...'
+                  />
+                </Form.Group>
+
+                <Button
+                  type='submit'
+                  variant='primary'
+                  disabled={!title || createPostMutation.isPending}
+                >
+                  {createPostMutation.isPending ? 'Creating...' : 'Create Post'}
+                </Button>
+
+                {createPostMutation.isSuccess && (
+                  <Alert variant='success' className='mt-3'>
+                    Post created successfully!
+                  </Alert>
+                )}
+              </Form>
+            </Card.Body>
+          </Card>
+        </div>
+      </Collapse>
+    </>
   )
 }

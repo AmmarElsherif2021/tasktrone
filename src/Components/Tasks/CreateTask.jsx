@@ -1,123 +1,171 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
+import { Form, Button, Card, Alert, ListGroup, Collapse } from 'react-bootstrap'
 import { createTask } from '../../API/tasks'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function CreateTask() {
-  // State hooks to manage the form inputs
-  const [title, setTitle] = useState('') // State for the task title
-  const [newReq, setNewReq] = useState('') // State for the new requirement
-  const [requirements, setRequirements] = useState([]) // State for the task requirements
-  const [leadTime, setLeadTime] = useState('') // State for the task lead time
-  const [attachments, setAttachments] = useState([]) // State for the task attachments
-
-  // Use auth
+  const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState('')
+  const [newReq, setNewReq] = useState('')
+  const [requirements, setRequirements] = useState([])
+  const [leadTime, setLeadTime] = useState('')
+  const [attachments, setAttachments] = useState([])
   const [token] = useAuth()
-  // Initialize the query client
   const queryClient = useQueryClient()
 
-  // Define the mutation for creating a task
   const createTaskMutation = useMutation({
-    mutationFn: () => createTask(token, { title, requirements, leadTime }), // Function to call the createTask API
-    onSuccess: () => queryClient.invalidateQueries(['tasks']), // Invalidate the 'tasks' query on success to refetch the tasks
+    mutationFn: () => createTask(token, { title, requirements, leadTime }),
+    onSuccess: () => queryClient.invalidateQueries(['tasks']),
   })
 
-  // Handle click add requirement button
   const handleAddReq = async () => {
-    try {
-      setRequirements((prevRequirements) => {
-        const updatedRequirements = [...prevRequirements, newReq]
-        return updatedRequirements
-      })
-    } catch (error) {
-      console.error('error adding new req' + error)
+    if (newReq.trim()) {
+      setRequirements((prev) => [...prev, newReq.trim()])
+      setNewReq('')
     }
   }
 
-  // Handle form submission
   const handleSubmit = (e) => {
-    e.preventDefault() // Prevent the default form submission behavior
-    createTaskMutation.mutate() // Trigger the mutation to create a task
+    e.preventDefault()
+    createTaskMutation.mutate()
   }
-  // Reset form fields on successful task creation
+
   useEffect(() => {
     if (createTaskMutation.isSuccess) {
       setAttachments([])
       setRequirements([])
-      setLeadTime(0)
+      setLeadTime('')
       setTitle('')
+      setOpen(false) // Close the form after successful creation
     }
   }, [createTaskMutation.isSuccess])
 
-  if (!token) return <div>Please log in to create new tasks.</div>
+  if (!token) {
+    return <Alert variant='warning'>Please log in to create new tasks.</Alert>
+  }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor='create-title'>Title: </label>
-        <input
-          type='text'
-          name='create-title'
-          id='create-title'
-          value={title}
-          onChange={(e) => setTitle(e.target.value)} // Update the title state on input change
-        />
-      </div>
-      <br />
-      <br />
-      <textarea
-        value={newReq}
-        onChange={(e) => setNewReq(e.target.value)} // Update the new requirement state on textarea change
-      />
-      <button
-        type='button'
-        onClick={() => {
-          handleAddReq()
-            .then(() => setNewReq(''))
-            .catch((error) => {
-              console.log('Error adding new requirement to task: ' + error)
-            })
-        }}
+    <div className='mb-4'>
+      <Button
+        variant='primary'
+        onClick={() => setOpen(!open)}
+        aria-controls='create-task-collapse'
+        aria-expanded={open}
+        className='mb-4'
       >
-        +
-      </button>
-      <br />
-      {requirements.map((req, index) => (
-        <div key={index}>{req}</div>
-      ))}
-      <div>
-        <label htmlFor='create-leadtime'>Lead time: </label>
-        <input
-          type='number'
-          name='create-leadtime'
-          id='create-leadtime'
-          value={leadTime}
-          onChange={(e) => setLeadTime(e.target.value)} // Update the lead time state on input change
-        />
-      </div>
-      <br />
-      <div>
-        <label htmlFor='create-attachment'>Attachment: </label>
-        <input
-          type='text'
-          name='create-attachment'
-          id='create-attachment'
-          value={attachments}
-          onChange={(e) => setAttachments([e.target.value])} // Update the attachments state on input change
-        />
-      </div>
-      <br />
-      <input
-        type='submit'
-        value={createTaskMutation.isPending ? 'Creating...' : 'Create'} // Change button text based on mutation state
-        disabled={!title || createTaskMutation.isPending} // Disable button if title is empty or mutation is pending
-      />
-      {createTaskMutation.isSuccess ? (
-        <div>
-          <br />
-          Task created successfully!
+        {open ? 'Hide Create Task' : 'Create New Task'}
+      </Button>
+
+      <Collapse in={open}>
+        <div id='create-task-collapse'>
+          <Card className='mb-4'>
+            <Card.Body>
+              <Card className='mb-3 p-2'>
+                <Card.Header>
+                  <h5 className='mb-0'>Create New Task</h5>
+                </Card.Header>
+                <Card.Body className='p-2'>
+                  <Form onSubmit={handleSubmit}>
+                    <Form.Group className='mb-2'>
+                      <Form.Label className='mb-1'>Title</Form.Label>
+                      <Form.Control
+                        size='sm'
+                        type='text'
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder='Enter task title'
+                      />
+                    </Form.Group>
+
+                    <Form.Group className='mb-2'>
+                      <Form.Label className='mb-1'>Requirements</Form.Label>
+                      <div className='d-flex gap-2 mb-1'>
+                        <Form.Control
+                          size='sm'
+                          type='text'
+                          value={newReq}
+                          onChange={(e) => setNewReq(e.target.value)}
+                          placeholder='Add a requirement'
+                        />
+                        <Button
+                          size='sm'
+                          variant='outline-primary'
+                          onClick={handleAddReq}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                      {requirements.length > 0 && (
+                        <ListGroup className='mb-2'>
+                          {requirements.map((req, index) => (
+                            <ListGroup.Item
+                              key={index}
+                              className='d-flex justify-content-between align-items-center p-1'
+                            >
+                              {req}
+                              <Button
+                                size='sm'
+                                variant='outline-danger'
+                                onClick={() =>
+                                  setRequirements((prev) =>
+                                    prev.filter((_, i) => i !== index),
+                                  )
+                                }
+                              >
+                                Remove
+                              </Button>
+                            </ListGroup.Item>
+                          ))}
+                        </ListGroup>
+                      )}
+                    </Form.Group>
+
+                    <Form.Group className='mb-2'>
+                      <Form.Label className='mb-1'>Lead Time (days)</Form.Label>
+                      <Form.Control
+                        size='sm'
+                        type='number'
+                        value={leadTime}
+                        onChange={(e) => setLeadTime(e.target.value)}
+                        placeholder='Enter estimated lead time'
+                      />
+                    </Form.Group>
+
+                    <Form.Group className='mb-2'>
+                      <Form.Label className='mb-1'>Attachment</Form.Label>
+                      <Form.Control
+                        size='sm'
+                        type='text'
+                        value={attachments[0] || ''}
+                        onChange={(e) => setAttachments([e.target.value])}
+                        placeholder='Add attachment link'
+                      />
+                    </Form.Group>
+
+                    <Button
+                      size='sm'
+                      type='submit'
+                      variant='primary'
+                      disabled={!title || createTaskMutation.isLoading}
+                    >
+                      {createTaskMutation.isLoading
+                        ? 'Creating...'
+                        : 'Create Task'}
+                    </Button>
+
+                    {createTaskMutation.isSuccess && (
+                      <Alert variant='success' className='mt-2 p-2'>
+                        Task created successfully!
+                      </Alert>
+                    )}
+                  </Form>
+                </Card.Body>
+              </Card>
+            </Card.Body>
+          </Card>
         </div>
-      ) : null}
-    </form>
+      </Collapse>
+    </div>
   )
 }

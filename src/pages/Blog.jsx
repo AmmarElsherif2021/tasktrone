@@ -1,18 +1,13 @@
-//import { useState } from 'react'
-//tanstack
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-//import './App.css'
+import { Container, Row, Col, Card } from 'react-bootstrap'
 import { PostList } from '../Components/Posts/PostList.jsx'
 import { CreatePost } from '../Components/Posts/CreatePost.jsx'
 import { PostFilter } from '../Components/Posts/PostFilter.jsx'
 import { PostSorting } from '../Components/Posts/PostSorting.jsx'
-//Api
 import { getPosts } from '../API/posts.js'
-//use state
-import { useState } from 'react'
 
 export function Blog() {
-  //Filters State
   const [author, setAuthor] = useState('')
   const [sortBy, setSortBy] = useState('createdAt')
   const [sortOrder, setSortOrder] = useState('descending')
@@ -23,27 +18,46 @@ export function Blog() {
   })
 
   const posts = postsQuery.data ?? []
+
   return (
-    <div style={{ padding: 8, background: 'white' }}>
-      <CreatePost />
-      <br />
-      <hr />
-      Filter by:
-      <PostFilter
-        field='author'
-        value={author}
-        onChange={(value) => setAuthor(value)}
-      />
-      <br />
-      <PostSorting
-        fields={['createdAt', 'updatedAt']}
-        value={sortBy}
-        onChange={(value) => setSortBy(value)}
-        orderValue={sortOrder}
-        onOrderChange={(orderValue) => setSortOrder(orderValue)}
-      />
-      <hr />
-      <PostList posts={posts} />
-    </div>
+    <Card className='h-100 shadow-sm'>
+      <Card.Body>
+        <Container fluid>
+          <Row className='mb-4'>
+            <Col>
+              <CreatePost />
+            </Col>
+          </Row>
+
+          <Row className='mb-3'>
+            <Col md={6}>
+              <Card.Subtitle className='mb-2 text-muted'>
+                Filter by:
+              </Card.Subtitle>
+              <PostFilter
+                field='author'
+                value={author}
+                onChange={(value) => setAuthor(value)}
+              />
+            </Col>
+            <Col md={6}>
+              <PostSorting
+                fields={['createdAt', 'updatedAt']}
+                value={sortBy}
+                onChange={(value) => setSortBy(value)}
+                orderValue={sortOrder}
+                onOrderChange={(orderValue) => setSortOrder(orderValue)}
+              />
+            </Col>
+          </Row>
+
+          <Row>
+            <Col>
+              <PostList posts={posts} />
+            </Col>
+          </Row>
+        </Container>
+      </Card.Body>
+    </Card>
   )
 }

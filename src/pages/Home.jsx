@@ -1,19 +1,23 @@
-//import './App.css'
+import { Container, Row, Col } from 'react-bootstrap'
 import { Blog } from './Blog.jsx'
-
 import { Header } from '../Components/Header/Header.jsx'
 import { Board } from './Board.jsx'
 
 export function Home() {
-  //Filters State
-
   return (
-    <div style={{ padding: 8, background: 'yellow' }}>
+    <div className='min-vh-100 bg-light'>
       <Header />
-      <div style={{ display: 'flex', flexDirection: 'horizontal' }}>
-        <Blog />
-        <Board />
-      </div>
+      <Container fluid className='py-4'>
+        <Row className='g-4'>
+          <Col xs={12} lg={3}>
+            <Blog />
+          </Col>
+
+          <Col xs={12} lg={9}>
+            <Board />
+          </Col>
+        </Row>
+      </Container>
     </div>
   )
 }
