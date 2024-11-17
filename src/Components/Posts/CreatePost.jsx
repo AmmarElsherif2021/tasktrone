@@ -37,7 +37,7 @@ export function CreatePost() {
         onClick={() => setOpen(!open)}
         aria-controls='create-post-collapse'
         aria-expanded={open}
-        className='mb-4'
+        className='btn-custom mb-4'
       >
         {open ? 'Hide Create Post' : 'Create New Post'}
       </Button>
@@ -73,6 +73,7 @@ export function CreatePost() {
                   type='submit'
                   variant='primary'
                   disabled={!title || createPostMutation.isPending}
+                  className='btn-custom'
                 >
                   {createPostMutation.isPending ? 'Creating...' : 'Create Post'}
                 </Button>

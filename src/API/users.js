@@ -24,3 +24,12 @@ export const getUserInfo = async (id) => {
   //console.log(JSON.stringify(res))
   return await res.json()
 }
+
+export const getAllUsers = async () => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  if (!res.ok) throw new Error('Failed to fetch users')
+  return await res.json()
+}

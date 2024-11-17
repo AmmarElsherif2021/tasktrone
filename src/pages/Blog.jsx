@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Container, Row, Col, Card } from 'react-bootstrap'
 import { PostList } from '../Components/Posts/PostList.jsx'
 import { CreatePost } from '../Components/Posts/CreatePost.jsx'
-import { PostFilter } from '../Components/Posts/PostFilter.jsx'
-import { PostSorting } from '../Components/Posts/PostSorting.jsx'
+
 import { getPosts } from '../API/posts.js'
+import { BlogControls } from './BlogController.jsx'
 
 export function Blog() {
   const [author, setAuthor] = useState('')
@@ -29,26 +29,16 @@ export function Blog() {
             </Col>
           </Row>
 
-          <Row className='mb-3'>
-            <Col md={6}>
-              <Card.Subtitle className='mb-2 text-muted'>
-                Filter by:
-              </Card.Subtitle>
-              <PostFilter
-                field='author'
-                value={author}
-                onChange={(value) => setAuthor(value)}
-              />
-            </Col>
-            <Col md={6}>
-              <PostSorting
-                fields={['createdAt', 'updatedAt']}
-                value={sortBy}
-                onChange={(value) => setSortBy(value)}
-                orderValue={sortOrder}
-                onOrderChange={(orderValue) => setSortOrder(orderValue)}
-              />
-            </Col>
+          <Row>
+            <BlogControls
+              author={author}
+              onAuthorChange={setAuthor}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              sortOrder={sortOrder}
+              onSortOrderChange={setSortOrder}
+              sortFields={['createdAt', 'updatedAt']}
+            />
           </Row>
 
           <Row>

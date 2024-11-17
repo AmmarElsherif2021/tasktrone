@@ -2,13 +2,9 @@ import PropTypes from 'prop-types'
 import { Card, Stack } from 'react-bootstrap'
 import { TaskCard } from './TaskCard'
 
-export const Column = ({ columnTitle, tasks }) => {
+export const Column = ({ tasks }) => {
   return (
     <Card className='h-100'>
-      <Card.Header className='text-center fw-bold text-capitalize'>
-        {columnTitle}
-        <span className='ms-2 badge bg-secondary'>{tasks.length}</span>
-      </Card.Header>
       <Card.Body className='p-2'>
         <Stack gap={2} className='overflow-auto' style={{ maxHeight: '70vh' }}>
           {tasks.map((task) => (
@@ -20,6 +16,8 @@ export const Column = ({ columnTitle, tasks }) => {
               leadTime={task.leadTime}
               cycleTime={task.cycleTime}
               phase={task.phase}
+              members={task.members}
+              requirements={task.requirements}
             />
           ))}
         </Stack>

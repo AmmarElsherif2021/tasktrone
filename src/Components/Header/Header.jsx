@@ -23,7 +23,11 @@ export function Header() {
         <Nav.Link as={Link} to='/dashboard' className='nav-link'>
           Dashboard
         </Nav.Link>
-        <Button variant='outline-light' onClick={handleLogout} className='ms-2'>
+        <Button
+          variant='outline-light'
+          onClick={handleLogout}
+          className='btn-custom ms-2'
+        >
           Sign out
         </Button>
       </>

@@ -115,13 +115,17 @@ export function CreateProject() {
           <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
             <span>•</span>
             {member.user} -- {member.role}
-            <button type='button' onClick={() => handleRemoveMember(index)}>
+            <button
+              className='btn-custom'
+              type='button'
+              onClick={() => handleRemoveMember(index)}
+            >
               Remove
             </button>
           </div>
         ))}
 
-        <button type='button' onClick={handleAddMember}>
+        <button type='button' onClick={handleAddMember} className='btn-custom'>
           Add Member
         </button>
       </div>
