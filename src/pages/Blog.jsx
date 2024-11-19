@@ -5,7 +5,7 @@ import { PostList } from '../Components/Posts/PostList.jsx'
 import { CreatePost } from '../Components/Posts/CreatePost.jsx'
 
 import { getPosts } from '../API/posts.js'
-import { BlogControls } from './BlogController.jsx'
+import { BlogControls } from '../Components/Posts/BlogController.jsx'
 
 export function Blog() {
   const [author, setAuthor] = useState('')
@@ -20,7 +20,10 @@ export function Blog() {
   const posts = postsQuery.data ?? []
 
   return (
-    <Card className='h-100 shadow-sm'>
+    <Card
+      className='h-100 shadow-sm'
+      style={{ maxHeight: '95vh', overflowY: 'scroll' }}
+    >
       <Card.Body>
         <Container fluid>
           <Row className='mb-4'>

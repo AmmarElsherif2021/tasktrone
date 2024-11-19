@@ -67,3 +67,29 @@ export const changeTaskPhase = async (token, taskId, phase) => {
     throw error
   }
 }
+export const uploadTaskAttachment = async (token, taskId, file) => {
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/tasks/${taskId}/attachments`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      },
+    )
+
+    if (!res.ok) {
+      throw new Error(`Error uploading attachment: ${res.statusText}`)
+    }
+
+    return await res.json()
+  } catch (error) {
+    console.error('Error uploading attachment:', error)
+    throw error
+  }
+}

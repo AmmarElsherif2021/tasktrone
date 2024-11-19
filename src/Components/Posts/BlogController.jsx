@@ -9,8 +9,9 @@ import {
   Button,
   Collapse,
   //Dropdown,
+  Image,
 } from 'react-bootstrap'
-
+import filterIcon from '../../assets/filter-negative.svg'
 export function BlogControls({
   author,
   onAuthorChange,
@@ -31,6 +32,7 @@ export function BlogControls({
         aria-expanded={isExpanded}
         className='mb-3'
       >
+        <Image src={filterIcon} width={20} />
         Filter
       </Button>
 

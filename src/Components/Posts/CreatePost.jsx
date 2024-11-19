@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Form, Button, Alert, Card, Collapse } from 'react-bootstrap'
+import { Form, Button, Alert, Card, Collapse, Image } from 'react-bootstrap'
 import { createPost } from '../../API/posts'
 import { useAuth } from '../../contexts/AuthContext'
+import createPostIcon from '../../assets/create-post-negative.svg'
 
 export function CreatePost() {
   const [title, setTitle] = useState('')
@@ -38,7 +39,9 @@ export function CreatePost() {
         aria-controls='create-post-collapse'
         aria-expanded={open}
         className='btn-custom mb-4'
+        style={{ width: '90%' }}
       >
+        <Image src={createPostIcon} width={30} />
         {open ? 'Hide Create Post' : 'Create New Post'}
       </Button>
 

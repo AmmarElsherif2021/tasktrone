@@ -1,11 +1,24 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import PropTypes from 'prop-types'
-import { useState } from 'react'
-import { Card, Button, Badge, Modal, ListGroup } from 'react-bootstrap'
+import { useState, useRef } from 'react'
+import { Card, Button, Badge, Modal, Image } from 'react-bootstrap'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { changeTaskPhase } from '../../API/tasks.js'
+import { changeTaskPhase, uploadTaskAttachment } from '../../API/tasks.js'
 import { useAuth } from '../../contexts/AuthContext.jsx'
 import { User } from '../User/User.jsx'
-import { format } from 'date-fns'
+
+import forwardArrow from '../../assets/forward-negative.svg'
+import backwardArrow from '../../assets/backward-negative.svg'
+import { format, isValid } from 'date-fns'
+import {
+  UploadCloud,
+  //X,
+  Paperclip,
+  Calendar,
+  Clock,
+  User as UserIcon,
+} from 'lucide-react'
 
 function createHexColor(id) {
   const cleanedId = id.replace(/\s/g, '')
@@ -27,10 +40,15 @@ export function TaskCard({
   attachments = [],
   createdAt,
   updatedAt,
+  onAttachmentUpload,
 }) {
   const [token] = useAuth()
   const queryClient = useQueryClient()
   const [showModal, setShowModal] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
 
   const mutation = useMutation({
     mutationFn: ({ token, taskId, newPhase }) =>
@@ -39,9 +57,63 @@ export function TaskCard({
       queryClient.invalidateQueries(['tasks', taskId])
     },
   })
+  function formatDate(createdAt) {
+    const date = new Date(createdAt)
+    return isValid(date) ? format(date, 'PP') : 'Invalid date'
+  }
+  const uploadMutation = useMutation({
+    mutationFn: async (file) => {
+      setIsUploading(true)
+      setUploadProgress(0)
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        const response = await uploadTaskAttachment(
+          token,
+          taskId,
+          formData,
+          (progress) => {
+            setUploadProgress(progress)
+          },
+        )
+        return response
+      } finally {
+        setIsUploading(false)
+        setUploadProgress(0)
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['tasks', taskId])
+      if (onAttachmentUpload) {
+        onAttachmentUpload()
+      }
+    },
+  })
 
   const handlePhaseChange = (newPhase) => {
     mutation.mutate({ token, taskId, newPhase })
+  }
+
+  const handleFileUpload = (files) => {
+    if (files?.length) {
+      uploadMutation.mutate(files[0])
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const files = e.dataTransfer.files
+    handleFileUpload(files)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = () => {
+    setIsDragging(false)
   }
 
   const getNextPhase = (currentPhase) => {
@@ -53,6 +125,25 @@ export function TaskCard({
     return phaseFlow[currentPhase]
   }
 
+  const getPreviousPhase = (currentPhase) => {
+    const reversePhaseFlow = {
+      done: 'reviewing',
+      reviewing: 'inProgress',
+      inProgress: 'story',
+    }
+    return reversePhaseFlow[currentPhase]
+  }
+
+  const getPhaseLabel = (phase) => {
+    const labels = {
+      story: 'Story',
+      inProgress: 'In Progress',
+      reviewing: 'Review',
+      done: 'Done',
+    }
+    return labels[phase] || phase
+  }
+
   const getPhaseVariant = (phase) => {
     const variants = {
       story: 'primary',
@@ -61,15 +152,6 @@ export function TaskCard({
       done: 'success',
     }
     return variants[phase] || 'primary'
-  }
-
-  const getNextPhaseLabel = (currentPhase) => {
-    const labels = {
-      story: 'In Progress',
-      inProgress: 'Review',
-      reviewing: 'Done',
-    }
-    return labels[currentPhase]
   }
 
   return (
@@ -94,22 +176,56 @@ export function TaskCard({
             </div>
           )}
 
-          {phase !== 'done' && (
-            <Button
-              variant='outline-primary'
-              size='sm'
-              className='w-100 btn-custom'
-              onClick={(e) => {
-                e.stopPropagation()
-                const nextPhase = getNextPhase(phase)
-                if (nextPhase) {
-                  handlePhaseChange(nextPhase)
-                }
-              }}
-            >
-              Move to {getNextPhaseLabel(phase)}
-            </Button>
-          )}
+          <div className='d-flex justify-content-between gap-2'>
+            {phase !== 'story' && (
+              <Button
+                variant='outline-secondary'
+                size='sm'
+                className='phase-button'
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const prevPhase = getPreviousPhase(phase)
+                  if (prevPhase) {
+                    handlePhaseChange(prevPhase)
+                  }
+                }}
+              >
+                <Image
+                  src={backwardArrow}
+                  width={15}
+                  alt={`Move to ${getPhaseLabel(getPreviousPhase(phase))}`}
+                  className='phase-button-icon'
+                />
+                <span className='phase-button-text'>
+                  Move to {getPhaseLabel(getPreviousPhase(phase))}
+                </span>
+              </Button>
+            )}
+            {phase !== 'done' && (
+              <Button
+                variant='outline-primary'
+                size='sm'
+                className='phase-button'
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const nextPhase = getNextPhase(phase)
+                  if (nextPhase) {
+                    handlePhaseChange(nextPhase)
+                  }
+                }}
+              >
+                <span className='phase-button-text'>
+                  Move to {getPhaseLabel(getNextPhase(phase))}
+                </span>
+                <Image
+                  src={forwardArrow}
+                  width={15}
+                  alt={`Move to ${getPhaseLabel(getNextPhase(phase))}`}
+                  className='phase-button-icon'
+                />
+              </Button>
+            )}
+          </div>
         </Card.Body>
       </Card>
 
@@ -118,128 +234,198 @@ export function TaskCard({
         onHide={() => setShowModal(false)}
         size='lg'
         centered
+        className='task-modal'
       >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <div className='d-flex align-items-center gap-2'>
-              {title}
-              <Badge bg={getPhaseVariant(phase)} className='ms-2'>
-                {phase}
+        <Modal.Header closeButton className='border-0 pb-0'>
+          <Modal.Title className='w-100'>
+            <div className='d-flex align-items-center justify-content-between'>
+              <div className='task-title'>
+                <h4 className='mb-1'>{title}</h4>
+                <div className='text-muted small'>ID: {taskId}</div>
+              </div>
+              <Badge bg={getPhaseVariant(phase)} className='ms-2 phase-badge'>
+                {getPhaseLabel(phase)}
               </Badge>
             </div>
           </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
-          <div className='mb-4'>
-            <h6 className='text-muted'>Task Information</h6>
-            <ListGroup variant='flush'>
-              <ListGroup.Item>
-                <strong>ID:</strong> {taskId}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <strong>Author:</strong> <User id={author} />
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <strong>Lead Time:</strong> {leadTime} days
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <strong>Cycle Time:</strong> {cycleTime} days
-              </ListGroup.Item>
-              {createdAt && (
-                <ListGroup.Item>
-                  <strong>Created:</strong>{' '}
-                  {format(new Date(createdAt), 'PPpp')}
-                </ListGroup.Item>
-              )}
-              {updatedAt && (
-                <ListGroup.Item>
-                  <strong>Last Updated:</strong>{' '}
-                  {format(new Date(updatedAt), 'PPpp')}
-                </ListGroup.Item>
-              )}
-            </ListGroup>
+        <Modal.Body className='pt-2'>
+          <div className='task-info-grid'>
+            <div className='info-item'>
+              <UserIcon size={16} className='text-muted' />
+              <span className='info-label'>Author:</span>
+              <User id={author} />
+            </div>
+            <div className='info-item'>
+              <Clock size={16} className='text-muted' />
+              <span className='info-label'>Lead Time:</span>
+              {leadTime} days
+            </div>
+            <div className='info-item'>
+              <Clock size={16} className='text-muted' />
+              <span className='info-label'>Cycle Time:</span>
+              {cycleTime} days
+            </div>
+            <div className='info-item'>
+              <Calendar size={16} className='text-muted' />
+              <span className='info-label'>Created:</span>
+              {formatDate(new Date(createdAt), 'PP')}
+            </div>
+            <div className='info-item'>
+              <Calendar size={16} className='text-muted' />
+              <span className='info-label'>Updated:</span>
+              {formatDate(new Date(updatedAt), 'PP')}
+            </div>
           </div>
 
           {requirements?.length > 0 && (
-            <div className='mb-4'>
-              <h6 className='text-muted'>Requirements</h6>
-              <ListGroup variant='flush'>
+            <div className='task-section'>
+              <h6 className='section-title'>Requirements</h6>
+              <div className='requirements-list'>
                 {requirements.map((req, index) => (
-                  <ListGroup.Item key={index}>
-                    <div className='d-flex align-items-center'>
-                      <span className='me-2'>•</span>
-                      {req}
-                    </div>
-                  </ListGroup.Item>
+                  <div key={index} className='requirement-item'>
+                    <span className='bullet'>•</span>
+                    {req}
+                  </div>
                 ))}
-              </ListGroup>
+              </div>
             </div>
           )}
 
           {members?.length > 0 && (
-            <div className='mb-4'>
-              <h6 className='text-muted'>Team Members</h6>
-              <ListGroup variant='flush'>
+            <div className='task-section'>
+              <h6 className='section-title'>Team Members</h6>
+              <div className='members-grid'>
                 {members.map((member, index) => (
-                  <ListGroup.Item
-                    key={index}
-                    className='d-flex justify-content-between align-items-center'
-                  >
-                    <div className='d-flex align-items-center gap-2'>
-                      <User id={member.user} />
-                      <Badge bg='secondary' className='text-capitalize'>
-                        {member.role}
-                      </Badge>
-                    </div>
-                  </ListGroup.Item>
+                  <div key={index} className='member-item'>
+                    <User id={member.user} />
+                    <Badge
+                      bg='secondary'
+                      className='text-capitalize role-badge'
+                    >
+                      {member.role}
+                    </Badge>
+                  </div>
                 ))}
-              </ListGroup>
+              </div>
             </div>
           )}
 
-          {attachments?.length > 0 && (
-            <div className='mb-4'>
-              <h6 className='text-muted'>Attachments</h6>
-              <ListGroup variant='flush'>
+          <div className='task-section'>
+            <h6 className='section-title'>
+              <Paperclip size={16} className='me-2' />
+              Attachments
+            </h6>
+            <div
+              className={`file-drop-zone ${isDragging ? 'dragging' : ''}`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                type='file'
+                ref={fileInputRef}
+                className='d-none'
+                onChange={(e) => handleFileUpload(e.target.files)}
+              />
+              <UploadCloud size={24} className='mb-2' />
+              <div className='text-center'>
+                {isUploading ? (
+                  <div className='upload-progress'>
+                    <div className='progress'>
+                      <div
+                        className='progress-bar'
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                    <div className='mt-2'>Uploading... {uploadProgress}%</div>
+                  </div>
+                ) : (
+                  <>
+                    <div>Drag & drop files here</div>
+                    <div className='text-muted small'>or click to browse</div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {attachments?.length > 0 && (
+              <div className='attachments-list mt-3'>
                 {attachments.map((attachment, index) => (
-                  <ListGroup.Item key={index}>
+                  <div key={index} className='attachment-item'>
                     <a
                       href={attachment.url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='d-flex align-items-center gap-2'
+                      className='attachment-link'
                     >
-                      {attachment.filename}
-                      <span className='text-muted'>
+                      <Paperclip size={16} className='me-2' />
+                      <span className='filename'>{attachment.filename}</span>
+                      <span className='content-type'>
                         ({attachment.contentType})
                       </span>
                     </a>
-                  </ListGroup.Item>
+                  </div>
                 ))}
-              </ListGroup>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </Modal.Body>
 
-        <Modal.Footer>
-          {phase !== 'done' && (
-            <Button
-              variant={getPhaseVariant(phase)}
-              onClick={() => {
-                const nextPhase = getNextPhase(phase)
-                if (nextPhase) {
-                  handlePhaseChange(nextPhase)
-                }
-                setShowModal(false)
-              }}
-            >
-              Move to {getNextPhaseLabel(phase)}
+        <Modal.Footer className='border-0'>
+          <div className='d-flex gap-2'>
+            {phase !== 'story' && (
+              <Button
+                variant='outline-secondary'
+                className='phase-button'
+                onClick={() => {
+                  const prevPhase = getPreviousPhase(phase)
+                  if (prevPhase) {
+                    handlePhaseChange(prevPhase)
+                  }
+                  setShowModal(false)
+                }}
+              >
+                <Image
+                  src={backwardArrow}
+                  width={20}
+                  alt={`Move to ${getPhaseLabel(getPreviousPhase(phase))}`}
+                  className='phase-button-icon'
+                />
+                <span className='phase-button-text'>
+                  Move to {getPhaseLabel(getPreviousPhase(phase))}
+                </span>
+              </Button>
+            )}
+            {phase !== 'done' && (
+              <Button
+                variant='outline-primary'
+                className='phase-button'
+                onClick={() => {
+                  const nextPhase = getNextPhase(phase)
+                  if (nextPhase) {
+                    handlePhaseChange(nextPhase)
+                  }
+                  setShowModal(false)
+                }}
+              >
+                <span className='phase-button-text'>
+                  Move to {getPhaseLabel(getNextPhase(phase))}
+                </span>
+                <Image
+                  src={forwardArrow}
+                  width={20}
+                  alt={`Move to ${getPhaseLabel(getNextPhase(phase))}`}
+                  className='phase-button-icon'
+                />
+              </Button>
+            )}
+            <Button variant='secondary' onClick={() => setShowModal(false)}>
+              Close
             </Button>
-          )}
-          <Button variant='secondary' onClick={() => setShowModal(false)}>
-            Close
-          </Button>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
@@ -269,4 +455,5 @@ TaskCard.propTypes = {
   ),
   createdAt: PropTypes.string,
   updatedAt: PropTypes.string,
+  onAttachmentUpload: PropTypes.func,
 }

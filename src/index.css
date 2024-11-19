@@ -59,11 +59,53 @@ button:focus-visible {
   border-color: #393939;
   color: white;
 }
-
+.btn-icon {
+  background-color: #000000;
+  padding: 0.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .btn-custom:hover {
-  background-color: #ffffff;
-  border-color: #004085;
+  background-color: '#ffffff';
   color: black;
+}
+.phase-button {
+  background-color: #000000; /* Ensure background is black */
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition:
+    color 0.3s ease,
+    max-width 0.3s ease,
+    opacity 0.3s ease;
+  min-width: 40px;
+  overflow: hidden;
+}
+
+.phase-button-text {
+  max-width: 0;
+  opacity: 0;
+  white-space: nowrap;
+  transition:
+    max-width 0.3s ease,
+    opacity 0.3s ease;
+  font-size: 0.6em;
+}
+
+.phase-button:hover .phase-button-text {
+  max-width: 200px;
+  opacity: 1;
+}
+
+.phase-button:hover {
+  background-color: #000000;
+}
+
+.phase-button-icon {
+  flex-shrink: 0;
 }
 .split-pane {
   display: flex;

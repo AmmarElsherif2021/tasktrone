@@ -1,9 +1,17 @@
 import { jwtDecode } from 'jwt-decode'
 import { useAuth } from '../../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
-import { Navbar, Nav, Container, Button, Row, Col } from 'react-bootstrap'
+import {
+  Navbar,
+  Nav,
+  Container,
+  Button,
+  Row,
+  Col,
+  Image,
+} from 'react-bootstrap'
 import { User } from '../User/User'
-
+import logo from '../../assets/logo-negative.svg'
 export function Header() {
   const [token, setToken] = useAuth()
   const navigate = useNavigate()
@@ -49,7 +57,7 @@ export function Header() {
     <Navbar bg='dark' variant='dark' expand='lg' sticky='top'>
       <Container fluid>
         <Navbar.Brand as={Link} to='/'>
-          MyApp
+          <Image src={logo} width={30} />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls='basic-navbar-nav' />
         <Navbar.Collapse id='basic-navbar-nav'>

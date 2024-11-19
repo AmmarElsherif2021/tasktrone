@@ -3,6 +3,7 @@ import { Card, Container, Row, Col, Spinner } from 'react-bootstrap'
 import { CreateTask } from '../Components/Tasks/CreateTask'
 import { listTasks } from '../API/tasks'
 import { Column } from '../Components/Tasks/Column'
+//import { ProjectInfo } from '../Components/Projects/ProjectInfo'
 
 export function Board() {
   const tasksQuery = useQuery({
@@ -34,7 +35,7 @@ export function Board() {
     transition: 'all 0.3s ease',
   }
 
-  const headerStyles = {
+  const taskHeaderStyles = {
     backgroundColor: '#f8f9fa',
     borderBottom: '2px solid #dee2e6',
     padding: '10px',
@@ -45,11 +46,18 @@ export function Board() {
   return (
     <Container fluid className='py-4'>
       {/* Create Task Section */}
-      <Card className='mb-4 shadow-sm'>
-        <Card.Body>
-          <CreateTask />
-        </Card.Body>
-      </Card>
+      <Row className='p-2 pb-0 mb-2 shadow-sm d-flex flex-row align-items-center'>
+        <CreateTask />
+        {/*
+        <ProjectInfo
+          projectId={'xxx'}
+          title={'placeholder for project title'}
+          subtitle={'placeholder for subtitle'}
+          admin={'admin'}
+          members={['m', 'a', 's']}
+        />
+        */}
+      </Row>
 
       {/* Board Section */}
       <Card className='shadow-sm'>
@@ -66,7 +74,7 @@ export function Board() {
                 {/* Story Column */}
                 <Col xs={12} md={3}>
                   <Card className='h-100 bg-light' style={columnStyles}>
-                    <Card.Header style={headerStyles}>
+                    <Card.Header style={taskHeaderStyles}>
                       Story
                       <span className='float-end badge bg-primary'>
                         {tasksByPhase.story.length}
@@ -81,7 +89,7 @@ export function Board() {
                 {/* In Progress Column */}
                 <Col xs={12} md={3}>
                   <Card className='h-100 bg-light' style={columnStyles}>
-                    <Card.Header style={headerStyles}>
+                    <Card.Header style={taskHeaderStyles}>
                       In Progress
                       <span className='float-end badge bg-warning'>
                         {tasksByPhase.inProgress.length}
@@ -99,7 +107,7 @@ export function Board() {
                 {/* Reviewing Column */}
                 <Col xs={12} md={3}>
                   <Card className='h-100 bg-light' style={columnStyles}>
-                    <Card.Header style={headerStyles}>
+                    <Card.Header style={taskHeaderStyles}>
                       Reviewing
                       <span className='float-end badge bg-info'>
                         {tasksByPhase.reviewing.length}
@@ -117,7 +125,7 @@ export function Board() {
                 {/* Done Column */}
                 <Col xs={12} md={3}>
                   <Card className='h-100 bg-light' style={columnStyles}>
-                    <Card.Header style={headerStyles}>
+                    <Card.Header style={taskHeaderStyles}>
                       Done
                       <span className='float-end badge bg-success'>
                         {tasksByPhase.done.length}
