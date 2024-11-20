@@ -114,6 +114,55 @@ button:focus-visible {
 .pane-right {
   overflow: auto;
 }
+
+/* icon button*/
+.icon-button {
+  width: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 100%;
+}
+
+.icon-image {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  max-width: 2rem;
+  max-height: 2rem;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.icon-text {
+  position: absolute;
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  white-space: nowrap;
+}
+
+.icon-button:hover .icon-image {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+.icon-button:hover .icon-text {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

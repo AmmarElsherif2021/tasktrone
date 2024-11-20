@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { Card, Container, Row, Col, Spinner } from 'react-bootstrap'
-import { CreateTask } from '../Components/Tasks/CreateTask'
+
 import { listTasks } from '../API/tasks'
 import { Column } from '../Components/Tasks/Column'
+import Toolbar from '../Components/Projects/ProjectToolbar'
 //import { ProjectInfo } from '../Components/Projects/ProjectInfo'
 
 export function Board() {
@@ -45,19 +46,8 @@ export function Board() {
 
   return (
     <Container fluid className='py-4'>
-      {/* Create Task Section */}
-      <Row className='p-2 pb-0 mb-2 shadow-sm d-flex flex-row align-items-center'>
-        <CreateTask />
-        {/*
-        <ProjectInfo
-          projectId={'xxx'}
-          title={'placeholder for project title'}
-          subtitle={'placeholder for subtitle'}
-          admin={'admin'}
-          members={['m', 'a', 's']}
-        />
-        */}
-      </Row>
+      {/* board nav Section */}
+      <Toolbar />
 
       {/* Board Section */}
       <Card className='shadow-sm'>

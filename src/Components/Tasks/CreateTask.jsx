@@ -9,7 +9,7 @@ import {
   Alert,
   ListGroup,
   Modal,
-  Image,
+  //Image,
   Row,
   Col,
 } from 'react-bootstrap'
@@ -18,7 +18,8 @@ import { UploadCloud, Paperclip } from 'lucide-react'
 import { createTask, uploadTaskAttachment } from '../../API/tasks'
 import { getAllUsers } from '../../API/users'
 import { useAuth } from '../../contexts/AuthContext'
-import createTaskIcon from '../../assets/create-task-negative.svg'
+import createTaskIcon from '../../assets/create-task.svg'
+import IconButton from '../../Ui/IconButton'
 
 // Utility Functions
 const formatFileSize = (bytes) => {
@@ -214,19 +215,13 @@ export function CreateTask() {
 
   return (
     <>
-      <div className='mb-4'>
-        <Button
-          variant='primary'
+      <div className='mb-0'>
+        <IconButton
+          src={createTaskIcon}
+          alt={'Create New Task'}
           onClick={handleShow}
-          className='btn-custom mb-4'
-        >
-          <Image
-            src={createTaskIcon}
-            width={27}
-            style={{ marginRight: '5px' }}
-          />
-          Create New Task
-        </Button>
+          className={'mb-0'}
+        />
 
         <Modal show={show} onHide={handleClose} size='lg'>
           <Modal.Header closeButton>

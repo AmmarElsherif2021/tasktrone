@@ -1,95 +1,212 @@
-﻿**Purpose**
+﻿# Tasktrone: Mechanical Assembly Factory Kanban Tool Documentation
 
-<p>
-<strong>Tasktrone</strong> leverages Kanban boards to help managers in assembly industries create, assign, visualize, and complete tasks collaboratively. This app, based on the Kanban approach, allows managers to create, schedule, edit, and delete collaborative tasks. Each task serves as a distinct platform where users can view instructional documents and multimedia, upload completed tasks, and review and approve tasks according to their roles. For each project, collaborators can preview the entire project board, including public data and project status.
+## 1. Introduction
 
-The main goal of Tasktrone is to provide a simpler way for every worker or employer to interact with tasks and responsibilities displayed on the board.
+### 1.1 Purpose
 
-</p>
-**Requirements:**
+This document provides comprehensive documentation for a Kanban tool specifically designed for mechanical assembly factory operations. The tool aims to improve productivity, workflow visualization, and overall operational efficiency in manufacturing environments.
 
-<ul>
-<li> <strong>User</strong> can create a <strong>Project , set all project essential data, add other <strong>User</strong>s, each <strong>Project</strong> contains a main <strong>Dashboard</strong> displays main toolbar, Text Announcement space, and Kanban board.
-<li> Once <strong>Task</strong> created, <strong>User</strong> could be either an <strong>Admin</strong> , <strong>Reviewer</strong> or <strong>Worker</strong> .
-<li> Each <strong>Task</strong> has 3 phases <strong>Story , <strong>Processing</strong> , <strong>ToBeReviewed</strong> , <strong>Approval , <strong>Done .
-<li> <strong>Admin</strong> can create, edit, and delete <strong>Task s also can add <strong>Worker s to join this <strong>Task instance.
-<li> <strong>Worker</strong> can download <strong>Task</strong> files and upload back required files.
-<li> <strong>Admin</strong> can set any <strong>Worker</strong> as a <strong>Reviewer</strong> who can make approval to the whole task.
-</ul>
-**Acronyms and abbreviations:**
-<ul>
-<li> UID:user ID
-<li> PID: project ID
-<li> projectName
-<li> projectStartDate
-<li> projectEndDate
-<li> Story
-<li> requirementsMaterial
-</ul>
+### 1.2 Scope
 
-**Functions:**
+This documentation covers the system architecture, features, user roles, data handling, and implementation guidelines for the Kanban tool.
 
-**Main domain:**
+## 2. System Overview
 
-<ul>
-<li> createUser(userName, password, email, phone)
-<li> Login()
-</ul>
+### 2.1 System Architecture
 
-**Project domain**
+The Kanban tool, Tasktrone, is designed as a web-based application with mobile compatibility, featuring:
 
-<ul>
-<li> createProject(UID, projectName,projectStartDate, projectEndDate )
-<li> terminateProject()
-</ul>
+- Frontend interface with drag-and-drop functionality
+- Backend server for data processing and storage
+- Real-time updates system
+- Integration capabilities with existing factory systems
 
-**User domain**
+### 2.2 User Groups and Roles
 
-<ul>
-<li> addWorker(UID,PID)
+#### Primary User Groups:
 
-<li> confirmJoin()
+1. Design Team
 
-<li> declineJoin()
+   - Design Engineers
+   - CAD Technicians
 
-<li> removeWorker()
+2. Manufacturing Team
 
-<li> createTask(taskName,UID[],story, requirementsMaterial) 1<li> editTask()
+   - CNC Programmers
+   - Manufacturing Engineers
+   - Machinists
+   - Machine Operators
+   - Production Supervisors
 
-<li> deleteTask()
+3. Quality Control Team
 
-<li> createPost()
+   - Quality Control Inspectors
+   - Metrology Engineers
 
-<li> editPost()
+4. Support Teams
+   - Inventory Managers
+   - Production Planners
+   - Maintenance Technicians
+   - HR Personnel
+   - Logistics Coordinators
 
-<li> deletePost()
+## 3. Core Features
 
-<li> uploadWork()
+### 3.1 Task Management
 
-<li> review()
+#### 3.1.1 Task Creation
 
-<li> approve()
-</ul>
-**Classes and objects:**
-<ul>
-<li> <strong>User</strong>
+- Title and description
+- Priority levels (High, Medium, Low)
+- Due dates and deadlines
+- Assignment capabilities
+- File attachment support
 
-<li> <strong>Project</strong>
+#### 3.1.2 Task Categories
 
-<li> <strong>Admin</strong>
+- Design tasks
+- Manufacturing operations
+- Quality control checks
+- Maintenance activities
+- Inventory management
+- Logistics operations
 
-<li> <strong>Worker</strong>
+### 3.2 Kanban Board Organization
 
-<li> <strong>Reviewer</strong>
+#### 3.2.1 Standard Columns
 
-<li> <strong>Task</strong>
+- To Do
+- In Progress
+- Review
+- Done
 
-<li> <strong>Post</strong>
+#### 3.2.2 Column Customization
 
-<li> <strong>Material</strong>
-</ul>
-**UseCases:**
+- Add/remove columns
+- Set WIP limits
+- Define column policies
 
-**ERD: DFD:**
+## 4. Data Management
 
-**Sequence Diagram: Test cases:**
+### 4.1 Supported Data Types
+
+#### 4.1.1 Design Data
+
+- File formats: STEP, IGES, STL, DXF, DWG
+- Handling: Version control and revision history
+- Access: Role-based permissions
+
+#### 4.1.2 Manufacturing Data
+
+- CNC programs (G-code, M-code)
+- Machine instructions
+- Production schedules
+- Work orders
+
+#### 4.1.3 Quality Control Data
+
+- Inspection reports
+- Measurement data
+- Quality metrics
+- Compliance documentation
+
+### 4.2 Data Flow
+
+#### 4.2.1 Input Sources
+
+- Manual entry
+- File uploads
+- API integrations
+- Automated data collection
+
+#### 4.2.2 Output Formats
+
+- CSV exports
+- PDF reports
+- API endpoints
+- Real-time dashboards
+
+## 5. Integration Capabilities
+
+### 5.1 System Integrations
+
+- ERP systems
+- CAD/CAM software
+- Quality management systems
+- Inventory management systems
+- Machine monitoring systems
+
+### 5.2 API Documentation
+
+#### 5.2.1 Available Endpoints
+
+- Task management
+- Board configuration
+- User management
+- Data exchange
+- Reporting
+
+## 6. Security and Access Control
+
+### 6.1 Authentication
+
+- User authentication
+- Single Sign-On (SSO)
+- Multi-factor authentication
+
+### 6.2 Authorization
+
+- Role-based access control
+- Permission levels
+- Data access restrictions
+
+## 7. Reporting and Analytics
+
+### 7.1 Standard Reports
+
+- Cycle time analysis
+- Lead time tracking
+- WIP monitoring
+- Bottleneck identification
+- Resource utilization
+
+### 7.2 Custom Analytics
+
+- Performance metrics
+- Productivity analysis
+- Quality metrics
+- Trend analysis
+- Predictive analytics
+
+## 8. Implementation Guidelines
+
+### 8.1 Setup Process
+
+1. Initial configuration
+2. User onboarding
+3. Data migration
+4. Integration setup
+5. Training and documentation
+
+### 8.2 Best Practices
+
+- WIP limit enforcement
+- Regular board reviews
+- Data backup procedures
+- Security protocols
+- User training requirements
+
+## 9. Support and Maintenance
+
+### 9.1 System Updates
+
+- Version control
+- Update procedures
+- Rollback protocols
+
+### 9.2 Technical Support
+
+- Support levels
+- Contact information
+- Issue reporting procedure
+- Resolution timeframes
