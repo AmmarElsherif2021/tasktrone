@@ -12,6 +12,7 @@ import {
 } from 'react-bootstrap'
 import { User } from '../User/User'
 import logo from '../../assets/logo-negative.svg'
+
 export function Header() {
   const [token, setToken] = useAuth()
   const navigate = useNavigate()

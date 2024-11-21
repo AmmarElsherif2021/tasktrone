@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { Button } from 'react-bootstrap'
+//import { Button } from 'react-bootstrap'
 
 const IconButton = ({
   src,
@@ -8,8 +8,7 @@ const IconButton = ({
   className = '',
 }) => {
   return (
-    <Button
-      variant='link'
+    <button
       onClick={onClick}
       className={`icon-button p-0 ${className}`}
       style={{ display: 'flex', alignItems: 'center' }}
@@ -18,7 +17,7 @@ const IconButton = ({
         <img src={src} alt={alt} className='icon-image' />
         <span className='icon-text'>{alt}</span>
       </div>
-    </Button>
+    </button>
   )
 }
 

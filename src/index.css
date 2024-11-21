@@ -117,18 +117,25 @@ button:focus-visible {
 
 /* icon button*/
 .icon-button {
-  width: auto;
   position: relative;
   overflow: hidden;
+  border: none;
+  background: none;
+  padding: 0;
 }
-
+.icon-button:focus {
+  outline: none;
+  box-shadow: none;
+}
 .icon-wrapper {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: auto;
+  width: 7rem;
   height: 100%;
+  border: none;
+  background-color: none;
 }
 
 .icon-image {
@@ -144,23 +151,29 @@ button:focus-visible {
 }
 
 .icon-text {
+  font-size: 0.8em;
   position: absolute;
   opacity: 0;
-  transform: translateY(30px);
+  transform: translatex(30px);
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
   white-space: nowrap;
+  border: none;
+  background: none;
 }
 
 .icon-button:hover .icon-image {
   opacity: 0;
-  transform: translateY(-30px);
+  transform: translateX(-30px);
 }
 
 .icon-button:hover .icon-text {
   opacity: 1;
   transform: translateY(0);
+}
+.dropdown-toggle::after {
+  display: none !important;
 }
 
 @media (prefers-color-scheme: light) {
