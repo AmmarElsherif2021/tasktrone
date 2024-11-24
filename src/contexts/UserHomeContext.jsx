@@ -65,7 +65,7 @@ export const UserHomeProvider = ({ children }) => {
     if (current) {
       setCurrentUser(current)
     }
-  }, [current])
+  }, [])
   //   useEffect(() => {
   //     if (userProfileQuery.data) {
   //       setCurrentProfile(userProfileQuery.data)
@@ -77,7 +77,7 @@ export const UserHomeProvider = ({ children }) => {
       setIsVisible(projects.length > 0)
       setUserProjects(projects)
     }
-  }, [projects])
+  }, [currentUser])
 
   const toggleVisibility = () => {
     setIsVisible(!isVisible)
@@ -94,7 +94,7 @@ export const UserHomeProvider = ({ children }) => {
     // console.log(
     //   `userProfile from user context ${currentProfile} ------------------------------------`,
     // )
-  }, [currentUser, userProjects]) // currentProfile to be added later
+  }, [currentUser, userProjects]) // currentProfile to be added later !!! important
 
   return (
     <UserHomeContext.Provider
@@ -103,6 +103,7 @@ export const UserHomeProvider = ({ children }) => {
         toggleVisibility,
         userProjects,
         currentUser,
+        setCurrentUser,
         //currentProfile,
       }}
     >

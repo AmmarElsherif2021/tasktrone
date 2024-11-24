@@ -1,7 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState, useEffect } from 'react'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { createProject } from '../../API/projects'
+import { getAllUsers } from '../../API/users'
 import { useAuth } from '../../contexts/AuthContext'
+import { Form, Button, Card, ListGroup, Alert, Spinner } from 'react-bootstrap'
 
 export function CreateProject() {
   const [formData, setFormData] = useState({
@@ -13,12 +15,50 @@ export function CreateProject() {
   const [token] = useAuth()
   const queryClient = useQueryClient()
 
+  // Fetch all users with error handling
+  const {
+    data: users = [],
+    isLoading: isLoadingUsers,
+    isError: isUsersError,
+    error: usersError,
+  } = useQuery({
+    queryKey: ['users'],
+    queryFn: getAllUsers,
+    retry: 2,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+  })
+
+  // Group users by team with safety checks
+  const usersByTeam = users.reduce((acc, user) => {
+    if (user && user.team && user.username) {
+      if (!acc[user.team]) {
+        acc[user.team] = []
+      }
+      acc[user.team].push(user)
+    }
+    return acc
+  }, {})
+
   const createProjectMutation = useMutation({
     mutationFn: () => {
       const { title, subtitle, members } = formData
-      createProject(token, { title, subtitle, members })
+      return createProject(token, {
+        title,
+        subtitle,
+        members: members.map((m) => ({
+          user: m.user,
+          role: m.role,
+        })),
+      })
     },
-    onSuccess: () => queryClient.invalidateQueries(['tasks']),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['tasks'])
+      setFormData({
+        title: '',
+        subtitle: '',
+        members: [],
+      })
+    },
   })
 
   const handleInputChange = (e) => {
@@ -38,9 +78,27 @@ export function CreateProject() {
   }
 
   const handleAddMember = () => {
+    if (!member.user) return
+
+    const selectedUser = users.find((u) => u.username === member.user)
+    if (!selectedUser) return
+
+    // Check for duplicate member
+    if (formData.members.some((m) => m.user === member.user)) {
+      alert('This user is already added to the project.')
+      return
+    }
+
+    const newMember = {
+      ...member,
+      id: formData.members.length,
+      team: selectedUser.team,
+      userRole: selectedUser.role,
+    }
+
     setFormData((prev) => ({
       ...prev,
-      members: [...prev.members, { ...member, id: prev.members.length }],
+      members: [...prev.members, newMember],
     }))
     setMember({ user: '', role: 'worker' })
   }
@@ -52,96 +110,163 @@ export function CreateProject() {
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     createProjectMutation.mutate()
   }
 
-  useEffect(() => {
-    if (createProjectMutation.isSuccess) {
-      setFormData({
-        title: '',
-        subtitle: '',
-        members: [],
-      })
-    }
-  }, [createProjectMutation.isSuccess])
+  if (!token) {
+    return (
+      <Alert variant='warning'>Please log in to create new projects.</Alert>
+    )
+  }
 
-  if (!token) return <div>Please log in to create new tasks.</div>
+  if (isUsersError) {
+    return (
+      <Alert variant='danger'>
+        Error loading users: {usersError?.message || 'Please try again later'}
+      </Alert>
+    )
+  }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor='create-title'>Title: </label>
-        <input
-          type='text'
-          name='title'
-          id='create-title'
-          value={formData.title}
-          onChange={handleInputChange}
-        />
-      </div>
-      <br />
-      <label htmlFor='create-subtitle'>Subtitle: </label>
-      <textarea
-        name='subtitle'
-        value={formData.subtitle}
-        onChange={handleInputChange}
-      />
-      <br />
+    <Card className='p-4 shadow-sm'>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group className='mb-3'>
+          <Form.Label>Project Title</Form.Label>
+          <Form.Control
+            type='text'
+            name='title'
+            value={formData.title}
+            onChange={handleInputChange}
+            placeholder='Enter project title'
+            required
+          />
+        </Form.Group>
 
-      <label htmlFor='add-member'>Member: </label>
-      <div>
-        <h3>Bullet List Input</h3>
-        <input
-          type='text'
-          name='user'
-          value={member.user}
-          onChange={handleMemberChange}
-          placeholder='User'
-        />
-        <select
-          name='role'
-          value={member.role}
-          onChange={handleMemberChange}
-          style={{ marginRight: '10px' }}
-        >
-          <option value='admin'>Admin</option>
-          <option value='worker'>Worker</option>
-          <option value='reviewer'>Reviewer</option>
-        </select>
+        <Form.Group className='mb-3'>
+          <Form.Label>Project Description</Form.Label>
+          <Form.Control
+            as='textarea'
+            name='subtitle'
+            value={formData.subtitle}
+            onChange={handleInputChange}
+            placeholder='Enter project description'
+            rows={3}
+          />
+        </Form.Group>
 
-        {formData.members.map((member, index) => (
-          <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
-            <span>•</span>
-            {member.user} -- {member.role}
-            <button
-              className='btn-custom'
-              type='button'
-              onClick={() => handleRemoveMember(index)}
-            >
-              Remove
-            </button>
-          </div>
-        ))}
+        <Card className='mb-3'>
+          <Card.Header>Add Project Members</Card.Header>
+          <Card.Body>
+            {isLoadingUsers ? (
+              <div className='text-center'>
+                <Spinner animation='border' role='status'>
+                  <span className='visually-hidden'>Loading users...</span>
+                </Spinner>
+              </div>
+            ) : (
+              <>
+                <div className='d-flex gap-2 mb-3'>
+                  <Form.Group className='flex-grow-1'>
+                    <Form.Select
+                      name='user'
+                      value={member.user}
+                      onChange={handleMemberChange}
+                      disabled={isLoadingUsers}
+                    >
+                      <option value=''>Select a team member</option>
+                      {Object.entries(usersByTeam).map(([team, teamUsers]) => (
+                        <optgroup label={team} key={team}>
+                          {teamUsers
+                            .sort((a, b) =>
+                              a.username.localeCompare(b.username),
+                            )
+                            .map((user) => (
+                              <option key={user.username} value={user.username}>
+                                {user.username} ({user.role})
+                              </option>
+                            ))}
+                        </optgroup>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
 
-        <button type='button' onClick={handleAddMember} className='btn-custom'>
-          Add Member
-        </button>
-      </div>
+                  <Form.Group style={{ width: '150px' }}>
+                    <Form.Select
+                      name='role'
+                      value={member.role}
+                      onChange={handleMemberChange}
+                    >
+                      <option value='admin'>Admin</option>
+                      <option value='worker'>Worker</option>
+                      <option value='reviewer'>Reviewer</option>
+                    </Form.Select>
+                  </Form.Group>
 
-      <br />
-      <input
-        type='submit'
-        value={createProjectMutation.isPending ? 'Creating...' : 'Create'}
-        disabled={!formData.title || createProjectMutation.isPending}
-      />
-      {createProjectMutation.isSuccess && (
-        <div>
-          <br />
-          Project created successfully!
+                  <Button
+                    onClick={handleAddMember}
+                    disabled={!member.user}
+                    variant='outline-primary'
+                  >
+                    Add
+                  </Button>
+                </div>
+
+                <ListGroup>
+                  {formData.members.map((member, index) => (
+                    <ListGroup.Item
+                      key={index}
+                      className='d-flex justify-content-between align-items-center'
+                    >
+                      <div>
+                        <strong>{member.user}</strong> - {member.role}
+                        <br />
+                        <small className='text-muted'>
+                          Team: {member.team} | Role: {member.userRole}
+                        </small>
+                      </div>
+                      <Button
+                        variant='outline-danger'
+                        size='sm'
+                        onClick={() => handleRemoveMember(index)}
+                      >
+                        Remove
+                      </Button>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
+              </>
+            )}
+          </Card.Body>
+        </Card>
+
+        <div className='d-grid gap-2'>
+          <Button
+            type='submit'
+            variant='primary'
+            disabled={
+              !formData.title ||
+              createProjectMutation.isPending ||
+              formData.members.length === 0
+            }
+          >
+            {createProjectMutation.isPending ? 'Creating...' : 'Create Project'}
+          </Button>
         </div>
-      )}
-    </form>
+
+        {createProjectMutation.isSuccess && (
+          <Alert variant='success' className='mt-3'>
+            Project created successfully!
+          </Alert>
+        )}
+
+        {createProjectMutation.isError && (
+          <Alert variant='danger' className='mt-3'>
+            Failed to create project. Please try again.
+          </Alert>
+        )}
+      </Form>
+    </Card>
   )
 }

@@ -7,6 +7,7 @@ import { AuthContextProvider } from './contexts/AuthContext.jsx'
 import { UserHomeProvider } from './contexts/UserHomeContext.jsx'
 import { Login } from './pages/Login.jsx'
 import { Dashboard } from './pages/Dashboard.jsx'
+import { ProjectProvider } from './contexts/ProjectContext.jsx'
 const queryClient = new QueryClient()
 export default function App() {
   const router = createBrowserRouter([
@@ -31,7 +32,9 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
         <UserHomeProvider>
-          <RouterProvider router={router} />
+          <ProjectProvider>
+            <RouterProvider router={router} />
+          </ProjectProvider>
         </UserHomeProvider>
       </AuthContextProvider>
     </QueryClientProvider>
