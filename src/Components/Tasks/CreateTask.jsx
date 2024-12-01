@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useState, useRef } from 'react'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useState, useRef, useEffect } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Form,
   Button,
@@ -12,14 +12,16 @@ import {
   //Image,
   Row,
   Col,
+  Spinner,
 } from 'react-bootstrap'
 import { UploadCloud, Paperclip } from 'lucide-react'
 
 import { createTask, uploadTaskAttachment } from '../../API/tasks'
-import { getAllUsers } from '../../API/users'
+
 import { useAuth } from '../../contexts/AuthContext'
 import createTaskIcon from '../../assets/create-task.svg'
 import IconButton from '../../Ui/IconButton'
+import { useProject } from '../../contexts/ProjectContext'
 
 // Utility Functions
 const formatFileSize = (bytes) => {
@@ -31,6 +33,8 @@ const formatFileSize = (bytes) => {
 }
 
 export function CreateTask() {
+  const { currentProjectMembers, usersDataQuery, currentProjectId } =
+    useProject()
   const [show, setShow] = useState(false)
   const [title, setTitle] = useState('')
   const [leadTime, setLeadTime] = useState('')
@@ -45,7 +49,16 @@ export function CreateTask() {
   const [token] = useAuth()
   const queryClient = useQueryClient()
   const fileInputRef = useRef(null)
-
+  //confirm context
+  useEffect(
+    () =>
+      console.log(
+        `Now you are createin a task with possible members ${JSON.stringify(
+          currentProjectMembers,
+        )}`,
+      ),
+    [show],
+  )
   // State management helpers
   const addRequirement = (req) => {
     if (req.trim() && !requirements.includes(req.trim())) {
@@ -63,17 +76,6 @@ export function CreateTask() {
   const [members, setMembers] = useState([])
 
   // Query to fetch all users
-  const { data: usersData, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ['users'],
-    queryFn: getAllUsers,
-    select: (data) => data?.users || [],
-    onError: (error) => {
-      console.error('Failed to fetch users:', error)
-      return []
-    },
-  })
-
-  const users = usersData || []
 
   const handleFileSelect = (files) => {
     const filesArray = Array.from(files)
@@ -102,7 +104,9 @@ export function CreateTask() {
 
   const handleAddMember = () => {
     if (newMemberId && newMemberRole) {
-      const userExists = users.find((user) => user.id === newMemberId)
+      const userExists = currentProjectMembers.find(
+        (user) => user.id === newMemberId,
+      )
       if (userExists) {
         const newMemberData = {
           user: newMemberId,
@@ -165,7 +169,12 @@ export function CreateTask() {
       await uploadAttachments()
 
       // Then create task with uploaded attachments
-      return createTask(token, {
+      // console.log(` Now you are submitting a new task of project ${currentProjectId} title ${title},
+      //   requirements ${requirements},
+      //   leadTime ${leadTime},
+      //   members ${members},
+      //   attachments,`)
+      return createTask(token, currentProjectId, {
         title,
         requirements,
         leadTime,
@@ -230,6 +239,7 @@ export function CreateTask() {
           <Modal.Body>
             <Form onSubmit={handleSubmit}>
               {/* Title and Lead Time Row */}
+
               <Row className='mb-3'>
                 <Col md={8}>
                   <Form.Group>
@@ -314,10 +324,15 @@ export function CreateTask() {
                         size='sm'
                         value={newMemberId}
                         onChange={(e) => setNewMemberId(e.target.value)}
-                        disabled={isLoadingUsers}
                       >
                         <option value=''>Select a user</option>
-                        {users.map((user) => (
+                        {usersDataQuery.isLoading && (
+                          <>
+                            <Spinner animation='boarder' />
+                          </>
+                        )}
+
+                        {currentProjectMembers?.map((user) => (
                           <option key={user.id} value={user.id}>
                             {user.username}
                           </option>
@@ -346,7 +361,9 @@ export function CreateTask() {
                     {members.length > 0 && (
                       <ListGroup>
                         {members.map((member, index) => {
-                          const user = users.find((u) => u.id === member.user)
+                          const user = currentProjectMembers.find(
+                            (u) => u.id === member.user,
+                          )
                           return (
                             <ListGroup.Item
                               key={index}

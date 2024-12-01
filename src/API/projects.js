@@ -1,17 +1,18 @@
 // Get projects
-export const listProjects = async (queryParams = {}, token) => {
+export const listProjects = async (userId, queryParams = {}) => {
   try {
     const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/projects?` +
+      `${import.meta.env.VITE_BACKEND_URL}/${userId}/projects/?` +
         new URLSearchParams(queryParams),
       {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          //Authorization: `Bearer ${token}`,
         },
       },
     )
+
     if (!res.ok) {
       const errorText = await res.text()
       throw new Error(`Error fetching projects: ${errorText}`)
@@ -62,6 +63,7 @@ export const getProjectById = async (projectId, token) => {
       const errorText = await res.text()
       throw new Error(`Error fetching project: ${errorText}`)
     }
+    console.log(`API retrieve project`)
     return await res.json()
   } catch (error) {
     console.error('Error fetching project:', error)

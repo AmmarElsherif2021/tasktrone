@@ -4,7 +4,7 @@ import { Blog } from './Blog.jsx'
 import { Header } from '../Components/Header/Header.jsx'
 import { Board } from './Board.jsx'
 import { useAuth } from '../contexts/AuthContext.jsx'
-import { useProject } from '../contexts/ProjectContext.jsx'
+//import { useProject } from '../contexts/ProjectContext.jsx'
 import { useUserHome } from '../contexts/UserHomeContext.jsx'
 import { jwtDecode } from 'jwt-decode'
 import { Link } from 'react-router-dom'
@@ -12,7 +12,9 @@ import logo from '../assets/logo.svg'
 import { Dashboard } from './Dashboard.jsx'
 
 export function Home() {
-  const { currentUser, userProjects } = useUserHome()
+  const { userProjects } = useUserHome()
+  //const { currentProject } = useProject()
+
   const [token] = useAuth()
   const decodeToken = (token) => {
     if (!token || typeof token !== 'string') {
@@ -28,7 +30,7 @@ export function Home() {
       return null
     }
   }
-  const { currentProject } = useProject()
+
   const userData = decodeToken(token)
   if (!userData) {
     return (
@@ -74,11 +76,16 @@ export function Home() {
       </Container>
     )
   }
-  if (Object.keys(currentProject).length === 0) {
+  if (userData && Object.keys(userProjects).length === 0) {
     return (
       <div>
         <Header />
         <h1>create project</h1>
+        {
+          //   {JSON.stringify(userData)}
+          //   {JSON.stringify(userProjects)}
+          //   {JSON.stringify(currentUser)}
+        }
         <Dashboard />
       </div>
     )
@@ -87,10 +94,14 @@ export function Home() {
     <div className='min-vh-100 bg-light'>
       <Header />
       <Container fluid className='py-4'>
-        <h2>current user {JSON.stringify(currentUser)}</h2>
+        {/*
+          <h2>current user {JSON.stringify(currentUser)}</h2>
         <h2>token {token}</h2>
         <h2>projects {JSON.stringify(userProjects)}</h2>
         <h2>current project {JSON.stringify(currentProject)}</h2>
+         <h3>project: {JSON.stringify(currentProject)}</h3>
+            <h3>{JSON.stringify(currentUser)}</h3>
+          */}
         <Row className='g-4'>
           <Col xs={12} lg={3}>
             <Blog />

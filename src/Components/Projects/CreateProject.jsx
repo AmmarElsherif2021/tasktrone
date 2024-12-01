@@ -8,10 +8,12 @@ import { Form, Button, Card, ListGroup, Alert, Spinner } from 'react-bootstrap'
 export function CreateProject() {
   const [formData, setFormData] = useState({
     title: '',
-    subtitle: '',
+    description: '',
     members: [],
+    startDate: null,
+    endDate: null,
   })
-  const [member, setMember] = useState({ user: '', role: 'worker' })
+  const [member, setMember] = useState({ userId: '', role: 'worker' })
   const [token] = useAuth()
   const queryClient = useQueryClient()
 
@@ -30,7 +32,7 @@ export function CreateProject() {
 
   // Group users by team with safety checks
   const usersByTeam = users.reduce((acc, user) => {
-    if (user && user.team && user.username) {
+    if (user && user.team && user.id) {
       if (!acc[user.team]) {
         acc[user.team] = []
       }
@@ -41,26 +43,37 @@ export function CreateProject() {
 
   const createProjectMutation = useMutation({
     mutationFn: () => {
-      const { title, subtitle, members } = formData
+      const { title, description, members, startDate, endDate } = formData
       return createProject(token, {
         title,
-        subtitle,
+        description,
+        startDate,
+        endDate,
         members: members.map((m) => ({
-          user: m.user,
-          role: m.role,
+          user: m.userId || m.user,
+          role: m.role || 'worker',
         })),
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['tasks'])
+      queryClient.invalidateQueries(['projects'])
+      console.log(`Created project: ${JSON.stringify(formData)}`)
+      // Reset form
       setFormData({
         title: '',
-        subtitle: '',
+        description: '',
         members: [],
+        startDate: null,
+        endDate: null,
       })
+      setMember({ userId: '', role: 'worker' })
+    },
+    onError: (error) => {
+      console.error('Project creation failed:', error)
     },
   })
 
+  // Added handleInputChange method
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -75,32 +88,40 @@ export function CreateProject() {
       ...prev,
       [name]: value,
     }))
+
+    console.log(
+      `member changed: ${JSON.stringify({
+        ...member,
+        [name]: value,
+      })}`,
+    )
   }
-
   const handleAddMember = () => {
-    if (!member.user) return
-
-    const selectedUser = users.find((u) => u.username === member.user)
+    if (!member.userId) return
+    console.log(`users in CreateProject: ${JSON.stringify(usersByTeam)}`)
+    const selectedUser = users.find((u) => u.id === member.userId)
     if (!selectedUser) return
 
     // Check for duplicate member
-    if (formData.members.some((m) => m.user === member.user)) {
+    if (formData.members.some((m) => m.userId === member.userId)) {
       alert('This user is already added to the project.')
       return
     }
 
     const newMember = {
-      ...member,
+      user: member.userId,
       id: formData.members.length,
       team: selectedUser.team,
-      userRole: selectedUser.role,
+      role: member.role,
+      fieldRole: selectedUser.role,
+      username: selectedUser.username,
     }
 
     setFormData((prev) => ({
       ...prev,
       members: [...prev.members, newMember],
     }))
-    setMember({ user: '', role: 'worker' })
+    setMember({ userId: '', role: 'worker' })
   }
 
   const handleRemoveMember = (index) => {
@@ -148,11 +169,41 @@ export function CreateProject() {
           <Form.Label>Project Description</Form.Label>
           <Form.Control
             as='textarea'
-            name='subtitle'
-            value={formData.subtitle}
+            name='description'
+            value={formData.description}
             onChange={handleInputChange}
             placeholder='Enter project description'
             rows={3}
+          />
+        </Form.Group>
+
+        <Form.Group className='mb-3'>
+          <Form.Label>Start Date (Optional)</Form.Label>
+          <Form.Control
+            type='date'
+            name='startDate'
+            value={formData.startDate || ''}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                startDate: e.target.value ? new Date(e.target.value) : null,
+              }))
+            }
+          />
+        </Form.Group>
+
+        <Form.Group className='mb-3'>
+          <Form.Label>End Date (Optional)</Form.Label>
+          <Form.Control
+            type='date'
+            name='endDate'
+            value={formData.endDate || ''}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                endDate: e.target.value ? new Date(e.target.value) : null,
+              }))
+            }
           />
         </Form.Group>
 
@@ -170,8 +221,8 @@ export function CreateProject() {
                 <div className='d-flex gap-2 mb-3'>
                   <Form.Group className='flex-grow-1'>
                     <Form.Select
-                      name='user'
-                      value={member.user}
+                      name='userId'
+                      value={member.userId}
                       onChange={handleMemberChange}
                       disabled={isLoadingUsers}
                     >
@@ -183,7 +234,7 @@ export function CreateProject() {
                               a.username.localeCompare(b.username),
                             )
                             .map((user) => (
-                              <option key={user.username} value={user.username}>
+                              <option key={user.id} value={user.id}>
                                 {user.username} ({user.role})
                               </option>
                             ))}
@@ -206,7 +257,7 @@ export function CreateProject() {
 
                   <Button
                     onClick={handleAddMember}
-                    disabled={!member.user}
+                    disabled={!member.userId}
                     variant='outline-primary'
                   >
                     Add
@@ -220,10 +271,10 @@ export function CreateProject() {
                       className='d-flex justify-content-between align-items-center'
                     >
                       <div>
-                        <strong>{member.user}</strong> - {member.role}
+                        <strong>{member.username}</strong> - {member.role}
                         <br />
                         <small className='text-muted'>
-                          Team: {member.team} | Role: {member.userRole}
+                          Team: {member.team} | Role: {member.fieldRole}
                         </small>
                       </div>
                       <Button

@@ -13,6 +13,10 @@ export function Login() {
     mutationFn: () => login({ username, password }),
     onSuccess: (data) => {
       setToken(data.token)
+      console.log('Raw Token:', data.token)
+
+      // Store token with 'Bearer ' prefix
+
       navigate('/')
     },
     onError: () => alert('failed to log in!'),

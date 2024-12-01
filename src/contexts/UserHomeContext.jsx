@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { listProjects } from '../API/projects'
 import { useAuth } from '../contexts/AuthContext'
@@ -10,91 +10,88 @@ const UserHomeContext = createContext()
 // eslint-disable-next-line react/prop-types
 export const UserHomeProvider = ({ children }) => {
   const [token] = useAuth()
-  //const queryClient = useQueryClient()
 
-  const decodeToken = (token) => {
-    if (!token || typeof token !== 'string') {
-      console.error('Invalid token format:', typeof token)
-      return null
-    }
+  // Function to decode the token
+  const decodeToken = useMemo(
+    () => (token) => {
+      if (!token || typeof token !== 'string') {
+        console.error('Invalid token format:', typeof token)
+        return null
+      }
 
-    try {
-      const decoded = jwtDecode(token)
-      console.log('Token decoded successfully:', {
-        sub: decoded.sub,
-        exp: new Date(decoded.exp * 1000).toISOString(),
-      })
-      return { userId: decoded.sub }
-    } catch (error) {
-      console.error('Token decode error:', error)
-      return null
-    }
-  }
+      try {
+        const decoded = jwtDecode(token)
+        console.log('Token decoded successfully:', JSON.stringify(decoded), {
+          sub: decoded.sub,
+          exp: new Date(decoded.exp * 1000).toISOString(),
+        })
+        return { userId: decoded.sub }
+      } catch (error) {
+        console.error('Token decode error:', error)
+        return null
+      }
+    },
+    [],
+  )
+
   const userData = decodeToken(token)
 
   // Context states
   const [currentUser, setCurrentUser] = useState({})
   const [isVisible, setIsVisible] = useState(false)
   const [userProjects, setUserProjects] = useState([])
-  //const [currentProfile, setCurrentProfile] = useState({})
 
   // Queries
   const currentUserQuery = useQuery({
     queryKey: ['users', { userId: userData?.userId }],
     queryFn: () => getUserInfo(userData?.userId),
+    enabled: !!userData?.userId, // Ensures the query runs only if userId is available
   })
-
-  //   const userProfileQuery = useQuery({
-  //     queryKey: ['users', 'profile-image', { userId: userData?.userId }],
-  //     queryFn: () => getUserProfileImage(userData?.userId),
-  //   })
-
   const projectsQuery = useQuery({
-    queryKey: ['projects', { userId: userData?.userId }],
-    queryFn: () => listProjects({ userId: userData?.userId }),
-    enabled: !!userData?.userId,
+    queryKey: ['projects', { sortBy: 'createdAt', sortOrder: 'desc' }],
+    queryFn: () =>
+      listProjects(userData?.userId, {
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+      }),
+    enabled: !!token,
   })
 
   // Context data
   const current = currentUserQuery.data ?? {}
-  //const currentUserProfile = userProfileQuery.data ?? {}
   const projects = projectsQuery.data ?? []
 
   // Invoke context state
   useEffect(() => {
-    if (current) {
+    if (Object.keys(current).length > 0) {
+      console.log(`token ${token}`)
       setCurrentUser(current)
     }
-  }, [])
-  //   useEffect(() => {
-  //     if (userProfileQuery.data) {
-  //       setCurrentProfile(userProfileQuery.data)
-  //     }
-  //   }, [userProfileQuery.data])
+  }, [current])
 
   useEffect(() => {
-    if (projects) {
-      setIsVisible(projects.length > 0)
-      setUserProjects(projects)
-    }
-  }, [currentUser])
+    setIsVisible(true)
+    // console.log(
+    //   ` @@@@@@@@@@@@@@@@@@@@@ projects of current user: ${JSON.stringify(
+    //     projects,
+    //   )}`,
+    // )
+    setUserProjects(projects)
+  }, [current, projects])
 
   const toggleVisibility = () => {
     setIsVisible(!isVisible)
   }
 
   // Confirm context state
-  useEffect(() => {
-    console.log(
-      `CurrentUserData from user context ${JSON.stringify(currentUser)}`,
-    )
-    console.log(
-      `userprojects from user context ${JSON.stringify(userProjects)}`,
-    )
-    // console.log(
-    //   `userProfile from user context ${currentProfile} ------------------------------------`,
-    // )
-  }, [currentUser, userProjects]) // currentProfile to be added later !!! important
+  // useEffect(() => {
+  //   console.log(
+  //     `CurrentUserData from user context ${JSON.stringify(currentUser)}`,
+  //   )
+  //   console.log(
+  //     `userprojects from user context ${JSON.stringify(userProjects)}`,
+  //   )
+  // }, [current, projects, currentUser, userProjects])
 
   return (
     <UserHomeContext.Provider
@@ -104,7 +101,6 @@ export const UserHomeProvider = ({ children }) => {
         userProjects,
         currentUser,
         setCurrentUser,
-        //currentProfile,
       }}
     >
       {children}

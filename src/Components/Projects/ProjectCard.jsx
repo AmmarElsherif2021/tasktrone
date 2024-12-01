@@ -1,43 +1,100 @@
 import PropTypes from 'prop-types'
+import { Card, Badge, ListGroup } from 'react-bootstrap'
 import { User } from '../User/User.jsx'
+import { useProject } from '../../contexts/ProjectContext.jsx'
+//import { Navigate } from 'react-router-dom'
 
-export function ProjectCard({ projectId, title, subtitle, admin, members }) {
-  // const [token] = useAuth()
-  // const queryClient = useQueryClient()
+function createHexColor(id) {
+  const cleanedId = id.replace(/\s/g, '')
+  const firstChar = cleanedId.charAt(cleanedId.length - 1)
+  const middleChar = cleanedId.charAt(cleanedId.length - 2)
+  const lastChar = cleanedId.charAt(cleanedId.length - 3)
+  return `#ffa${firstChar}${middleChar}${lastChar}`
+}
 
-  // const mutation = useMutation({
-  //   mutationFn: ({ token, projectId }) => changeProjectPhase(token, projectId),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries(['projects', projectId])
-  //   },
-  // })
+export function ProjectCard({
+  projectId,
+  title,
+  description,
+  createdBy,
+  members,
+}) {
+  const { setCurrentProject } = useProject()
+
+  const handleProjectClick = () => {
+    setCurrentProject(projectId)
+  }
+
+  const cardBgColor = createHexColor(projectId)
 
   return (
-    <article style={{ margin: '1vw', width: '15vw', border: 'solid' }}>
-      <h3>{title}</h3>
-      <p>{projectId}</p>
-      {subtitle && (
-        <em>
-          <br />
-          Written by <User id={admin} />
-        </em>
-      )}
+    <Card
+      onClick={handleProjectClick}
+      style={{
+        margin: '1vw',
+        width: '18rem',
+        cursor: 'pointer',
+        backgroundColor: cardBgColor,
+        transition: 'transform 0.2s',
+      }}
+      className='shadow-sm hover:scale-105'
+    >
+      <Card.Body>
+        <Card.Title className='d-flex justify-content-between align-items-center'>
+          {title}
+          <Badge bg='secondary' className='ms-2'>
+            {projectId.slice(-6)}
+          </Badge>
+        </Card.Title>
 
-      <div>{members}</div>
-    </article>
+        {description && (
+          <Card.Subtitle className='mb-2 text-muted'>
+            Created by <User id={createdBy} />
+          </Card.Subtitle>
+        )}
+
+        <Card.Text className='mt-2'>
+          <strong>Team Members:</strong>
+        </Card.Text>
+
+        <ListGroup variant='flush'>
+          {members.map((member) => (
+            <ListGroup.Item
+              key={member.user}
+              className='d-flex justify-content-between align-items-center px-0'
+            >
+              <div>
+                <User id={member.user} />
+              </div>
+              <Badge
+                bg={
+                  member.role === 'admin'
+                    ? 'danger'
+                    : member.role === 'reviewer'
+                      ? 'warning'
+                      : 'primary'
+                }
+              >
+                {member.role}
+              </Badge>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      </Card.Body>
+    </Card>
   )
 }
 
 ProjectCard.propTypes = {
   projectId: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
-  subtitle: PropTypes.string.isRequired,
-  admin: PropTypes.string.isRequired,
-  tasks: PropTypes.arrayOf(PropTypes.string),
+  description: PropTypes.string.isRequired,
+  createdBy: PropTypes.string.isRequired,
   members: PropTypes.arrayOf(
     PropTypes.shape({
       user: PropTypes.string.isRequired,
-      role: PropTypes.oneOf(['admin', 'reviwer', 'worker']).isRequired,
+      role: PropTypes.oneOf(['admin', 'reviewer', 'worker']).isRequired,
+      _id: PropTypes.string.isRequired,
     }),
-  ),
+  ).isRequired,
 }

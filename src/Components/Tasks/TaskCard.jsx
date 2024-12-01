@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { useState, useRef } from 'react'
 import { Card, Button, Badge, Modal, Image } from 'react-bootstrap'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { changeTaskPhase, uploadTaskAttachment } from '../../API/tasks.js'
+import { updateTask, uploadTaskAttachment } from '../../API/tasks.js'
 import { useAuth } from '../../contexts/AuthContext.jsx'
 import { User } from '../User/User.jsx'
 
@@ -13,7 +13,6 @@ import backwardArrow from '../../assets/backward-negative.svg'
 import { format, isValid } from 'date-fns'
 import {
   UploadCloud,
-  //X,
   Paperclip,
   Calendar,
   Clock,
@@ -30,6 +29,7 @@ function createHexColor(id) {
 
 export function TaskCard({
   taskId,
+  projectId,
   title,
   author,
   leadTime,
@@ -50,17 +50,19 @@ export function TaskCard({
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
 
-  const mutation = useMutation({
-    mutationFn: ({ token, taskId, newPhase }) =>
-      changeTaskPhase(token, taskId, newPhase),
+  const phaseMutation = useMutation({
+    mutationFn: ({ token, projectId, taskId, phase }) =>
+      updateTask(token, projectId, taskId, { phase }),
     onSuccess: () => {
       queryClient.invalidateQueries(['tasks', taskId])
     },
   })
+
   function formatDate(createdAt) {
     const date = new Date(createdAt)
     return isValid(date) ? format(date, 'PP') : 'Invalid date'
   }
+
   const uploadMutation = useMutation({
     mutationFn: async (file) => {
       setIsUploading(true)
@@ -68,14 +70,7 @@ export function TaskCard({
       try {
         const formData = new FormData()
         formData.append('file', file)
-        const response = await uploadTaskAttachment(
-          token,
-          taskId,
-          formData,
-          (progress) => {
-            setUploadProgress(progress)
-          },
-        )
+        const response = await uploadTaskAttachment(token, taskId, formData)
         return response
       } finally {
         setIsUploading(false)
@@ -91,7 +86,7 @@ export function TaskCard({
   })
 
   const handlePhaseChange = (newPhase) => {
-    mutation.mutate({ token, taskId, newPhase })
+    phaseMutation.mutate({ token, projectId, taskId, phase: newPhase })
   }
 
   const handleFileUpload = (files) => {
@@ -434,6 +429,7 @@ export function TaskCard({
 
 TaskCard.propTypes = {
   taskId: PropTypes.string.isRequired,
+  projectId: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   author: PropTypes.string,
   leadTime: PropTypes.number,

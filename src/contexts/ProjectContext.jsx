@@ -1,87 +1,89 @@
+/* eslint-disable react/prop-types */
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getProjectById } from '../API/projects'
-//import { useAuth } from '../contexts/AuthContext'
-//import { jwtDecode } from 'jwt-decode'
-// getUserProfileImage to be added
-//import { useUserHome } from './UserHomeContext'
+import { getUserInfo } from '../API/users'
+import { useAuth } from '../contexts/AuthContext'
 
 const ProjectContext = createContext()
 
-// eslint-disable-next-line react/prop-types
 export const ProjectProvider = ({ children }) => {
-  // const [token] = useAuth()
-  //const queryClient = useQueryClient()
-
-  //   const decodeToken = (token) => {
-  //     if (!token || typeof token !== 'string') {
-  //       console.error('Invalid token format:', typeof token)
-  //       return null
-  //     }
-
-  //     try {
-  //       const decoded = jwtDecode(token)
-  //       console.log('Token decoded successfully:', {
-  //         sub: decoded.sub,
-  //         exp: new Date(decoded.exp * 1000).toISOString(),
-  //       })
-  //       return { projectId: decoded.sub }
-  //     } catch (error) {
-  //       console.error('Token decode error:', error)
-  //       return null
-  //     }
-  //   }
-  //   const currentProject = decodeToken(token)
-  //get current user data
+  const [token] = useAuth()
 
   // Context states
-  const [currentProject, setCurrentProject] = useState({})
+  const [currentProjectId, setCurrentProjectId] = useState('')
+  const [currentProject, setCurrentProject] = useState('')
+  const [currentProjectMembers, setCurrentProjectMembers] = useState([])
 
-  //const [projectInfo, setProjectInfo] = useState(null)
-  //const [currentProfile, setCurrentProfile] = useState({})
-
-  // Queries
+  // Project query - kept simple and focused on project data
   const currentProjectQuery = useQuery({
-    queryKey: ['project', { projectId: currentProject?._id }],
-    queryFn: () => getProjectById(currentProject?.projectId),
+    queryKey: ['project', currentProjectId],
+    queryFn: () => getProjectById(currentProjectId, token),
+    enabled: !!currentProjectId,
   })
 
-  //   const userProfileQuery = useQuery({
-  //     queryKey: ['projects', 'profile-image', { projectId: currentProject?._id }],
-  //     queryFn: () => getUserProfileImage(currentProject?.projectId),
-  //   })
+  // Separate query for users data - now more flexible and independent
+  const usersDataQuery = useQuery({
+    queryKey: ['project-users', currentProjectId],
+    queryFn: async () => {
+      // Only try to fetch users if project members exist
+      if (!currentProject?.members?.length) return []
 
-  // Context data
-  const current = currentProjectQuery.data ?? {}
-  //const currentProjectProfile = userProfileQuery.data ?? {}
-  //const projects = projectsQuery.data ?? []
+      try {
+        const userPromises = currentProject.members.map(async (member) => {
+          try {
+            return await getUserInfo(member.user)
+          } catch (userFetchError) {
+            console.error(
+              `Failed to fetch user ${member.user}:`,
+              userFetchError,
+            )
+            return null
+          }
+        })
 
-  // Invoke context state
+        const users = await Promise.all(userPromises)
+        return users.filter((user) => user !== null)
+      } catch (error) {
+        console.error('Failed to fetch project users:', error)
+        return []
+      }
+    },
+    // Important: Make this query manually triggered
+    enabled: false,
+  })
+
+  // Trigger users fetch when project is loaded and has members
   useEffect(() => {
-    if (current) {
-      setCurrentProject(current)
+    if (currentProject?.members?.length) {
+      usersDataQuery.refetch()
     }
-  }, [])
-  //   useEffect(() => {
-  //     if (userProfileQuery.data) {
-  //       setCurrentProfile(userProfileQuery.data)
-  //     }
-  //   }, [userProfileQuery.data])
+  }, [currentProject])
 
-  // Confirm context state
+  // Handle project query result
   useEffect(() => {
-    console.log(
-      `currentProjectData from user context ${JSON.stringify(currentProject)}`,
-    )
-  }, [currentProject]) // currentProfile to be added later
+    if (currentProjectQuery?.data) {
+      setCurrentProject(currentProjectQuery.data)
+    }
+  }, [currentProjectQuery])
+
+  // update project members when users are fetched..
+  useEffect(() => {
+    if (usersDataQuery.data) {
+      setCurrentProjectMembers(usersDataQuery.data)
+    }
+  }, [usersDataQuery.data])
 
   return (
     <ProjectContext.Provider
       value={{
-        // projectInfo,
+        currentProjectId,
+        setCurrentProjectId,
         currentProject,
         setCurrentProject,
-        //currentProfile,
+        currentProjectMembers,
+        setCurrentProjectMembers,
+        usersDataQuery,
       }}
     >
       {children}

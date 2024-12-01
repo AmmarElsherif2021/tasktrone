@@ -1,8 +1,8 @@
 // Get tasks
-export const listTasks = async (queryParams) => {
+export const listTasks = async (projectId, queryParams) => {
   try {
     const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/tasks?` +
+      `${import.meta.env.VITE_BACKEND_URL}/projects/${projectId}/tasks?` +
         new URLSearchParams(queryParams),
     )
     if (!res.ok) {
@@ -16,16 +16,20 @@ export const listTasks = async (queryParams) => {
 }
 
 // Create new task
-export const createTask = async (token, task) => {
+export const createTask = async (token, projectId, task) => {
+  console.log(`task from api ${JSON.stringify(task)}`)
   try {
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/tasks`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/projects/${projectId}/tasks`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(task),
       },
-      body: JSON.stringify(task),
-    })
+    )
     if (!res.ok) {
       throw new Error(`Error creating task: ${res.statusText}`)
     }
@@ -35,45 +39,40 @@ export const createTask = async (token, task) => {
     throw error
   }
 }
-export const changeTaskPhase = async (token, taskId, phase) => {
+export const updateTask = async (token, projectId, taskId, updates) => {
   try {
-    // Log the token and taskId for debugging purposes
-    console.log('Token:', token)
-    console.log('Task ID:', taskId)
-
-    // Make the PATCH request to update the task phase
     const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/tasks/${taskId}/phase`,
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/projects/${projectId}/tasks/${taskId}`,
       {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`, // Ensure the token is correctly formatted
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ phase }),
+        body: JSON.stringify(updates),
       },
     )
-
-    // Check if the response is not OK and throw an error if so
     if (!res.ok) {
-      throw new Error(`Error patching task: ${res.statusText}`)
+      throw new Error(`Error updating task: ${res.statusText}`)
     }
-
-    // Return the JSON response
     return await res.json()
   } catch (error) {
-    // Log the error for debugging purposes
-    console.error('Error patching task:', error)
+    console.error('Error updating task:', error)
     throw error
   }
 }
+
 export const uploadTaskAttachment = async (token, taskId, file) => {
   try {
     const formData = new FormData()
     formData.append('file', file)
 
     const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/tasks/${taskId}/attachments`,
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/projects/tasks/${taskId}/attachments`,
       {
         method: 'POST',
         headers: {

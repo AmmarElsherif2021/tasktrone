@@ -1,48 +1,52 @@
-/* eslint-disable no-unused-vars */
 import { User } from '../Components/User/User'
 import { CreateProject } from '../Components/Projects/CreateProject'
-//import { Fragment } from 'react'
 import { ProjectCard } from '../Components/Projects/ProjectCard'
-import { listProjects } from '../API/projects'
-import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
 import { jwtDecode } from 'jwt-decode'
-import { Container, Card, Row, Col, Spinner } from 'react-bootstrap'
+import { Container, Card, Row, Col } from 'react-bootstrap'
+import { useUserHome } from '../contexts/UserHomeContext'
+import { useProject } from '../contexts/ProjectContext'
+import { useNavigate } from 'react-router-dom'
+//import { useEffect } from 'react'
 
 export function Dashboard() {
+  const navigate = useNavigate()
+  const { userProjects } = useUserHome()
+  const { setCurrentProjectId } = useProject()
+
+  const [token] = useAuth()
+
   const decodeToken = (token) => {
     try {
       const decoded = jwtDecode(token)
       const userId = decoded.sub
-      const userName = decoded.name
-      return { userId, userName }
+      const username = decoded.username
+      return { userId, username }
     } catch (error) {
       console.error('Invalid token:', error)
       return null
     }
   }
 
-  const [token] = useAuth()
   const userData = decodeToken(token)
-  const projectsQuery = useQuery({
-    queryKey: ['projects', {}],
-    queryFn: () => {
-      listProjects({})
-    },
-  })
 
-  const projects = projectsQuery.data ?? []
-
-  const sectionStyles = {
-    marginBottom: '2rem',
-    transition: 'all 0.3s ease',
-  }
+  // const sectionStyles = {
+  //   marginBottom: '2rem',
+  //   transition: 'all 0.3s ease',
+  // }
 
   const headerStyles = {
     backgroundColor: '#f8f9fa',
     borderBottom: '2px solid #dee2e6',
     padding: '15px',
     fontWeight: 'bold',
+  }
+
+  // Handle project click
+  const handleProjectClick = (projectId) => {
+    console.log(`clicked project ${projectId}`)
+    setCurrentProjectId(projectId)
+    navigate(`/`)
   }
 
   return (
@@ -72,29 +76,29 @@ export function Dashboard() {
         <Card.Header style={headerStyles}>
           <h4 className='mb-0'>
             Your Projects
-            {projects.length > 0 && (
+            {userProjects.length > 0 && (
               <span className='float-end badge bg-primary'>
-                {projects.length}
+                {userProjects.length}
               </span>
             )}
           </h4>
         </Card.Header>
         <Card.Body>
-          {projectsQuery.isLoading ? (
-            <div className='text-center py-5'>
-              <Spinner animation='border' role='status' variant='primary'>
-                <span className='visually-hidden'>Loading...</span>
-              </Spinner>
-            </div>
-          ) : projects && projects.length ? (
+          {userProjects && userProjects.length ? (
             <Row className='g-4'>
-              {projects.map((project) => (
-                <Col key={project._id} xs={12} md={6} lg={4}>
+              {userProjects.map((project) => (
+                <Col
+                  key={project._id}
+                  xs={12}
+                  md={6}
+                  lg={4}
+                  onClick={() => handleProjectClick(project._id)}
+                >
                   <ProjectCard
                     projectId={project._id}
                     title={project.title}
-                    subtitle={project.subtitle}
-                    admin={project.admin}
+                    description={project.description}
+                    createdBy={project.createdBy}
                     members={project.members}
                   />
                 </Col>

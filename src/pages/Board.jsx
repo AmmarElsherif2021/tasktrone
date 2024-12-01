@@ -4,12 +4,15 @@ import { Card, Container, Row, Col, Spinner } from 'react-bootstrap'
 import { listTasks } from '../API/tasks'
 import { Column } from '../Components/Tasks/Column'
 import Toolbar from '../Components/Projects/ProjectToolbar'
+import { useProject } from '../contexts/ProjectContext'
 //import { ProjectInfo } from '../Components/Projects/ProjectInfo'
 
 export function Board() {
+  const { currentProjectId } = useProject()
+  const projectId = currentProjectId ? currentProjectId : ''
   const tasksQuery = useQuery({
-    queryKey: ['tasks', {}],
-    queryFn: () => listTasks({}),
+    queryKey: ['tasks', projectId, {}],
+    queryFn: () => listTasks(projectId, {}),
     select: (data) =>
       data.map((task) => ({
         ...task,
@@ -17,6 +20,7 @@ export function Board() {
         members: task.members || [],
         attachments: task.attachments || [],
       })),
+    enabled: !!currentProjectId,
   })
   const tasks = tasksQuery.data ?? []
 
