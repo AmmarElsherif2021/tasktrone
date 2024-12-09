@@ -4,7 +4,11 @@ import { useNavigate, Link } from 'react-router-dom'
 import { login } from '../API/users'
 import { useAuth } from '../contexts/AuthContext'
 import { Container, Row, Col, Alert, Form, Button } from 'react-bootstrap'
+import { useUserHome } from '../contexts/UserHomeContext'
+import { useProject } from '../contexts/ProjectContext'
 export function Login() {
+  const { setCurrentUser } = useUserHome()
+  const { setCurrentProjectId } = useProject()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
@@ -23,6 +27,8 @@ export function Login() {
   })
   const handleSubmit = (e) => {
     e.preventDefault()
+    setCurrentUser({})
+    setCurrentProjectId('')
     loginMutation.mutate()
   }
   return (

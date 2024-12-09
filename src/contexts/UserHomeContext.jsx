@@ -64,8 +64,8 @@ export const UserHomeProvider = ({ children }) => {
   // Invoke context state
   useEffect(() => {
     if (Object.keys(current).length > 0) {
-      console.log(`token ${token}`)
       setCurrentUser(current)
+      //console.log(`currentUser ${JSON.stringify(currentUser)}`)
     }
   }, [current])
 

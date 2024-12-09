@@ -10,10 +10,13 @@ export const Column = ({ tasks }) => {
           {tasks.map((task) => (
             <TaskCard
               key={task._id}
+              projectId={task.project}
               taskId={task._id}
               title={task.title}
               author={task.author}
               leadTime={task.leadTime}
+              startDate={task.startDate}
+              dueDate={task.dueDate}
               cycleTime={task.cycleTime}
               phase={task.phase}
               members={task.members}

@@ -73,7 +73,61 @@ The Kanban tool, Tasktrone, is designed as a web-based application with mobile c
 
 ### 3.2 Kanban Board Organization
 
-#### 3.2.1 Standard Columns
+#### 3.2.1 Board paramaters:
+
+A Kanban board is a visual tool used to manage workflows and tasks in a project. Here are the main parameters and components commonly used on a Kanban board:
+
+##### 1. **Cards**
+
+- Represent individual tasks or work items.
+- Contain details such as task name, description, assignees, due dates, and attachments.
+
+##### 2. **WIP Limits (Work In Progress Limits)**
+
+- Restrictions on the number of tasks that can be in the "In Progress" column at any one time.
+- Helps to prevent overloading and ensure focus on task completion.
+
+##### 3. **Swimlanes**
+
+- Horizontal lanes that separate tasks by different categories, teams, or priorities.
+- Useful for distinguishing tasks by type, project, or team.
+
+##### 4. **Labels/Tags**
+
+- Color-coded labels or tags to categorize tasks.
+- Helps in quickly identifying the type, priority, or status of tasks.
+
+##### 4. **Due Dates**
+
+- Dates by which tasks need to be completed.
+- Helps in tracking deadlines and ensuring timely delivery.
+
+##### 5. **Assignees**
+
+- Team members responsible for each task.
+- Clearly identifies who is working on what.
+
+##### 6. **Task Details**
+
+- Descriptions, checklists, and subtasks within each card.
+- Helps in breaking down work and ensuring all aspects of a task are addressed.
+
+##### 7. **Comments and Attachments**
+
+- Space for team members to leave comments or attach files related to the task.
+- Enhances collaboration and communication.
+
+##### 8. **Metrics and Analytics**
+
+- Data such as cycle time, lead time, and cumulative flow diagrams.
+- Helps in monitoring performance and identifying areas for improvement.
+
+##### 9. **Priority Indicators**
+
+- Flags or icons to denote high-priority tasks.
+- Ensures critical tasks receive attention first.
+
+#### 3.2.2 Standard Columns
 
 - To Do
 - In Progress

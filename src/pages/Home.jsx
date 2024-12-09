@@ -3,18 +3,26 @@ import { Container, Row, Col, Button } from 'react-bootstrap'
 import { Blog } from './Blog.jsx'
 import { Header } from '../Components/Header/Header.jsx'
 import { Board } from './Board.jsx'
+import { ProjectCard } from '../Components/Projects/ProjectCard.jsx'
 import { useAuth } from '../contexts/AuthContext.jsx'
 //import { useProject } from '../contexts/ProjectContext.jsx'
 import { useUserHome } from '../contexts/UserHomeContext.jsx'
 import { jwtDecode } from 'jwt-decode'
 import { Link } from 'react-router-dom'
 import logo from '../assets/logo.svg'
-import { Dashboard } from './Dashboard.jsx'
+//import { Dashboard } from './Dashboard.jsx'
+import { CreateProject } from '../Components/Projects/CreateProject.jsx'
+import { useProject } from '../contexts/ProjectContext.jsx'
+import { useNavigate } from 'react-router-dom'
 
 export function Home() {
   const { userProjects } = useUserHome()
-  //const { currentProject } = useProject()
-
+  const { currentProjectId, setCurrentProjectId } = useProject()
+  const navigate = useNavigate()
+  const handleProjectClick = (projectId) => {
+    setCurrentProjectId(projectId)
+    navigate('/board')
+  }
   const [token] = useAuth()
   const decodeToken = (token) => {
     if (!token || typeof token !== 'string') {
@@ -76,6 +84,8 @@ export function Home() {
       </Container>
     )
   }
+
+  //After logging in
   if (userData && Object.keys(userProjects).length === 0) {
     return (
       <div>
@@ -86,12 +96,12 @@ export function Home() {
           //   {JSON.stringify(userProjects)}
           //   {JSON.stringify(currentUser)}
         }
-        <Dashboard />
+        <CreateProject />
       </div>
     )
   }
   return (
-    <div className='min-vh-100 bg-light'>
+    <div className='min-vh-100 bg-light' style={{ width: '100vw' }}>
       <Header />
       <Container fluid className='py-4'>
         {/*
@@ -102,15 +112,49 @@ export function Home() {
          <h3>project: {JSON.stringify(currentProject)}</h3>
             <h3>{JSON.stringify(currentUser)}</h3>
           */}
-        <Row className='g-4'>
-          <Col xs={12} lg={3}>
-            <Blog />
-          </Col>
+        {!currentProjectId ? (
+          <Row className='g-4'>
+            <h1>Welcome back </h1>
+            <h3>Projects</h3>
+            {
+              <Row xs={1} sm={2} md={3} lg={4} className='g-4'>
+                {userProjects.map((project) => (
+                  <Col key={project._id}>
+                    <div
+                      onClick={() => handleProjectClick(project._id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          handleProjectClick(project._id)
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                      role='button'
+                      tabIndex={0}
+                    >
+                      <ProjectCard
+                        projectId={project._id}
+                        title={project.title}
+                        description={project.description}
+                        createdBy={project.createdBy}
+                        members={project.members}
+                      />
+                    </div>
+                  </Col>
+                ))}
+              </Row>
+            }
+          </Row>
+        ) : (
+          <Row className='g-4'>
+            <Col xs={12} lg={3}>
+              <Blog />
+            </Col>
 
-          <Col xs={12} lg={9}>
-            <Board />
-          </Col>
-        </Row>
+            <Col xs={12} lg={9}>
+              <Board />
+            </Col>
+          </Row>
+        )}
       </Container>
     </div>
   )

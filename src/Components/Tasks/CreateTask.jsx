@@ -15,7 +15,7 @@ import {
   Spinner,
 } from 'react-bootstrap'
 import { UploadCloud, Paperclip } from 'lucide-react'
-
+import { calculateLeadTime, calcDueDate } from '../../Ui/utils'
 import { createTask, uploadTaskAttachment } from '../../API/tasks'
 
 import { useAuth } from '../../contexts/AuthContext'
@@ -37,6 +37,7 @@ export function CreateTask() {
     useProject()
   const [show, setShow] = useState(false)
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [leadTime, setLeadTime] = useState('')
   const [newReq, setNewReq] = useState('')
   const [newMemberId, setNewMemberId] = useState('')
@@ -45,7 +46,7 @@ export function CreateTask() {
   const [attachments, setAttachments] = useState([])
   const [, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
-
+  const [dueDate, setDueDate] = useState('')
   const [token] = useAuth()
   const queryClient = useQueryClient()
   const fileInputRef = useRef(null)
@@ -162,7 +163,14 @@ export function CreateTask() {
       setIsUploading(false)
     }
   }
-
+  useEffect(() => {
+    const calculatedLeadTime = calculateLeadTime(dueDate)
+    setLeadTime(calculatedLeadTime)
+  }, [dueDate])
+  useEffect(() => {
+    const calculatedDueDate = calcDueDate(leadTime)
+    setDueDate(calculatedDueDate)
+  }, [leadTime])
   const createTaskMutation = useMutation({
     mutationFn: async () => {
       // First upload attachments
@@ -176,8 +184,10 @@ export function CreateTask() {
       //   attachments,`)
       return createTask(token, currentProjectId, {
         title,
+        description,
         requirements,
         leadTime,
+        dueDate,
         members,
         attachments,
       })
@@ -193,10 +203,12 @@ export function CreateTask() {
 
   const resetForm = () => {
     setTitle('')
+    setDescription('')
     setLeadTime('')
     setNewReq('')
     setRequirements([])
     setMembers([])
+    setDueDate('')
     setSelectedFiles([])
     setAttachments([])
     setNewMemberId('')
@@ -250,6 +262,28 @@ export function CreateTask() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder='Enter task title'
+                    />
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>Description</Form.Label>
+                    <Form.Control
+                      size='sm'
+                      type='text'
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder='Describe your new task'
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={3}>
+                  <Form.Group>
+                    <Form.Label>Due Date</Form.Label>
+                    <Form.Control
+                      size='sm'
+                      type='date'
+                      value={dueDate}
+                      onChange={(e) => setDueDate(e.target.value)}
+                      placeholder='Select due date'
                     />
                   </Form.Group>
                 </Col>

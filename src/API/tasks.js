@@ -14,7 +14,32 @@ export const listTasks = async (projectId, queryParams) => {
     throw error
   }
 }
-
+//Get specific task by Id
+export const getTaskById = async (taskId, projectId, token) => {
+  try {
+    const res = await fetch(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/projects/${projectId}/tasks/${taskId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
+    if (!res.ok) {
+      throw new Error(
+        `Error retrieving task with id ${taskId}: ${res.statusText}`,
+      )
+    }
+    return await res.json()
+  } catch (err) {
+    console.error(`Error retrieving task with id ${taskId}: ${err}`)
+    throw err
+  }
+}
 // Create new task
 export const createTask = async (token, projectId, task) => {
   console.log(`task from api ${JSON.stringify(task)}`)

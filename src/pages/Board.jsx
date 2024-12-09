@@ -5,6 +5,8 @@ import { listTasks } from '../API/tasks'
 import { Column } from '../Components/Tasks/Column'
 import Toolbar from '../Components/Projects/ProjectToolbar'
 import { useProject } from '../contexts/ProjectContext'
+import { Metrics } from '../Components/Projects/Metrics'
+//import { removeMemberFromTask } from '../../server/src/services/tasks'
 //import { ProjectInfo } from '../Components/Projects/ProjectInfo'
 
 export function Board() {
@@ -15,10 +17,18 @@ export function Board() {
     queryFn: () => listTasks(projectId, {}),
     select: (data) =>
       data.map((task) => ({
-        ...task,
-        requirements: task.requirements || [],
+        _id: task._id,
+        project: task.project,
+        title: task.title,
+        author: task.author,
+        leadTime: task.leadTime,
+        cycleTime: task.cycleTime,
+        startDate: task?.startDate,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+        dueDate: task.dueDate,
+        phase: task.phase,
         members: task.members || [],
-        attachments: task.attachments || [],
       })),
     enabled: !!currentProjectId,
   })
@@ -50,8 +60,10 @@ export function Board() {
 
   return (
     <Container fluid className='py-4'>
+      {JSON.stringify(tasks)}
       {/* board nav Section */}
       <Toolbar />
+      <Metrics />
 
       {/* Board Section */}
       <Card className='shadow-sm'>

@@ -12,11 +12,13 @@ import {
 } from 'react-bootstrap'
 import { User } from '../User/User'
 import logo from '../../assets/logo-negative.svg'
+//import { useUserHome } from '../../contexts/UserHomeContext'
+import { useProject } from '../../contexts/ProjectContext'
 
 export function Header() {
   const [token, setToken] = useAuth()
   const navigate = useNavigate()
-
+  const { setCurrentProjectId } = useProject()
   const handleLogout = () => {
     setToken(null)
     navigate('/') // Navigate to Intro after logout
@@ -57,7 +59,7 @@ export function Header() {
   return (
     <Navbar bg='dark' variant='dark' expand='lg' sticky='top'>
       <Container fluid>
-        <Navbar.Brand as={Link} to='/'>
+        <Navbar.Brand as={Link} to='/' onClick={() => setCurrentProjectId('')}>
           <Image src={logo} width={30} />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls='basic-navbar-nav' />

@@ -49,7 +49,7 @@ export const ProjectProvider = ({ children }) => {
         return []
       }
     },
-    // Important: Make this query manually triggered
+    // Important: Make this query manually triggered !!!!!
     enabled: false,
   })
 
