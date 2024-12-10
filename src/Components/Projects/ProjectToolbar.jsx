@@ -2,10 +2,7 @@ import { Navbar, Nav, Container } from 'react-bootstrap'
 import { CreateTask } from '../Tasks/CreateTask'
 import ProjectDashboard from './ProjectDashboard'
 import Notifications from './Notifications'
-import Settings from './Settings'
-import ProjectUsers from './ProjectUsers'
 import Search from './Search'
-import ExportProject from './ExportProject'
 import RefreshProject from './RefreshProject'
 
 const Toolbar = () => {
@@ -18,9 +15,6 @@ const Toolbar = () => {
             <CreateTask />
             <ProjectDashboard />
             <Notifications />
-            <Settings />
-            <ProjectUsers />
-            <ExportProject />
             <RefreshProject />
           </Nav>
           <Search />

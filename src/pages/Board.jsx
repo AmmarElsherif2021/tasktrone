@@ -60,7 +60,7 @@ export function Board() {
 
   return (
     <Container fluid className='py-4'>
-      {JSON.stringify(tasks)}
+      {/*JSON.stringify(tasks) */}
       {/* board nav Section */}
       <Toolbar />
       <Metrics />

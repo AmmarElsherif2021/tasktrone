@@ -1,11 +1,17 @@
-export function getHexBackground(id) {
+export function getHexBackground(id, phase) {
+  const intesityInt = {
+    story: 130,
+    inProgress: 110,
+    reviewing: 80,
+    done: 50,
+  }
   // Id to integer
   const integer = parseInt(id, 16)
 
   // Random pick R, G, or B
   let ptr = 1 //Math.floor(Math.random() * 3)
-  let subPtr = Math.floor(Math.random() * 2) // Randomly pick 0 or 1
-  let randIndex = (integer % 156) + 100
+  let subPtr = 0 //Math.floor(Math.random() * 2) // Randomly pick 0 or 1
+  let randIndex = (integer % intesityInt[phase]) + 100
   let color = []
 
   function decimalToHex(decimal) {
@@ -16,13 +22,22 @@ export function getHexBackground(id) {
   // Switch to set the color array based on the random pointers
   switch (ptr) {
     case 0:
-      color = subPtr === 0 ? [255, 152, randIndex] : [255, randIndex, 152]
+      color =
+        subPtr === 0
+          ? [255, intesityInt[phase], randIndex]
+          : [255, randIndex, intesityInt[phase]]
       break
     case 1:
-      color = subPtr === 0 ? [99, 255, randIndex] : [randIndex, 255, 152]
+      color =
+        subPtr === 0
+          ? [intesityInt[phase], 255, randIndex]
+          : [randIndex, 255, intesityInt[phase]]
       break
     case 2:
-      color = subPtr === 0 ? [99, randIndex, 255] : [randIndex, 152, 255]
+      color =
+        subPtr === 0
+          ? [intesityInt[phase], randIndex, 255]
+          : [randIndex, intesityInt[phase], 255]
       break
   }
 

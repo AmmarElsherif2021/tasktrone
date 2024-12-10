@@ -138,7 +138,10 @@ export function TaskCard({
     <>
       <Card
         className='task-card'
-        style={{ backgroundColor: getHexBackground(taskId), cursor: 'pointer' }}
+        style={{
+          backgroundColor: getHexBackground(taskId, phase),
+          cursor: 'pointer',
+        }}
         onClick={() => setShowModal(true)}
       >
         <Card.Body className='p-2'>
