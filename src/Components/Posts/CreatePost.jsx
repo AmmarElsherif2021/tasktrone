@@ -4,16 +4,17 @@ import { Form, Button, Alert, Card, Collapse, Image } from 'react-bootstrap'
 import { createPost } from '../../API/posts'
 import { useAuth } from '../../contexts/AuthContext'
 import createPostIcon from '../../assets/create-post-negative.svg'
-
+import { useProject } from '../../contexts/ProjectContext'
 export function CreatePost() {
   const [title, setTitle] = useState('')
   const [contents, setContents] = useState('')
   const [token] = useAuth()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
-
+  const { currentProjectId } = useProject()
   const createPostMutation = useMutation({
-    mutationFn: () => createPost(token, { title, contents }),
+    mutationFn: () =>
+      createPost(token, currentProjectId.toString(), { title, contents }),
     onSuccess: () => {
       queryClient.invalidateQueries(['posts'])
       setTitle('')
@@ -48,6 +49,7 @@ export function CreatePost() {
       <Collapse in={open}>
         <div id='create-post-collapse'>
           <Card className='mb-4'>
+            <h3>{currentProjectId.toString()}</h3>
             <Card.Body>
               <Form onSubmit={handleSubmit}>
                 <Form.Group className='mb-3'>

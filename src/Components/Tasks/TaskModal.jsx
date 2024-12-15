@@ -3,13 +3,13 @@ import PropTypes from 'prop-types'
 import {
   Modal,
   Button,
-  Badge,
+  //Badge,
   Tab,
   Nav,
   ProgressBar,
   Alert,
   Spinner,
-  Form,
+  //Form,
 } from 'react-bootstrap'
 import {
   FileText,
@@ -20,10 +20,13 @@ import {
   ArrowRight,
   Check,
 } from 'lucide-react'
+import { User } from '../User/User'
+import FormCounter from '../../Ui/FormUi'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { getTaskById, updateTask } from '../../API/tasks'
 import { useAuth } from '../../contexts/AuthContext'
-
+import refreshIcon from '../../assets/refresh-icon.svg'
+import userIcon from '../../assets/profile.svg'
 // TASK MODAL
 function TaskModal({ show, onHide, taskId, projectId }) {
   const [token] = useAuth()
@@ -133,30 +136,34 @@ function TaskModal({ show, onHide, taskId, projectId }) {
             <Modal.Title>{taskQuery?.data?.title}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <div className='mb-3'>
-              <span className='text-muted'>
-                Task ID: {taskQuery?.data?._id} <br />
+            <div
+              className='mb-3 flex-row'
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+              }}
+            >
+              <div>
+                Task ID: <small>{taskQuery?.data?._id}</small>
+                <br />
                 {` `}
-                Due date: {Date(taskQuery?.data?.dueDate)}
-              </span>
-              <Badge bg={'#ffffff'} className='ms-2 text-xs capitalize'>
+                Created at: <small>{Date(taskQuery?.data?.createdAt)}</small>
+                <br />
+                {` `}
+                Due date: <small>{Date(taskQuery?.data?.dueDate)}</small>
+              </div>
+              <div>
                 {taskQuery?.data?.phase}
 
-                <Form.Control
-                  type='number'
-                  value={priority}
-                  onChange={handlePriorityChange}
-                  min={0}
-                  max={100}
+                <FormCounter
+                  src={refreshIcon}
+                  handlePriorityChange={handlePriorityChange}
+                  handlePrioritySubmit={handlePrioritySubmit}
+                  priority={taskQuery?.data?.priority}
+                  projectId={projectId}
                 />
-                <Button
-                  variant='primary'
-                  onClick={handlePrioritySubmit}
-                  disabled={!projectId}
-                >
-                  Update
-                </Button>
-              </Badge>
+              </div>
             </div>
 
             <Tab.Container
@@ -214,13 +221,17 @@ function TaskModal({ show, onHide, taskId, projectId }) {
                         className='col-6 d-flex align-items-center gap-3 p-3 border rounded'
                       >
                         <img
-                          src={member.avatar}
-                          alt={member.name}
-                          className='w-10 h-10 rounded-circle'
+                          //src={member?.avatar ? member.avatar : userIcon}
+                          src={userIcon}
+                          alt={member.user}
+                          className='w-2 h-2 rounded-circle'
+                          style={{ width: '2rem' }}
                         />
                         <div>
-                          <div className='font-medium'>{member.name}</div>
-                          <Badge bg='outline-secondary'>{member.role}</Badge>
+                          <div className='font-medium'>
+                            <User id={member.user} />
+                          </div>
+                          <small>{member.role}</small>
                         </div>
                       </div>
                     ))}

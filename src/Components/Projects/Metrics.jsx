@@ -63,7 +63,7 @@ export function Metrics() {
   const metricValueStyle = {
     fontSize: '1.5rem',
     fontWeight: 'bold',
-    color: '#007bff',
+    color: '#f11c1f',
   }
 
   return (
@@ -85,7 +85,7 @@ export function Metrics() {
                 min={0}
               />
               <Button
-                variant='primary'
+                variant='secondary'
                 onClick={handleWipSubmit}
                 disabled={!currentProjectId}
               >

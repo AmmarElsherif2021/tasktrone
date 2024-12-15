@@ -1,11 +1,24 @@
-import { Form, FormControl, Button } from 'react-bootstrap'
-
+import { Button, Nav } from 'react-bootstrap'
+import searchIcon from '../../assets/search.svg'
+import { useState } from 'react'
 const Search = () => {
+  const [isOpenSearch, setIsOpenSearch] = useState(false)
+
+  const toggleSearch = () => setIsOpenSearch(!isOpenSearch)
+
   return (
-    <Form inline>
-      <FormControl type='text' placeholder='Search' className='mr-sm-2' />
-      <Button variant='outline-primary'>Search</Button>
-    </Form>
+    <Nav>
+      <Nav.Item className='nav-item'>
+        <Button
+          variant='light'
+          className='px-3'
+          type='button'
+          onClick={toggleSearch}
+        >
+          <img src={searchIcon} style={{ width: '2rem' }} alt='search' />
+        </Button>
+      </Nav.Item>
+    </Nav>
   )
 }
 

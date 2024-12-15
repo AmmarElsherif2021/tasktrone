@@ -1,23 +1,60 @@
+// Correct hex to RGB conversion
+function hexToRGB(hexString) {
+  // Remove the potential hash (#) prefix
+  if (hexString.startsWith('#')) {
+    hexString = hexString.slice(1)
+  }
+
+  // Ensure the string is the correct length
+  if (hexString.length !== 6) {
+    throw new Error('Invalid hexadecimal input')
+  }
+
+  // Convert each pair of hex digits to decimal
+  const r = parseInt(hexString.substring(0, 2), 16)
+  const g = parseInt(hexString.substring(2, 4), 16)
+  const b = parseInt(hexString.substring(4, 6), 16)
+
+  return [r, g, b]
+}
+
+// Invert the RGB color and return as hex
+export function invertHex(hex) {
+  const rgbArray = hexToRGB(hex)
+
+  const [r, g, b] = rgbArray
+  const invertedR = 255 - r
+  const invertedG = 255 - g
+  const invertedB = 255 - b
+
+  return `#${decimalToHex(invertedR)}${decimalToHex(invertedG)}${decimalToHex(
+    invertedB,
+  )}`
+}
+
+// Helper function for decimal to hex conversion
+function decimalToHex(decimal) {
+  let hex = decimal.toString(16)
+  return hex.length === 1 ? '0' + hex : hex // Ensure two characters
+}
+
+// Generate hex color based on ID and phase
 export function getHexBackground(id, phase) {
   const intesityInt = {
-    story: 130,
-    inProgress: 110,
-    reviewing: 80,
-    done: 50,
+    story: 160,
+    inProgress: 140,
+    reviewing: 100,
+    done: 95,
   }
+
   // Id to integer
   const integer = parseInt(id, 16)
 
   // Random pick R, G, or B
-  let ptr = 1 //Math.floor(Math.random() * 3)
-  let subPtr = 0 //Math.floor(Math.random() * 2) // Randomly pick 0 or 1
-  let randIndex = (integer % intesityInt[phase]) + 100
+  let ptr = integer % 3
+  let subPtr = integer % 2
+  let randIndex = (integer % intesityInt[phase]) + intesityInt[phase]
   let color = []
-
-  function decimalToHex(decimal) {
-    let hex = decimal.toString(16)
-    return hex.length === 1 ? '0' + hex : hex // Ensure two characters
-  }
 
   // Switch to set the color array based on the random pointers
   switch (ptr) {
@@ -64,10 +101,12 @@ export const calculateLeadTime = (dueDate) => {
 // Utility function to calculate dueDate
 export const calcDueDate = (lead) => {
   if (!lead) return ''
+
   const today = new Date()
   const dueTime = lead * 24 * 3600 * 1000
+
   // Calculate the due date by adding the lead time to today's date
   const dueDate = new Date(today.getTime() + dueTime)
-  return dueDate.toISOString().split('T')[0]
-  // Return the date in 'YYYY-MM-DD' format
+
+  return dueDate.toISOString().split('T')[0] // Return the date in 'YYYY-MM-DD' format
 }

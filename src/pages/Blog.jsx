@@ -6,15 +6,25 @@ import { CreatePost } from '../Components/Posts/CreatePost.jsx'
 
 import { getPosts } from '../API/posts.js'
 import { BlogControls } from '../Components/Posts/BlogController.jsx'
+import { useAuth } from '../contexts/AuthContext.jsx'
+import { useProject } from '../contexts/ProjectContext.jsx'
 
 export function Blog() {
   const [author, setAuthor] = useState('')
   const [sortBy, setSortBy] = useState('createdAt')
   const [sortOrder, setSortOrder] = useState('descending')
+  const [token] = useAuth()
+  const { currentProjectId } = useProject()
 
   const postsQuery = useQuery({
-    queryKey: ['posts', { author, sortBy, sortOrder }],
-    queryFn: () => getPosts({ author, sortBy, sortOrder }),
+    queryKey: [
+      'posts',
+      { projectId: currentProjectId, author, sortBy, sortOrder },
+    ],
+    queryFn: () =>
+      getPosts(token, currentProjectId, { author, sortBy, sortOrder }),
+    enabled: !!token && !!currentProjectId,
+    staleTime: 1000 * 60,
   })
 
   const posts = postsQuery.data ?? []

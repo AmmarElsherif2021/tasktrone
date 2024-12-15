@@ -147,7 +147,7 @@ export function TaskCard({
         <Card.Body className='p-2'>
           <Card.Title className='h6 mb-2'>{title}</Card.Title>
           <Card.Text className='small text-muted mb-2'>
-            ID: <small style={{ color: '#FB0D0D' }}>{taskId}</small>
+            ID: <small>{taskId}</small>
           </Card.Text>
 
           <div className='d-flex gap-2 mb-2'>
