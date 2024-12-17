@@ -4,12 +4,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateProject } from '../../API/projects'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-
+import refreshIcon from '../../assets/refresh-icon.svg'
 export function Metrics() {
   const queryClient = useQueryClient()
   const [wipLimit, setWipLimit] = useState(0)
-  const [avgCycleTime, setAvgCycleTime] = useState(0)
-  const [avgLeadTime, setAvgLeadTime] = useState(0)
+  const { currentAvgCycleTime, currentAvgLeadTime } = useProject()
+
   const { currentProjectId, currentProject } = useProject()
   const [token] = useAuth()
 
@@ -27,20 +27,20 @@ export function Metrics() {
     }
   }, [currentProjectId, currentProject])
 
-  useEffect(() => {
-    if (currentProject?.tasks?.length) {
-      const totalCycleTime = currentProject.tasks.reduce(
-        (acc, task) => acc + (task.cycleTime || 0),
-        0,
-      )
-      const totalLeadTime = currentProject.tasks.reduce(
-        (acc, task) => acc + (task.leadTime || 0),
-        0,
-      )
-      setAvgCycleTime(totalCycleTime / currentProject.tasks.length)
-      setAvgLeadTime(totalLeadTime / currentProject.tasks.length)
-    }
-  }, [currentProjectId, currentProject])
+  // useEffect(() => {
+  //   if (currentProject?.tasks?.length) {
+  //     const totalCycleTime = currentProject.tasks.reduce(
+  //       (acc, task) => acc + (task.cycleTime || 0),
+  //       0,
+  //     )
+  //     const totalLeadTime = currentProject.tasks.reduce(
+  //       (acc, task) => acc + (task.leadTime || 0),
+  //       0,
+  //     )
+  //     setcurrentAvgCycleTime(totalCycleTime / currentProject.tasks.length)
+  //     setcurrentAvgLeadTime(totalLeadTime / currentProject.tasks.length)
+  //   }
+  // }, [currentProjectId, currentProject])
 
   const handleWipChange = (e) => {
     setWipLimit(e.target.value)
@@ -75,7 +75,7 @@ export function Metrics() {
             <p style={metricValueStyle}>{currentProject?.tasks?.length || 0}</p>
           </Col>
 
-          <Col md={3} style={metricCardStyle}>
+          <Col md={2} style={metricCardStyle}>
             <h6 className='text-muted mb-3'>WIP Limit</h6>
             <InputGroup>
               <Form.Control
@@ -85,11 +85,11 @@ export function Metrics() {
                 min={0}
               />
               <Button
-                variant='secondary'
+                variant='none'
                 onClick={handleWipSubmit}
                 disabled={!currentProjectId}
               >
-                Update
+                <img alt='wip' src={refreshIcon} style={{ width: '2rem' }} />
               </Button>
             </InputGroup>
           </Col>
@@ -97,14 +97,18 @@ export function Metrics() {
           <Col md={3} style={metricCardStyle}>
             <h6 className='text-muted mb-3'>Avg Cycle Time</h6>
             <p style={metricValueStyle}>
-              {!isNaN(avgCycleTime) ? avgCycleTime.toFixed(2) : '0'} days
+              {!isNaN(currentAvgCycleTime)
+                ? currentAvgCycleTime.toFixed(2)
+                : '0'}{' '}
+              days
             </p>
           </Col>
 
           <Col md={3} style={metricCardStyle}>
             <h6 className='text-muted mb-3'>Avg Lead Time</h6>
             <p style={metricValueStyle}>
-              {!isNaN(avgLeadTime) ? avgLeadTime.toFixed(2) : '0'} days
+              {!isNaN(currentAvgLeadTime) ? currentAvgLeadTime.toFixed(2) : '0'}{' '}
+              days
             </p>
           </Col>
         </Row>

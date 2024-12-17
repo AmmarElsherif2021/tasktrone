@@ -16,8 +16,8 @@ const Toolbar = () => {
             <ProjectDashboard />
             <Notifications />
             <RefreshProject />
+            <Search />
           </Nav>
-          <Search />
         </Navbar.Collapse>
       </Container>
     </Navbar>

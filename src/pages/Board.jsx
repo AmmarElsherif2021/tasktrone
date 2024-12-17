@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Card, Container, Row, Col, Spinner } from 'react-bootstrap'
-
+import { useEffect } from 'react'
 import { listTasks } from '../API/tasks'
 import { Column } from '../Components/Tasks/Column'
 import Toolbar from '../Components/Projects/ProjectToolbar'
@@ -10,7 +10,8 @@ import { Metrics } from '../Components/Projects/Metrics'
 //import { ProjectInfo } from '../Components/Projects/ProjectInfo'
 
 export function Board() {
-  const { currentProjectId } = useProject()
+  const { currentProjectId, setCurrentAvgCycleTime, setCurrentAvgLeadTime } =
+    useProject()
   const projectId = currentProjectId ? currentProjectId : ''
   const tasksQuery = useQuery({
     queryKey: ['tasks', projectId, {}],
@@ -34,6 +35,23 @@ export function Board() {
   })
   const tasks = tasksQuery.data ?? []
 
+  //update metrics leadTime for the entire project context on tasks retrieval
+  useEffect(() => {
+    if (tasks?.length) {
+      const totalCycleTime = tasks.reduce(
+        (acc, task) => acc + (task.cycleTime || 0),
+        0,
+      )
+      const totalLeadTime = tasks.reduce(
+        (acc, task) => acc + (task.leadTime || 0),
+        0,
+      )
+      setCurrentAvgCycleTime(totalCycleTime / tasks.length)
+      setCurrentAvgLeadTime(totalLeadTime / tasks.length)
+    }
+  }, [currentProjectId, tasks.data])
+
+  //tasks by phase
   const tasksByPhase = tasks.reduce(
     (acc, task) => {
       if (!acc[task.phase]) {

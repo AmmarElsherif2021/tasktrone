@@ -14,6 +14,8 @@ export const ProjectProvider = ({ children }) => {
   const [currentProjectId, setCurrentProjectId] = useState('')
   const [currentProject, setCurrentProject] = useState('')
   const [currentProjectMembers, setCurrentProjectMembers] = useState([])
+  const [currentAvgLeadTime, setCurrentAvgLeadTime] = useState(0)
+  const [currentAvgCycleTime, setCurrentAvgCycleTime] = useState(0)
 
   // Project query - kept simple and focused on project data
   const currentProjectQuery = useQuery({
@@ -83,10 +85,15 @@ export const ProjectProvider = ({ children }) => {
         setCurrentProject,
         currentProjectMembers,
         setCurrentProjectMembers,
+        currentAvgLeadTime,
+        setCurrentAvgLeadTime,
+        currentAvgCycleTime,
+        setCurrentAvgCycleTime,
         usersDataQuery,
       }}
     >
-      {children}
+      {' '}
+      {children}{' '}
     </ProjectContext.Provider>
   )
 }
