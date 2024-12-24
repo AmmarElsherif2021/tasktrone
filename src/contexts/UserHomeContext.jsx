@@ -65,7 +65,11 @@ export const UserHomeProvider = ({ children }) => {
   useEffect(() => {
     if (Object.keys(current).length > 0) {
       setCurrentUser(current)
-      //console.log(`currentUser ${JSON.stringify(currentUser)}`)
+      console.log(
+        `--------------------------------currentUser ${JSON.stringify(
+          currentUser,
+        )}`,
+      )
     }
   }, [current])
 

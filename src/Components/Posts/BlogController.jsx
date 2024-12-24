@@ -4,14 +4,12 @@ import {
   Form,
   InputGroup,
   Card,
-  //Row,
-  //Col,
   Button,
   Collapse,
-  //Dropdown,
   Image,
 } from 'react-bootstrap'
 import filterIcon from '../../assets/filter-negative.svg'
+
 export function BlogControls({
   author,
   onAuthorChange,
@@ -24,25 +22,26 @@ export function BlogControls({
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <div className='mb-4'>
+    <div className='mb-3'>
       <Button
         variant='secondary'
         onClick={() => setIsExpanded(!isExpanded)}
         aria-controls='filter-collapse'
         aria-expanded={isExpanded}
-        className='mb-3'
+        className='d-flex align-items-center mb-2'
+        size='sm'
       >
-        <Image src={filterIcon} width={20} />
+        <Image src={filterIcon} width={20} className='me-2' />
         Filter
       </Button>
 
       <Collapse in={isExpanded}>
         <div id='filter-collapse'>
-          <Card className='p-3'>
+          <Card className='p-2'>
             <Form>
-              <Form.Group controlId='filterByAuthor' className='mb-3'>
-                <Form.Label>Filter by Author</Form.Label>
-                <InputGroup>
+              <Form.Group controlId='filterByAuthor' className='mb-2'>
+                <Form.Label className='mb-1'>Filter by Author</Form.Label>
+                <InputGroup size='sm'>
                   <InputGroup.Text>Author</InputGroup.Text>
                   <Form.Control
                     type='text'
@@ -52,11 +51,12 @@ export function BlogControls({
                   />
                 </InputGroup>
               </Form.Group>
-              <Form.Group controlId='sortBy' className='mb-3'>
-                <Form.Label>Sort By</Form.Label>
+              <Form.Group controlId='sortBy' className='mb-2'>
+                <Form.Label className='mb-1'>Sort By</Form.Label>
                 <Form.Select
                   value={sortBy}
                   onChange={(e) => onSortChange(e.target.value)}
+                  size='sm'
                 >
                   {sortFields.map((field) => (
                     <option key={field} value={field}>
@@ -65,17 +65,22 @@ export function BlogControls({
                   ))}
                 </Form.Select>
               </Form.Group>
-              <Form.Group controlId='sortOrder' className='mb-3'>
-                <Form.Label>Order</Form.Label>
+              <Form.Group controlId='sortOrder' className='mb-2'>
+                <Form.Label className='mb-1'>Order</Form.Label>
                 <Form.Select
                   value={sortOrder}
                   onChange={(e) => onSortOrderChange(e.target.value)}
+                  size='sm'
                 >
                   <option value='ascending'>Ascending</option>
                   <option value='descending'>Descending</option>
                 </Form.Select>
               </Form.Group>
-              <Button variant='primary' onClick={() => setIsExpanded(false)}>
+              <Button
+                variant='primary'
+                onClick={() => setIsExpanded(false)}
+                size='sm'
+              >
                 Apply
               </Button>
             </Form>

@@ -1,58 +1,78 @@
-import { useQuery } from '@tanstack/react-query'
 import { Card, Container, Row, Col, Spinner } from 'react-bootstrap'
-import { useEffect } from 'react'
-import { listTasks } from '../API/tasks'
+import { useState, useEffect } from 'react'
+
 import { Column } from '../Components/Tasks/Column'
 import Toolbar from '../Components/Projects/ProjectToolbar'
 import { useProject } from '../contexts/ProjectContext'
 import { Metrics } from '../Components/Projects/Metrics'
-//import { removeMemberFromTask } from '../../server/src/services/tasks'
-//import { ProjectInfo } from '../Components/Projects/ProjectInfo'
+
+// Skeleton Loading Component
+const BoardSkeleton = () => (
+  <Container fluid className='py-4'>
+    <Toolbar />
+    <Metrics />
+    <Card className='shadow-sm'>
+      <Card.Body>
+        <div className='text-center py-5'>
+          <Spinner animation='border' role='status' variant='primary'>
+            <span className='visually-hidden'>Loading...</span>
+          </Spinner>
+          <p className='mt-3'>Loading project board...</p>
+        </div>
+      </Card.Body>
+    </Card>
+  </Container>
+)
 
 export function Board() {
-  const { currentProjectId, setCurrentAvgCycleTime, setCurrentAvgLeadTime } =
-    useProject()
-  const projectId = currentProjectId ? currentProjectId : ''
-  const tasksQuery = useQuery({
-    queryKey: ['tasks', projectId, {}],
-    queryFn: () => listTasks(projectId, {}),
-    select: (data) =>
-      data.map((task) => ({
-        _id: task._id,
-        project: task.project,
-        title: task.title,
-        author: task.author,
-        leadTime: task.leadTime,
-        cycleTime: task.cycleTime,
-        startDate: task?.startDate,
-        createdAt: task.createdAt,
-        updatedAt: task.updatedAt,
-        dueDate: task.dueDate,
-        phase: task.phase,
-        members: task.members || [],
-      })),
-    enabled: !!currentProjectId,
-  })
-  const tasks = tasksQuery.data ?? []
+  const {
+    currentProjectId,
+    setCurrentAvgCycleTime,
+    setCurrentAvgLeadTime,
+    currentTasks,
+    refreshTasks,
+    isTasksLoading,
+    //setIsTasksLoading,
+  } = useProject()
 
-  //update metrics leadTime for the entire project context on tasks retrieval
+  // State to track initial load
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+  // Update metrics when tasks change
   useEffect(() => {
-    if (tasks?.length) {
-      const totalCycleTime = tasks.reduce(
+    if (currentTasks?.length) {
+      const totalCycleTime = currentTasks.reduce(
         (acc, task) => acc + (task.cycleTime || 0),
         0,
       )
-      const totalLeadTime = tasks.reduce(
+      const totalLeadTime = currentTasks.reduce(
         (acc, task) => acc + (task.leadTime || 0),
         0,
       )
-      setCurrentAvgCycleTime(totalCycleTime / tasks.length)
-      setCurrentAvgLeadTime(totalLeadTime / tasks.length)
-    }
-  }, [currentProjectId, tasks.data])
 
-  //tasks by phase
-  const tasksByPhase = tasks.reduce(
+      setCurrentAvgCycleTime(
+        currentTasks.length > 0 ? totalCycleTime / currentTasks.length : 0,
+      )
+      setCurrentAvgLeadTime(
+        currentTasks.length > 0 ? totalLeadTime / currentTasks.length : 0,
+      )
+    }
+  }, [currentTasks])
+
+  // Initial tasks refresh
+  useEffect(() => {
+    if (currentProjectId && (!currentTasks.length || isInitialLoad)) {
+      const timeoutId = setTimeout(() => {
+        refreshTasks()
+        setIsInitialLoad(false)
+      }, 500)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [currentProjectId, currentTasks, isInitialLoad])
+
+  // Organize tasks by phase
+  const currentTasksByPhase = currentTasks?.reduce(
     (acc, task) => {
       if (!acc[task.phase]) {
         acc[task.phase] = []
@@ -66,100 +86,71 @@ export function Board() {
   const columnStyles = {
     minHeight: '70vh',
     transition: 'all 0.3s ease',
+    marginRight: 0,
+    marginLeft: 0,
+    paddingRight: '1px',
+    paddingLeft: '1px',
+    backgroundColor: '#fff',
+    border: 'none',
   }
 
-  const taskHeaderStyles = {
-    backgroundColor: '#f8f9fa',
-    borderBottom: '2px solid #dee2e6',
-    padding: '10px',
+  const colHeaderStyles = {
+    backgroundColor: '#fff',
+    color: '#000',
+    borderBottom: '2px solid #fff',
+    paddingLeft: '2rem',
+    paddingRight: '2rem',
     fontWeight: 'bold',
     textTransform: 'capitalize',
+  }
+  //Kanban column
+  // eslint-disable-next-line react/prop-types
+  const KanbanColumn = ({ phase }) => (
+    <Col xs={12} md={3} style={columnStyles}>
+      <Card className='h-100 ' style={columnStyles}>
+        <Card.Header style={colHeaderStyles}>
+          {phase}
+          <span className='float-end badge bg-black'>
+            {currentTasksByPhase[phase]?.length || 0}
+          </span>
+        </Card.Header>
+        <Card.Body className='p-2'>
+          <Column tasks={currentTasksByPhase[phase] || []} />
+        </Card.Body>
+      </Card>
+    </Col>
+  )
+  // If no project ID or initial loading, show skeleton
+  if (!currentProjectId && !currentTasks?.length) {
+    return <BoardSkeleton />
   }
 
   return (
     <Container fluid className='py-4'>
-      {/*JSON.stringify(tasks) */}
-      {/* board nav Section */}
       <Toolbar />
       <Metrics />
 
-      {/* Board Section */}
       <Card className='shadow-sm'>
         <Card.Body>
-          {tasksQuery.isLoading ? (
+          {isTasksLoading && !currentTasks?.length ? (
             <div className='text-center py-5'>
               <Spinner animation='border' role='status' variant='primary'>
-                <span className='visually-hidden'>Loading...</span>
+                <span className='visually-hidden'>Loading tasks...</span>
               </Spinner>
             </div>
           ) : (
             <Container fluid>
               <Row className='g-4'>
                 {/* Story Column */}
-                <Col xs={12} md={3}>
-                  <Card className='h-100 bg-light' style={columnStyles}>
-                    <Card.Header style={taskHeaderStyles}>
-                      Story
-                      <span className='float-end badge bg-primary'>
-                        {tasksByPhase.story.length}
-                      </span>
-                    </Card.Header>
-                    <Card.Body className='p-2'>
-                      <Column columnTitle='story' tasks={tasksByPhase.story} />
-                    </Card.Body>
-                  </Card>
-                </Col>
-
+                <KanbanColumn phase='story' />
                 {/* In Progress Column */}
-                <Col xs={12} md={3}>
-                  <Card className='h-100 bg-light' style={columnStyles}>
-                    <Card.Header style={taskHeaderStyles}>
-                      In Progress
-                      <span className='float-end badge bg-warning'>
-                        {tasksByPhase.inProgress.length}
-                      </span>
-                    </Card.Header>
-                    <Card.Body className='p-2'>
-                      <Column
-                        columnTitle='In progress'
-                        tasks={tasksByPhase.inProgress}
-                      />
-                    </Card.Body>
-                  </Card>
-                </Col>
+                <KanbanColumn phase='inProgress' />
 
                 {/* Reviewing Column */}
-                <Col xs={12} md={3}>
-                  <Card className='h-100 bg-light' style={columnStyles}>
-                    <Card.Header style={taskHeaderStyles}>
-                      Reviewing
-                      <span className='float-end badge bg-info'>
-                        {tasksByPhase.reviewing.length}
-                      </span>
-                    </Card.Header>
-                    <Card.Body className='p-2'>
-                      <Column
-                        columnTitle='Reviewing'
-                        tasks={tasksByPhase.reviewing}
-                      />
-                    </Card.Body>
-                  </Card>
-                </Col>
+                <KanbanColumn phase='reviewing' />
 
                 {/* Done Column */}
-                <Col xs={12} md={3}>
-                  <Card className='h-100 bg-light' style={columnStyles}>
-                    <Card.Header style={taskHeaderStyles}>
-                      Done
-                      <span className='float-end badge bg-success'>
-                        {tasksByPhase.done.length}
-                      </span>
-                    </Card.Header>
-                    <Card.Body className='p-2'>
-                      <Column columnTitle='Done' tasks={tasksByPhase.done} />
-                    </Card.Body>
-                  </Card>
-                </Col>
+                <KanbanColumn phase='done' />
               </Row>
             </Container>
           )}

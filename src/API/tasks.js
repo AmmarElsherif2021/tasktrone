@@ -64,6 +64,8 @@ export const createTask = async (token, projectId, task) => {
     throw error
   }
 }
+
+//update task
 export const updateTask = async (token, projectId, taskId, updates) => {
   try {
     const res = await fetch(
@@ -116,4 +118,22 @@ export const uploadTaskAttachment = async (token, taskId, file) => {
     console.error('Error uploading attachment:', error)
     throw error
   }
+}
+// Delete a post
+export const deleteTask = async (token, projectId, taskId) => {
+  const res = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/projects/${projectId}/tasks/${taskId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  )
+
+  if (!res.ok) {
+    throw new Error('Failed to delete post')
+  }
+
+  return res
 }

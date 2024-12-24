@@ -1,9 +1,10 @@
 /* eslint-disable react/prop-types */
 import { createContext, useContext, useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { getProjectById } from '../API/projects'
+import { useQuery, useMutation, QueryClient } from '@tanstack/react-query'
+import { getProjectById, updateTasksCycleTime } from '../API/projects'
 import { getUserInfo } from '../API/users'
 import { useAuth } from '../contexts/AuthContext'
+import { listTasks } from '../API/tasks'
 
 const ProjectContext = createContext()
 
@@ -16,19 +17,20 @@ export const ProjectProvider = ({ children }) => {
   const [currentProjectMembers, setCurrentProjectMembers] = useState([])
   const [currentAvgLeadTime, setCurrentAvgLeadTime] = useState(0)
   const [currentAvgCycleTime, setCurrentAvgCycleTime] = useState(0)
-
-  // Project query - kept simple and focused on project data
+  const [currentTasks, setCurrentTasks] = useState([])
+  const [isTasksLoading, setIsTasksLoading] = useState(false)
+  const queryClient = new QueryClient()
+  // Project query
   const currentProjectQuery = useQuery({
     queryKey: ['project', currentProjectId],
     queryFn: () => getProjectById(currentProjectId, token),
     enabled: !!currentProjectId,
   })
 
-  // Separate query for users data - now more flexible and independent
+  // Separate query for users data
   const usersDataQuery = useQuery({
     queryKey: ['project-users', currentProjectId],
     queryFn: async () => {
-      // Only try to fetch users if project members exist
       if (!currentProject?.members?.length) return []
 
       try {
@@ -51,11 +53,38 @@ export const ProjectProvider = ({ children }) => {
         return []
       }
     },
-    // Important: Make this query manually triggered !!!!!
     enabled: false,
   })
 
-  // Trigger users fetch when project is loaded and has members
+  // Tasks query
+
+  const tasksQuery = useQuery({
+    queryKey: ['tasks', currentProjectId],
+    queryFn: () => {
+      setIsTasksLoading(true)
+      return listTasks(currentProjectId, {})
+    },
+    select: (data) =>
+      data.map((task) => ({
+        _id: task._id,
+        project: task.project,
+        title: task.title,
+        author: task.author,
+        leadTime: task.leadTime,
+        cycleTime: task.cycleTime,
+        startDate: task?.startDate,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+        dueDate: task.dueDate,
+        phase: task.phase,
+        members: task.members || [],
+      })),
+    enabled: !!currentProjectId,
+    onSuccess: () => setIsTasksLoading(false),
+    onError: () => setIsTasksLoading(false),
+  })
+
+  // Trigger users fetch when project is loaded
   useEffect(() => {
     if (currentProject?.members?.length) {
       usersDataQuery.refetch()
@@ -69,12 +98,37 @@ export const ProjectProvider = ({ children }) => {
     }
   }, [currentProjectQuery])
 
-  // update project members when users are fetched..
+  // Update project members when users are fetched
   useEffect(() => {
     if (usersDataQuery.data) {
       setCurrentProjectMembers(usersDataQuery.data)
     }
   }, [usersDataQuery.data])
+
+  // Update currentTasks state with improved reliability
+  useEffect(() => {
+    if (tasksQuery.data) {
+      setCurrentTasks(tasksQuery.data)
+    }
+  }, [tasksQuery.data, currentProjectId])
+
+  //update cycleTimes
+  const cycleTimesMutation = useMutation({
+    mutationFn: () => updateTasksCycleTime(token, currentProjectId),
+    onSuccess: (data) => {
+      console.log(`Successfully updated ${data.updatedCount} tasks`)
+      // Invalidate and refetch tasks
+      queryClient.invalidateQueries(['tasks', currentProjectId])
+    },
+    onError: (error) => {
+      console.error('Failed to update cycle times:', error)
+    },
+  })
+  // refreshTasks method
+  const refreshTasks = () => {
+    cycleTimesMutation.mutate()
+    tasksQuery.refetch()
+  }
 
   return (
     <ProjectContext.Provider
@@ -89,11 +143,15 @@ export const ProjectProvider = ({ children }) => {
         setCurrentAvgLeadTime,
         currentAvgCycleTime,
         setCurrentAvgCycleTime,
+        currentTasks,
+        setCurrentTasks,
+        isTasksLoading,
+        setIsTasksLoading,
         usersDataQuery,
+        refreshTasks,
       }}
     >
-      {' '}
-      {children}{' '}
+      {children}
     </ProjectContext.Provider>
   )
 }

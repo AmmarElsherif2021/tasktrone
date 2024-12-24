@@ -2,29 +2,26 @@ import { useState, useEffect } from 'react'
 import {
   Container,
   Card,
-  Row,
-  Col,
-  Badge,
   Alert,
   Button,
   OverlayTrigger,
   Tooltip,
 } from 'react-bootstrap'
+import { PreviewProjects } from './PreviewProjects'
 import { Plus, FolderPlus, User as UserIcon } from 'lucide-react'
 import { User } from '../Components/User/User'
 import { CreateProject } from '../Components/Projects/CreateProject'
-import { ProjectCard } from '../Components/Projects/ProjectCard'
 import { useAuth } from '../contexts/AuthContext'
 import { useUserHome } from '../contexts/UserHomeContext'
-import { useProject } from '../contexts/ProjectContext'
-import { useNavigate } from 'react-router-dom'
+//import { useProject } from '../contexts/ProjectContext';
+//import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode'
 import { Header } from '../Components/Header/Header'
 
 export function Dashboard() {
-  const navigate = useNavigate()
+  //const navigate = useNavigate();
   const { userProjects } = useUserHome()
-  const { setCurrentProjectId } = useProject()
+  //const { setCurrentProjectId } = useProject();
   const [token] = useAuth()
   const [userData, setUserData] = useState(null)
   const [showCreateProject, setShowCreateProject] = useState(false)
@@ -43,10 +40,10 @@ export function Dashboard() {
     setUserData(decodeToken(token))
   }, [token])
 
-  const handleProjectClick = (projectId) => {
-    setCurrentProjectId(projectId)
-    navigate('/')
-  }
+  // const handleProjectClick = (projectId) => {
+  //   setCurrentProjectId(projectId);
+  //   navigate('/');
+  // };
 
   return (
     <div style={{ position: 'absolute', top: 0, left: 0 }}>
@@ -62,7 +59,9 @@ export function Dashboard() {
           </Card.Header>
           <Card.Body>
             {userData ? (
-              <User id={userData.userId} />
+              <div style={{ width: '20rem' }}>
+                <User id={userData.userId} explicit={true} />
+              </div>
             ) : (
               <Alert variant='warning'>User data not available</Alert>
             )}
@@ -71,65 +70,36 @@ export function Dashboard() {
 
         {/* Projects Section */}
         <Card className='border-0 shadow-sm' bg='light'>
-          <Card.Header className='d-flex align-items-center justify-content-between bg-white text-black py-3'>
-            <div className='d-flex align-items-center'>
-              <FolderPlus size={24} className='me-2' />
-              <h4 className='mb-0'>
-                Your Projects
-                {userProjects.length > 0 && (
-                  <Badge bg='light' text='primary' className='ms-2'>
-                    {userProjects.length}
-                  </Badge>
-                )}
-              </h4>
-            </div>
-            <OverlayTrigger
-              placement='top'
-              overlay={<Tooltip>Create New Project</Tooltip>}
-            >
-              <Button
-                variant='light'
-                size='sm'
-                onClick={() => setShowCreateProject(!showCreateProject)}
-              >
-                <Plus size={20} />
-              </Button>
-            </OverlayTrigger>
-          </Card.Header>
-
-          {showCreateProject && (
-            <Card.Body className='border-bottom'>
-              <CreateProject onClose={() => setShowCreateProject(false)} />
-            </Card.Body>
-          )}
-
           <Card.Body>
             {userProjects && userProjects.length ? (
-              <Row xs={1} sm={2} md={3} lg={4} className='g-4'>
-                {userProjects.map((project) => (
-                  <Col key={project._id}>
-                    <div
-                      onClick={() => handleProjectClick(project._id)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          handleProjectClick(project._id)
-                        }
-                      }}
-                      style={{ cursor: 'pointer' }}
-                      role='button'
-                      tabIndex={0}
+              <>
+                <Card.Header className='d-flex align-items-center justify-content-between bg-white text-black py-3'>
+                  <div className='d-flex align-items-center'>
+                    <FolderPlus size={24} className='me-2' />
+                    <h4 className='mb-0'>Your Projects</h4>
+                  </div>
+                  <OverlayTrigger
+                    placement='top'
+                    overlay={<Tooltip>Create New Project</Tooltip>}
+                  >
+                    <Button
+                      variant='light'
+                      size='sm'
+                      onClick={() => setShowCreateProject(!showCreateProject)}
                     >
-                      <ProjectCard
-                        projectId={project._id}
-                        title={project.title}
-                        description={project.description}
-                        createdBy={project.createdBy}
-                        members={project.members}
-                      />
-                    </div>
-                  </Col>
-                ))}
-              </Row>
+                      <Plus size={20} />
+                    </Button>
+                  </OverlayTrigger>
+                </Card.Header>
+                {showCreateProject && (
+                  <Card.Body className='border-bottom'>
+                    <CreateProject
+                      onClose={() => setShowCreateProject(false)}
+                    />
+                  </Card.Body>
+                )}
+                <PreviewProjects />
+              </>
             ) : (
               <Card className='text-center border-0 bg-light'>
                 <Card.Body>

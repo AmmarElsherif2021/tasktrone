@@ -1,33 +1,137 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+/* Global font family for the entire project */
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  --bs-primary: #186545;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  --font-family-primary: 'Roboto', sans-serif;
+  --font-weight-thin: 100;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+  --primary-color: #186545;
+  --text-color: rgba(16, 16, 16, 0.87);
+  --background-color: #eeeeee;
 }
 
 body {
+  font-family: var(--font-family-primary), Inter, system-ui, Avenir, Helvetica,
+    Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: var(--font-weight-regular);
+  color-scheme: light dark;
+  color: var(--text-color);
+  background-color: var(--background-color);
   margin: 0;
   display: flex;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Style the scrollbar */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #000 #ffffff; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+  background: #f4f4f4; /* Color of the scrollbar track */
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 6px; /* Roundness of the scrollbar thumb */
+  border: 3px solid #f4f4f4; /* Padding around scrollbar thumb */
+}
+
+body::-webkit-scrollbar-thumb:horizontal {
+  background-color: #ccc; /* Color of the horizontal scrollbar thumb */
+}
+
+/* Typography classes */
+.roboto-thin {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-thin);
+}
+
+.roboto-light {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.roboto-regular {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-regular);
+}
+
+.roboto-medium {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.roboto-bold {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.roboto-black {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-black);
+}
+
+.roboto-thin-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-thin);
+  font-style: italic;
+}
+
+.roboto-light-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-light);
+  font-style: italic;
+}
+
+.roboto-regular-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-regular);
+  font-style: italic;
+}
+
+.roboto-medium-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-medium);
+  font-style: italic;
+}
+
+.roboto-bold-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-bold);
+  font-style: italic;
+}
+
+.roboto-black-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-black);
+  font-style: italic;
+}
+
+/* Other global styles */
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
 }
 
 h1 {
@@ -46,13 +150,16 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #727272;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
 /* custom.css */
 .btn-custom {
   background-color: #000000;
@@ -72,17 +179,17 @@ button:focus-visible {
   color: black;
 }
 .phase-button {
-  background-color: #000000; /* Ensure background is black */
-  color: #ffffff;
+  color: #000000;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   transition:
-    color 0.3s ease,
+    color ease,
     max-width 0.3s ease,
     opacity 0.3s ease;
   min-width: 40px;
   overflow: hidden;
+  border-width: 2px;
 }
 
 .phase-button-text {
@@ -101,7 +208,6 @@ button:focus-visible {
 }
 
 .phase-button:hover {
-  background-color: #000000;
 }
 
 .phase-button-icon {
@@ -139,12 +245,11 @@ button:focus-visible {
 }
 
 .icon-image {
-  width: 2rem;
   height: 2rem;
-  min-width: 2rem;
-  min-height: 2rem;
-  max-width: 2rem;
-  max-height: 2rem;
+  min-width: 1rem;
+  min-height: 1rem;
+  max-width: 3rem;
+  max-height: 3rem;
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;

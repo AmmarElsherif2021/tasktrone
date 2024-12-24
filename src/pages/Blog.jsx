@@ -37,9 +37,7 @@ export function Blog() {
       <Card.Body>
         <Container fluid>
           <Row className='mb-4'>
-            <Col>
-              <CreatePost />
-            </Col>
+            <CreatePost />
           </Row>
 
           <Row>

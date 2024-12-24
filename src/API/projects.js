@@ -119,3 +119,33 @@ export const deleteProject = async (projectId, token) => {
     throw error
   }
 }
+//update cycleTimes
+export const updateTasksCycleTime = async (token, projectId) => {
+  try {
+    const res = await fetch(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/projects/${projectId}/update-cycle-times/tasks`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
+
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(
+        errorData.message ||
+          `Error updating tasks cycleTimes: ${res.statusText}`,
+      )
+    }
+
+    return await res.json()
+  } catch (error) {
+    console.error('Error updating tasks cycleTimes:', error)
+    throw error
+  }
+}

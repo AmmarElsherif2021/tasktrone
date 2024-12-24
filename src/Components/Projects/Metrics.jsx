@@ -1,11 +1,49 @@
-import { Card, Row, Col, Form, Button, InputGroup } from 'react-bootstrap'
+/* eslint-disable react/prop-types */
+//import React from 'react';
+import {
+  Container,
+  Card,
+  Button,
+  Form,
+  OverlayTrigger,
+  Tooltip,
+  Row,
+  Col,
+} from 'react-bootstrap'
+import { RefreshCw, AlertCircle, Clock, ListTodo, Activity } from 'lucide-react'
 import { useProject } from '../../contexts/ProjectContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateProject } from '../../API/projects'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import refreshIcon from '../../assets/refresh-icon.svg'
-export function Metrics() {
+
+const MetricsCard = ({ title, value, icon: Icon, tooltip }) => (
+  <OverlayTrigger placement='top' overlay={<Tooltip>{tooltip}</Tooltip>}>
+    <Card className='bg-white text-center p-3 mb-4'>
+      <Card.Body>
+        <div
+          className='d-flex justify-content-center align-items-center mb-2'
+          style={{
+            width: '5rem',
+            height: '5rem',
+            borderRadius: '50%',
+            backgroundColor: '#e6f7ff',
+            borderWidth: '2px',
+            borderColor: '#186545',
+          }}
+        >
+          <Icon style={{ width: '24px', height: '24px', color: '#186545' }} />
+        </div>
+        <Card.Title className='mb-1'>
+          <strong style={{ fontSize: '0.6em' }}>{title}</strong>
+        </Card.Title>
+        <Card.Text className='h2'>{value}</Card.Text>
+      </Card.Body>
+    </Card>
+  </OverlayTrigger>
+)
+
+const Metrics = () => {
   const queryClient = useQueryClient()
   const [wipLimit, setWipLimit] = useState(0)
   const { currentAvgCycleTime, currentAvgLeadTime } = useProject()
@@ -27,92 +65,101 @@ export function Metrics() {
     }
   }, [currentProjectId, currentProject])
 
-  // useEffect(() => {
-  //   if (currentProject?.tasks?.length) {
-  //     const totalCycleTime = currentProject.tasks.reduce(
-  //       (acc, task) => acc + (task.cycleTime || 0),
-  //       0,
-  //     )
-  //     const totalLeadTime = currentProject.tasks.reduce(
-  //       (acc, task) => acc + (task.leadTime || 0),
-  //       0,
-  //     )
-  //     setcurrentAvgCycleTime(totalCycleTime / currentProject.tasks.length)
-  //     setcurrentAvgLeadTime(totalLeadTime / currentProject.tasks.length)
-  //   }
-  // }, [currentProjectId, currentProject])
-
-  const handleWipChange = (e) => {
+  const onWipChange = (e) => {
     setWipLimit(e.target.value)
   }
 
-  const handleWipSubmit = () => {
+  const onWipSubmit = () => {
     if (currentProjectId && token) {
       wipMutation.mutate({ token, projectId: currentProjectId, wip: wipLimit })
     }
   }
-
-  const metricCardStyle = {
-    textAlign: 'center',
-    padding: '15px',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '8px',
-    margin: '10px 0',
-  }
-
-  const metricValueStyle = {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#f11c1f',
-  }
+  //Define params
+  const tasksInProgress =
+    currentProject?.tasks?.filter((t) => t.status === 'inProgress')?.length || 0
+  const completedTasks =
+    currentProject?.tasks?.filter((t) => t.status === 'completed')?.length || 0
+  const throughput = completedTasks / 30 // Tasks completed per day over last 30 days
+  const flowEfficiency =
+    ((currentAvgCycleTime || 0) / (currentAvgLeadTime || 1)) * 100
 
   return (
-    <Card className='shadow-sm'>
-      <Card.Body>
-        <Row>
-          <Col md={3} style={metricCardStyle}>
-            <h6 className='text-muted mb-3'>Total Tasks</h6>
-            <p style={metricValueStyle}>{currentProject?.tasks?.length || 0}</p>
-          </Col>
+    <Container>
+      <Row className='justify-content-between align-items-center mb-4'>
+        <Col>
+          <h2 className='font-weight-bold'>Project Metrics</h2>
+        </Col>
+        <Col className='d-flex justify-content-end align-items-center'>
+          <Form.Control
+            type='number'
+            value={wipLimit}
+            onChange={(e) => onWipChange(e.target.value)}
+            className='w-25 mr-2'
+            min={0}
+          />
+          <Button onClick={onWipSubmit} variant='outline-primary' size='sm'>
+            <RefreshCw className='mr-2' />
+            Update WIP
+          </Button>
+        </Col>
+      </Row>
 
-          <Col md={2} style={metricCardStyle}>
-            <h6 className='text-muted mb-3'>WIP Limit</h6>
-            <InputGroup>
-              <Form.Control
-                type='number'
-                value={wipLimit}
-                onChange={handleWipChange}
-                min={0}
-              />
-              <Button
-                variant='none'
-                onClick={handleWipSubmit}
-                disabled={!currentProjectId}
-              >
-                <img alt='wip' src={refreshIcon} style={{ width: '2rem' }} />
-              </Button>
-            </InputGroup>
-          </Col>
-
-          <Col md={3} style={metricCardStyle}>
-            <h6 className='text-muted mb-3'>Avg Cycle Time</h6>
-            <p style={metricValueStyle}>
-              {!isNaN(currentAvgCycleTime)
-                ? currentAvgCycleTime.toFixed(2)
-                : '0'}{' '}
-              days
-            </p>
-          </Col>
-
-          <Col md={3} style={metricCardStyle}>
-            <h6 className='text-muted mb-3'>Avg Lead Time</h6>
-            <p style={metricValueStyle}>
-              {!isNaN(currentAvgLeadTime) ? currentAvgLeadTime.toFixed(2) : '0'}{' '}
-              days
-            </p>
-          </Col>
-        </Row>
-      </Card.Body>
-    </Card>
+      <Row>
+        <Col md={4} lg={2}>
+          <MetricsCard
+            title='Total Tasks'
+            value={currentProject?.tasks?.length || 0}
+            icon={ListTodo}
+            tooltip='Total number of tasks in the project'
+          />
+        </Col>
+        <Col md={4} lg={2}>
+          <MetricsCard
+            title='In Progress'
+            value={tasksInProgress}
+            icon={Activity}
+            tooltip={`Tasks in progress (WIP Limit: ${wipLimit})`}
+          />
+        </Col>
+        <Col md={4} lg={2}>
+          <MetricsCard
+            title='Cycle Time'
+            value={`${
+              !isNaN(currentAvgCycleTime) ? currentAvgCycleTime.toFixed(1) : '0'
+            }d`}
+            icon={Clock}
+            tooltip="Average time from 'In Progress' to 'Done'"
+          />
+        </Col>
+        <Col md={4} lg={2}>
+          <MetricsCard
+            title='Lead Time'
+            value={`${
+              !isNaN(currentAvgLeadTime) ? currentAvgLeadTime.toFixed(1) : '0'
+            }d`}
+            icon={Clock}
+            tooltip='Average time from task creation to completion'
+          />
+        </Col>
+        <Col md={4} lg={2}>
+          <MetricsCard
+            title='Throughput'
+            value={throughput.toFixed(1)}
+            icon={Activity}
+            tooltip='Average number of tasks completed per day'
+          />
+        </Col>
+        <Col md={4} lg={2}>
+          <MetricsCard
+            title='Flow Efficiency'
+            value={`${flowEfficiency.toFixed(0)}%`}
+            icon={AlertCircle}
+            tooltip='Ratio of active work time to total lead time'
+          />
+        </Col>
+      </Row>
+    </Container>
   )
 }
+
+export default Metrics

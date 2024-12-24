@@ -39,21 +39,22 @@ function decimalToHex(decimal) {
 }
 
 // Generate hex color based on ID and phase
-export function getHexBackground(id, phase) {
+export function getHexBackground(id, phase, hoverDecrease = 0) {
   const intesityInt = {
-    story: 160,
-    inProgress: 140,
-    reviewing: 100,
-    done: 95,
+    story: 160 - hoverDecrease,
+    inProgress: 140 - hoverDecrease,
+    reviewing: 100 - hoverDecrease,
+    done: 95 - hoverDecrease,
   }
 
   // Id to integer
-  const integer = parseInt(id, 16)
+  const integer = parseInt(id, 16) % 217
 
   // Random pick R, G, or B
   let ptr = integer % 3
   let subPtr = integer % 2
-  let randIndex = (integer % intesityInt[phase]) + intesityInt[phase]
+  let significantInex =
+    ((integer + 140) % intesityInt[phase]) + intesityInt[phase]
   let color = []
 
   // Switch to set the color array based on the random pointers
@@ -61,20 +62,20 @@ export function getHexBackground(id, phase) {
     case 0:
       color =
         subPtr === 0
-          ? [255, intesityInt[phase], randIndex]
-          : [255, randIndex, intesityInt[phase]]
+          ? [255, intesityInt[phase], significantInex]
+          : [255, significantInex, intesityInt[phase]]
       break
     case 1:
       color =
         subPtr === 0
-          ? [intesityInt[phase], 255, randIndex]
-          : [randIndex, 255, intesityInt[phase]]
+          ? [intesityInt[phase], 255, significantInex]
+          : [significantInex, 255, intesityInt[phase]]
       break
     case 2:
       color =
         subPtr === 0
-          ? [intesityInt[phase], randIndex, 255]
-          : [randIndex, intesityInt[phase], 255]
+          ? [intesityInt[phase], significantInex, 255]
+          : [significantInex, intesityInt[phase], 255]
       break
   }
 

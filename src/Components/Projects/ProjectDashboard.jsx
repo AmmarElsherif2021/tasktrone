@@ -69,7 +69,7 @@ const ExportProject = () => {
 }
 
 // Project Dashboard Component
-const ProjectDashboard = () => {
+export const ProjectDashboard = () => {
   const [show, setShow] = useState(false)
 
   const handleShow = () => setShow(true)
@@ -82,6 +82,7 @@ const ProjectDashboard = () => {
         alt='Project dashboard'
         className='mb-0 p-0 border-0'
         onClick={handleShow}
+        iconWidthREM={7}
       />
 
       <Modal show={show} onHide={handleClose} centered size='lg'>
@@ -113,5 +114,5 @@ const ProjectDashboard = () => {
   )
 }
 
-export default ProjectDashboard
+//export default ProjectDashboard
 export { Settings, ExportProject }

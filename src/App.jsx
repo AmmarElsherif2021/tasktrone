@@ -8,20 +8,16 @@ import { UserHomeProvider } from './contexts/UserHomeContext.jsx'
 import { Login } from './pages/Login.jsx'
 import { Dashboard } from './pages/Dashboard.jsx'
 import { ProjectProvider } from './contexts/ProjectContext.jsx'
-import { Board } from './pages/Board.jsx'
+import { ProjectLayout } from './pages/ProjectLayout.jsx'
+
 const queryClient = new QueryClient()
 export default function App() {
   const router = createBrowserRouter([
     {
       path: '/',
       element: <Home />,
-      children: [
-        {
-          path: '/board',
-          element: <Board />,
-        },
-      ],
     },
+    { path: '/project', element: <ProjectLayout /> },
     {
       path: '/signup',
       element: <Signup />,

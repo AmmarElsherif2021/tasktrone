@@ -1,21 +1,19 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import PropTypes from 'prop-types'
 import { useState } from 'react'
+import PropTypes from 'prop-types'
 import { Card, Button, Badge, Image } from 'react-bootstrap'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updateTask } from '../../API/tasks.js'
+import { deleteTask, updateTask } from '../../API/tasks.js'
 import { useAuth } from '../../contexts/AuthContext.jsx'
 import { User } from '../User/User.jsx'
-
+import { useUserHome } from '../../contexts/UserHomeContext.jsx'
 import forwardArrow from '../../assets/forward-negative.svg'
 import backwardArrow from '../../assets/backward-negative.svg'
-//import { format, isValid } from 'date-fns'
-
-//import { useUserHome } from '../../contexts/UserHomeContext.jsx'
-
+import deleteIcon from '../../assets/delete.svg'
 import { getHexBackground } from '../../Ui/utils.jsx'
 import TaskModal from './TaskModal.jsx'
+import { DeleteWarningModal } from './DeleteTaskModal.jsx'
+import { useProject } from '../../contexts/ProjectContext.jsx'
+import IconButton from '../../Ui/IconButton.jsx'
 export function TaskCard({
   taskId,
   projectId,
@@ -26,15 +24,12 @@ export function TaskCard({
   phase,
 }) {
   const [token] = useAuth()
-  //const { currentUser } = useUserHome()
-
+  const { currentUser } = useUserHome()
+  const { refreshTasks } = useProject()
   const queryClient = useQueryClient()
-  const [showModal, setShowModal] = useState(false)
-  // const [isDragging, setIsDragging] = useState(false)
-  // const fileInputRef = useRef(null)
-  // const [uploadProgress, setUploadProgress] = useState(0)
-  // const [isUploading, setIsUploading] = useState(false)
-
+  const [showTaskModal, setShowTaskModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [hover, setHover] = useState(false)
   const phaseMutation = useMutation({
     mutationFn: ({ token, projectId, taskId, phase }) =>
       updateTask(token, projectId, taskId, { phase }),
@@ -43,130 +38,144 @@ export function TaskCard({
     },
   })
 
-  // function formatDate(createdAt) {
-  //   const date = new Date(createdAt)
-  //   return isValid(date) ? format(date, 'PP') : 'Invalid date'
-  // }
-
-  // const uploadMutation = useMutation({
-  //   mutationFn: async (file) => {
-  //     setIsUploading(true)
-  //     setUploadProgress(0)
-  //     try {
-  //       const formData = new FormData()
-  //       formData.append('file', file)
-  //       const response = await uploadTaskAttachment(token, taskId, formData)
-  //       return response
-  //     } finally {
-  //       setIsUploading(false)
-  //       setUploadProgress(0)
-  //     }
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries(['tasks', taskId])
-  //     if (onAttachmentUpload) {
-  //       onAttachmentUpload()
-  //     }
-  //   },
-  // })
+  const deleteMutation = useMutation({
+    mutationFn: ({ token, projectId, taskId }) =>
+      deleteTask(token, projectId, taskId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['tasks', taskId])
+    },
+  })
 
   const handlePhaseChange = (newPhase) => {
     phaseMutation.mutate({ token, projectId, taskId, phase: newPhase })
+    refreshTasks()
   }
 
-  // const handleFileUpload = (files) => {
-  //   if (files?.length) {
-  //     uploadMutation.mutate(files[0])
-  //   }
-  // }
+  const handleDeleteClick = (e) => {
+    e.stopPropagation()
+    setShowDeleteModal(true)
+  }
 
-  // const handleDrop = (e) => {
-  //   e.preventDefault()
-  //   setIsDragging(false)
-  //   const files = e.dataTransfer.files
-  //   handleFileUpload(files)
-  // }
+  const handleDeleteConfirm = () => {
+    deleteMutation.mutate({ token, projectId, taskId })
+    setShowDeleteModal(false)
+  }
 
-  // const handleDragOver = (e) => {
-  //   e.preventDefault()
-  //   setIsDragging(true)
-  // }
-
-  // const handleDragLeave = () => {
-  //   setIsDragging(false)
-  // }
-
-  const getNextPhase = (currentPhase) => {
-    const phaseFlow = {
+  const getNextPhase = (currentPhase) =>
+    ({
       story: 'inProgress',
       inProgress: 'reviewing',
       reviewing: 'done',
-    }
-    return phaseFlow[currentPhase]
-  }
+    })[currentPhase]
 
-  const getPreviousPhase = (currentPhase) => {
-    const reversePhaseFlow = {
+  const getPreviousPhase = (currentPhase) =>
+    ({
       done: 'reviewing',
       reviewing: 'inProgress',
       inProgress: 'story',
-    }
-    return reversePhaseFlow[currentPhase]
-  }
+    })[currentPhase]
 
-  const getPhaseLabel = (phase) => {
-    const labels = {
+  const getPhaseLabel = (phase) =>
+    ({
       story: 'Story',
       inProgress: 'In Progress',
       reviewing: 'Review',
       done: 'Done',
-    }
-    return labels[phase] || phase
-  }
-
-  // const getPhaseVariant = (phase) => {
-  //   const variants = {
-  //     story: 'primary',
-  //     inProgress: 'warning',
-  //     reviewing: 'info',
-  //     done: 'success',
-  //   }
-  //   return variants[phase] || 'primary'
-  // }
+    })[phase] || phase
 
   return (
     <>
       <Card
-        className='task-card'
+        className='task-card shadow-sm'
         style={{
-          backgroundColor: getHexBackground(taskId, phase),
+          backgroundColor: hover
+            ? getHexBackground(taskId, phase, 30)
+            : getHexBackground(taskId, phase),
           cursor: 'pointer',
+          borderWidth: '2.5px',
+          borderColor: '#000',
         }}
-        onClick={() => setShowModal(true)}
+        onClick={() => setShowTaskModal(true)}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
       >
-        <Card.Body className='p-2'>
-          <Card.Title className='h6 mb-2'>{title}</Card.Title>
-          <Card.Text className='small text-muted mb-2'>
-            ID: <small>{taskId}</small>
-          </Card.Text>
+        <Card.Body className='p-3'>
+          <div className='d-flex justify-content-between align-items-start mb-2'>
+            <Card.Title className='h6 mb-0' style={{ maxWidth: '75%' }}>
+              {title}
+            </Card.Title>
+            <br />
 
-          <div className='d-flex gap-2 mb-2'>
-            <Badge bg='info'>Lead: {leadTime}d</Badge>
-            <Badge bg='secondary'>Cycle: {cycleTime}d</Badge>
+            {currentUser.id === author && (
+              <IconButton
+                src={deleteIcon}
+                alt={'delete'}
+                onClick={handleDeleteClick}
+                className={'danger'}
+                iconWidthREM='1rem'
+                color='#ad0000'
+              />
+            )}
           </div>
+          <Card.Subtitle style={{ color: '#ad0000' }}>
+            {cycleTime > leadTime
+              ? 'Exceeded deadline!'
+              : cycleTime / leadTime > 0.8 || leadTime < 3
+                ? 'Expires soon!'
+                : ''}
+          </Card.Subtitle>
+          <Card.Text className='small text-muted mb-2'>
+            {/*<small style={{ size: '0.4em' }}>{taskId}</small> */}
+          </Card.Text>
+          <div className='d-flex gap-2 mb-2'>
+            <Badge
+              bg='none'
+              style={{
+                borderWidth: '2px',
+                borderColor: '#186545',
+                borderRadius: '2rem',
+                borderStyle: 'solid',
+                padding: '0.5rem',
+                color: '#186545',
 
+                // backgroundColor: '#e6f5e9',
+              }}
+            >
+              {' '}
+              Lead: {leadTime}d{' '}
+            </Badge>
+            <Badge
+              bg='none'
+              style={{
+                borderWidth: '2px',
+                borderColor: '#ad0000',
+                borderRadius: '2rem',
+                borderStyle: 'solid',
+                padding: '0.5rem',
+                color: '#ad0000',
+                //backgroundColor: 'none',
+              }}
+            >
+              {' '}
+              Cycle: {cycleTime}d{' '}
+            </Badge>
+          </div>
           {author && (
             <div className='small text-muted mb-2'>
               By <User id={author} />
             </div>
           )}
-
           <div className='d-flex justify-content-between gap-2'>
             {phase !== 'story' && (
               <Button
-                variant='outline-secondary'
+                variant='none'
                 size='sm'
                 className='phase-button'
+                style={{
+                  borderWidth: '2px',
+                  borderColor: '#ad0000',
+                  borderRadius: '2rem',
+                }}
                 onClick={(e) => {
                   e.stopPropagation()
                   const prevPhase = getPreviousPhase(phase)
@@ -181,14 +190,19 @@ export function TaskCard({
                   alt={`Move to ${getPhaseLabel(getPreviousPhase(phase))}`}
                   className='phase-button-icon'
                 />
-                <span className='phase-button-text'>
-                  Move to {getPhaseLabel(getPreviousPhase(phase))}
+                <span
+                  className='phase-button-text'
+                  style={{ color: '#ad0000' }}
+                >
+                  <strong>
+                    Move to {getPhaseLabel(getPreviousPhase(phase))}
+                  </strong>
                 </span>
               </Button>
             )}
             {phase !== 'done' && (
               <Button
-                variant='outline-primary'
+                variant='none'
                 size='sm'
                 className='phase-button'
                 onClick={(e) => {
@@ -198,9 +212,14 @@ export function TaskCard({
                     handlePhaseChange(nextPhase)
                   }
                 }}
+                style={{
+                  borderWidth: '2px',
+                  borderColor: '#000',
+                  borderRadius: '2rem',
+                }}
               >
-                <span className='phase-button-text'>
-                  Move to {getPhaseLabel(getNextPhase(phase))}
+                <span className='phase-button-text' style={{ color: '#000' }}>
+                  <strong> Move to {getPhaseLabel(getNextPhase(phase))}</strong>
                 </span>
                 <Image
                   src={forwardArrow}
@@ -214,12 +233,20 @@ export function TaskCard({
         </Card.Body>
       </Card>
 
+      <DeleteWarningModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        taskTitle={title}
+      />
+
       {taskId && (
         <TaskModal
-          show={showModal}
-          onHide={() => setShowModal(false)}
+          show={showTaskModal}
+          onHide={() => setShowTaskModal(false)}
           taskId={taskId}
           projectId={projectId}
+          cardColor={getHexBackground(taskId, phase)}
         />
       )}
     </>
@@ -243,14 +270,16 @@ TaskCard.propTypes = {
   ),
   attachments: PropTypes.arrayOf(
     PropTypes.shape({
-      filename: PropTypes.string.required,
-      url: PropTypes.string.required,
-      contentType: PropTypes.string.required,
+      filename: PropTypes.string.isRequired,
+      url: PropTypes.string.isRequired,
+      contentType: PropTypes.string.isRequired,
     }),
   ),
-  startDate: PropTypes.startDate,
+  startDate: PropTypes.string,
   dueDate: PropTypes.string,
   createdAt: PropTypes.string,
   updatedAt: PropTypes.string,
   onAttachmentUpload: PropTypes.func,
 }
+
+export default TaskCard

@@ -33,8 +33,12 @@ const formatFileSize = (bytes) => {
 }
 
 export function CreateTask() {
-  const { currentProjectMembers, usersDataQuery, currentProjectId } =
-    useProject()
+  const {
+    currentProjectMembers,
+    usersDataQuery,
+    currentProjectId,
+    refreshTasks,
+  } = useProject()
   const [show, setShow] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -54,9 +58,7 @@ export function CreateTask() {
   useEffect(
     () =>
       console.log(
-        `Now you are createin a task with possible members ${JSON.stringify(
-          currentProjectMembers,
-        )}`,
+        `You can create a task with possible members ${currentProjectMembers.length}`,
       ),
     [show],
   )
@@ -225,6 +227,7 @@ export function CreateTask() {
     }
 
     createTaskMutation.mutate()
+    refreshTasks()
   }
 
   const handleClose = () => setShow(false)
@@ -242,6 +245,7 @@ export function CreateTask() {
           alt={'Create New Task'}
           onClick={handleShow}
           className={'mb-0'}
+          iconWidthREM={7}
         />
 
         <Modal show={show} onHide={handleClose} size='lg'>

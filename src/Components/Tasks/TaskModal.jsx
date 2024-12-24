@@ -28,7 +28,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import refreshIcon from '../../assets/refresh-icon.svg'
 import userIcon from '../../assets/profile.svg'
 // TASK MODAL
-function TaskModal({ show, onHide, taskId, projectId }) {
+function TaskModal({ show, onHide, taskId, projectId, cardColor }) {
   const [token] = useAuth()
   const [activeTab, setActiveTab] = useState('overview')
 
@@ -132,7 +132,7 @@ function TaskModal({ show, onHide, taskId, projectId }) {
         </Modal.Body>
       ) : (
         <>
-          <Modal.Header closeButton>
+          <Modal.Header style={{ backgroundColor: cardColor }} closeButton>
             <Modal.Title>{taskQuery?.data?.title}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -334,6 +334,7 @@ TaskModal.propTypes = {
   onHide: PropTypes.func.isRequired,
   taskId: PropTypes.string.isRequired,
   projectId: PropTypes.string.isRequired,
+  cardColor: PropTypes.string.isRequired,
 }
 
 export default TaskModal

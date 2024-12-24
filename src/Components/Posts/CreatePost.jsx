@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Form, Button, Alert, Card, Collapse, Image } from 'react-bootstrap'
+import { Form, Button, Alert, Card, Collapse } from 'react-bootstrap'
 import { createPost } from '../../API/posts'
 import { useAuth } from '../../contexts/AuthContext'
-import createPostIcon from '../../assets/create-post-negative.svg'
+import createPostIcon from '../../assets/create-post.svg'
 import { useProject } from '../../contexts/ProjectContext'
+import IconButton from '../../Ui/IconButton'
 export function CreatePost() {
   const [title, setTitle] = useState('')
   const [contents, setContents] = useState('')
@@ -34,18 +35,14 @@ export function CreatePost() {
 
   return (
     <>
-      <Button
-        variant='primary'
+      <IconButton
+        src={createPostIcon}
+        alt={open ? 'Hide Create Post' : 'Create New Post'}
         onClick={() => setOpen(!open)}
-        aria-controls='create-post-collapse'
-        aria-expanded={open}
-        className='btn-custom mb-4'
-        style={{ width: '90%' }}
-      >
-        <Image src={createPostIcon} width={30} />
-        {open ? 'Hide Create Post' : 'Create New Post'}
-      </Button>
-
+        className={'mb-4'}
+        iconWidthREM={15}
+        color='#000000'
+      />
       <Collapse in={open}>
         <div id='create-post-collapse'>
           <Card className='mb-4'>

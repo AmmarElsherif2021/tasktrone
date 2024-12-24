@@ -1,4 +1,3 @@
-import { jwtDecode } from 'jwt-decode'
 import { useAuth } from '../../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -12,13 +11,14 @@ import {
 } from 'react-bootstrap'
 import { User } from '../User/User'
 import logo from '../../assets/logo-negative.svg'
-//import { useUserHome } from '../../contexts/UserHomeContext'
 import { useProject } from '../../contexts/ProjectContext'
+import { jwtDecode } from 'jwt-decode'
 
 export function Header() {
   const [token, setToken] = useAuth()
   const navigate = useNavigate()
   const { setCurrentProjectId } = useProject()
+
   const handleLogout = () => {
     setToken(null)
     navigate('/') // Navigate to Intro after logout
@@ -27,49 +27,61 @@ export function Header() {
   const renderAuthenticatedLinks = () => {
     const { sub } = jwtDecode(token)
     return (
-      <>
+      <Nav
+        className='ml-auto'
+        style={{
+          flex: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
         <Nav.Item as='span' className='navbar-text me-2'>
           Logged in as <User id={sub} />
         </Nav.Item>
         <Nav.Link as={Link} to='/dashboard' className='nav-link'>
           Dashboard
         </Nav.Link>
-        <Button
-          variant='outline-light'
-          onClick={handleLogout}
-          className='btn-custom ms-2'
-        >
+        <Button variant='outline-light' onClick={handleLogout} className='ms-2'>
           Sign out
         </Button>
-      </>
+      </Nav>
     )
   }
 
-  const renderUnauthenticatedLinks = () => (
-    <>
+  const renderGuestLinks = () => (
+    <Nav className='ml-auto'>
       <Nav.Link as={Link} to='/login' className='nav-link'>
         Log In
       </Nav.Link>
       <Nav.Link as={Link} to='/signup' className='nav-link'>
         Sign Up
       </Nav.Link>
-    </>
+    </Nav>
   )
 
   return (
-    <Navbar bg='dark' variant='dark' expand='lg' sticky='top'>
+    <Navbar
+      bg='dark'
+      variant='dark'
+      expand='lg'
+      sticky='top'
+      className='mb-4'
+      style={{
+        paddingRight: '3rem',
+        postion: 'fixed',
+        left: 0,
+        width: '100vw',
+      }}
+    >
       <Container fluid>
         <Navbar.Brand as={Link} to='/' onClick={() => setCurrentProjectId('')}>
-          <Image src={logo} width={30} />
+          <Image src={logo} width={30} alt='Tasktrone Logo' />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls='basic-navbar-nav' />
         <Navbar.Collapse id='basic-navbar-nav'>
           <Nav className='w-100 justify-content-end'>
             <Row className='w-100'>
               <Col className='d-flex justify-content-end'>
-                {token
-                  ? renderAuthenticatedLinks()
-                  : renderUnauthenticatedLinks()}
+                {token ? renderAuthenticatedLinks() : renderGuestLinks()}
               </Col>
             </Row>
           </Nav>
