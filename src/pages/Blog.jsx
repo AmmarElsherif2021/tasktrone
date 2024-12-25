@@ -36,8 +36,22 @@ export function Blog() {
     >
       <Card.Body>
         <Container fluid>
-          <Row className='mb-4'>
-            <CreatePost />
+          <Row className='mb-1 pl-1 pt-0 '>
+            <div
+              style={{
+                backgroundColor: '#e6f7ff',
+                borderColor: '#000',
+                borderWidth: '2px',
+                borderRadius: '1rem',
+                borderStyle: 'solid',
+                maxHeight: '3.5rem',
+                width: '9rem',
+                marginLeft: '1rem',
+                paddingBottom: '1rem',
+              }}
+            >
+              <CreatePost />
+            </div>
           </Row>
 
           <Row>

@@ -20,18 +20,19 @@ export const ProjectLayout = () => {
     <Container fluid className='vh-100 d-flex flex-column'>
       <Header />
       <Row className='flex-grow-1 g-0'>
-        {/* Sidebar with toggle button */}
+        {/* Sidebar */}
         <Col
-          xs={12}
+          xs={2}
           lg={1}
-          className='d-none d-lg-flex flex-column align-items-center bg-light p-2'
+          className='d-flex flex-column align-items-center bg-light p-2'
           style={{
             height: 'calc(100vh - 5rem)',
             position: 'fixed',
             top: '5rem',
             left: 0,
-            transition: 'width 0.3s',
             zIndex: 1000,
+            display: 'flex',
+            flexDirection: 'column',
             justifyContent: 'space-around',
           }}
         >
@@ -45,33 +46,30 @@ export const ProjectLayout = () => {
           <ProjectDashboard />
         </Col>
 
-        {/* Blog Sidebar */}
-        {showBlog && (
-          <Col
-            xs={12}
-            lg={3}
-            className='d-none d-lg-block bg-light p-2'
-            style={{
-              position: 'fixed',
-              top: '56px',
-              left: '4rem', // Adjust based on sidebar width
-              height: 'calc(100vh - 56px)',
-              overflowY: 'auto',
-              transition: 'left 0.3s',
-            }}
-          >
-            <Blog />
-          </Col>
-        )}
-
-        {/* Main Content Area */}
+        {/* Blog Panel */}
         <Col
-          xs={12}
-          lg={showBlog ? 8 : 11}
+          xs={10}
+          lg={showBlog ? 3 : 1}
+          className={`bg-light p-2 ${showBlog ? 'd-block' : 'd-none'}`}
           style={{
-            marginLeft: showBlog ? '4rem' : '4rem',
+            height: 'calc(100vh - 5rem)',
+            position: 'fixed',
+            top: '5rem',
+            left: '5rem',
+            overflowY: 'auto',
+            zIndex: 999,
+          }}
+        >
+          <Blog />
+        </Col>
 
-            transition: 'margin-left 0.3s',
+        {/* Main Content */}
+        <Col
+          xs={10}
+          lg={11}
+          className='h-100'
+          style={{
+            marginLeft: '4rem',
             paddingTop: '1rem',
             paddingBottom: '1rem',
           }}

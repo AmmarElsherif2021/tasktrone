@@ -10,32 +10,52 @@ import {
   Row,
   Col,
 } from 'react-bootstrap'
-import { RefreshCw, AlertCircle, Clock, ListTodo, Activity } from 'lucide-react'
+
 import { useProject } from '../../contexts/ProjectContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateProject } from '../../API/projects'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-
-const MetricsCard = ({ title, value, icon: Icon, tooltip }) => (
+import tasksIcon from '../../assets/tasks.svg'
+import inProgressIcon from '../../assets/inProgress.svg'
+import cycleTimeIcon from '../../assets/cycleTime.svg'
+import leadTimeIcon from '../../assets/leadTime.svg'
+import doneIcon from '../../assets/done.svg'
+import flowIcon from '../../assets/flow.svg'
+import refreshIcon from '../../assets/refresh-icon.svg'
+const MetricsCard = ({
+  title,
+  value,
+  src,
+  color,
+  backgroundColor,
+  tooltip,
+}) => (
   <OverlayTrigger placement='top' overlay={<Tooltip>{tooltip}</Tooltip>}>
-    <Card className='bg-white text-center p-3 mb-4'>
+    <Card
+      className='bg-white text-center p-2 mb-4'
+      style={{ borderWidth: '2px', borderColor: color, width: '8rem' }}
+    >
       <Card.Body>
         <div
-          className='d-flex justify-content-center align-items-center mb-2'
+          className='d-flex justify-content-center align-items-center mb-1'
           style={{
             width: '5rem',
             height: '5rem',
-            borderRadius: '50%',
-            backgroundColor: '#e6f7ff',
+            borderColor: color,
             borderWidth: '2px',
-            borderColor: '#186545',
+            borderRadius: '50%',
+            backgroundColor: backgroundColor,
           }}
         >
-          <Icon style={{ width: '24px', height: '24px', color: '#186545' }} />
+          <img
+            src={src}
+            alt={value}
+            style={{ width: '24px', height: '24px' }}
+          />
         </div>
         <Card.Title className='mb-1'>
-          <strong style={{ fontSize: '0.6em' }}>{title}</strong>
+          <strong style={{ color: color, fontSize: '0.5em' }}>{title}</strong>
         </Card.Title>
         <Card.Text className='h2'>{value}</Card.Text>
       </Card.Body>
@@ -43,7 +63,7 @@ const MetricsCard = ({ title, value, icon: Icon, tooltip }) => (
   </OverlayTrigger>
 )
 
-const Metrics = () => {
+export const Metrics = () => {
   const queryClient = useQueryClient()
   const [wipLimit, setWipLimit] = useState(0)
   const { currentAvgCycleTime, currentAvgLeadTime } = useProject()
@@ -98,7 +118,7 @@ const Metrics = () => {
             min={0}
           />
           <Button onClick={onWipSubmit} variant='outline-primary' size='sm'>
-            <RefreshCw className='mr-2' />
+            <image src={refreshIcon} />
             Update WIP
           </Button>
         </Col>
@@ -109,16 +129,20 @@ const Metrics = () => {
           <MetricsCard
             title='Total Tasks'
             value={currentProject?.tasks?.length || 0}
-            icon={ListTodo}
+            src={tasksIcon}
             tooltip='Total number of tasks in the project'
+            color={'#000'}
+            backgroundColor={'#dddddd'}
           />
         </Col>
         <Col md={4} lg={2}>
           <MetricsCard
             title='In Progress'
             value={tasksInProgress}
-            icon={Activity}
             tooltip={`Tasks in progress (WIP Limit: ${wipLimit})`}
+            src={inProgressIcon}
+            color={'#186545'}
+            backgroundColor={'#e6f7ff'}
           />
         </Col>
         <Col md={4} lg={2}>
@@ -127,8 +151,10 @@ const Metrics = () => {
             value={`${
               !isNaN(currentAvgCycleTime) ? currentAvgCycleTime.toFixed(1) : '0'
             }d`}
-            icon={Clock}
             tooltip="Average time from 'In Progress' to 'Done'"
+            src={cycleTimeIcon}
+            color={'#60B8BB'}
+            backgroundColor={'#BCF5F7'}
           />
         </Col>
         <Col md={4} lg={2}>
@@ -137,24 +163,30 @@ const Metrics = () => {
             value={`${
               !isNaN(currentAvgLeadTime) ? currentAvgLeadTime.toFixed(1) : '0'
             }d`}
-            icon={Clock}
             tooltip='Average time from task creation to completion'
+            src={leadTimeIcon}
+            color={'#FE9900'}
+            backgroundColor={'#FFEEAA'}
           />
         </Col>
         <Col md={4} lg={2}>
           <MetricsCard
             title='Throughput'
             value={throughput.toFixed(1)}
-            icon={Activity}
             tooltip='Average number of tasks completed per day'
+            src={doneIcon}
+            color={'#186545'}
+            backgroundColor={'#e6f7ff'}
           />
         </Col>
         <Col md={4} lg={2}>
           <MetricsCard
             title='Flow Efficiency'
             value={`${flowEfficiency.toFixed(0)}%`}
-            icon={AlertCircle}
             tooltip='Ratio of active work time to total lead time'
+            src={flowIcon}
+            color={'#CA5051'}
+            backgroundColor={'#FFC5C6'}
           />
         </Col>
       </Row>

@@ -39,13 +39,13 @@ export function CreatePost() {
         src={createPostIcon}
         alt={open ? 'Hide Create Post' : 'Create New Post'}
         onClick={() => setOpen(!open)}
-        className={'mb-4'}
+        className={'mb-1 pb-3'}
         iconWidthREM={15}
         color='#000000'
       />
       <Collapse in={open}>
         <div id='create-post-collapse'>
-          <Card className='mb-4'>
+          <Card className='mb-1'>
             <h3>{currentProjectId.toString()}</h3>
             <Card.Body>
               <Form onSubmit={handleSubmit}>
