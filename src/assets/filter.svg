@@ -1,4 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M17.8258 5H6.17422C5.31987 5 4.85896 6.00212 5.41496 6.65079L9.75926 11.7191C9.91461 11.9004 10 12.1312 10 12.3699V17.382C10 17.7607 10.214 18.107 10.5528 18.2764L12.5528 19.2764C13.2177 19.6088 14 19.1253 14 18.382V12.3699C14 12.1312 14.0854 11.9004 14.2407 11.7191L18.585 6.65079C19.141 6.00212 18.6801 5 17.8258 5Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Filter</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Filter">
+            <rect id="Rectangle" fill-rule="nonzero" x="0" y="0" width="24" height="24">
+
+</rect>
+            <line x1="4" y1="5" x2="16" y2="5" id="Path" stroke="#0C0310" stroke-width="2" stroke-linecap="round">
+
+</line>
+            <line x1="4" y1="12" x2="10" y2="12" id="Path" stroke="#0C0310" stroke-width="2" stroke-linecap="round">
+
+</line>
+            <line x1="14" y1="12" x2="20" y2="12" id="Path" stroke="#0C0310" stroke-width="2" stroke-linecap="round">
+
+</line>
+            <line x1="8" y1="19" x2="20" y2="19" id="Path" stroke="#0C0310" stroke-width="2" stroke-linecap="round">
+
+</line>
+            <circle id="Oval" stroke="#0C0310" stroke-width="2" stroke-linecap="round" cx="18" cy="5" r="2">
+
+</circle>
+            <circle id="Oval" stroke="#0C0310" stroke-width="2" stroke-linecap="round" cx="12" cy="12" r="2">
+
+</circle>
+            <circle id="Oval" stroke="#0C0310" stroke-width="2" stroke-linecap="round" cx="6" cy="19" r="2">
+
+</circle>
+        </g>
+    </g>
 </svg>

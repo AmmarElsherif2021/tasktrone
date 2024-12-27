@@ -7,7 +7,7 @@ import RefreshProject from './RefreshProject'
 
 const Toolbar = () => {
   return (
-    <Navbar bg='light' expand='lg' className='mb-2 shadow-sm w-100'>
+    <Navbar bg='light' expand='lg' className='mb-2 shadow-sm w-100 py-1'>
       <Container className='d-flex justify-content-between align-items-center w-100'>
         <Navbar.Toggle aria-controls='basic-navbar-nav' />
         <Navbar.Collapse id='basic-navbar-nav'>

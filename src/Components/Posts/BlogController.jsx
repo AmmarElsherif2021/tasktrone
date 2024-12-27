@@ -1,14 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react'
-import {
-  Form,
-  InputGroup,
-  Card,
-  Button,
-  Collapse,
-  Image,
-} from 'react-bootstrap'
-import filterIcon from '../../assets/filter-negative.svg'
+import { Form, InputGroup, Card, Button, Modal, Image } from 'react-bootstrap'
+import filterIcon from '../../assets/filter.svg'
 
 export function BlogControls({
   author,
@@ -19,24 +12,38 @@ export function BlogControls({
   onSortOrderChange,
   sortFields,
 }) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   return (
-    <div className='mb-3'>
+    <div className='mb-3 mx-1'>
       <Button
-        variant='secondary'
-        onClick={() => setIsExpanded(!isExpanded)}
-        aria-controls='filter-collapse'
-        aria-expanded={isExpanded}
-        className='d-flex align-items-center mb-2'
-        size='sm'
+        variant='none'
+        size='lg'
+        className='phase-button'
+        style={{
+          borderWidth: '2px',
+          borderColor: '#000',
+          borderRadius: '2rem',
+          backgroundColor: '#FFDE59',
+        }}
+        onClick={() => setShowModal(true)}
       >
-        <Image src={filterIcon} width={20} className='me-2' />
-        Filter
+        <Image
+          src={filterIcon}
+          width={25}
+          alt='Filter'
+          className='phase-button-icon'
+        />
+        <span className='phase-button-text' style={{ color: '#000' }}>
+          <strong>Filter</strong>
+        </span>
       </Button>
 
-      <Collapse in={isExpanded}>
-        <div id='filter-collapse'>
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Filter Options</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
           <Card className='p-2'>
             <Form>
               <Form.Group controlId='filterByAuthor' className='mb-2'>
@@ -78,15 +85,15 @@ export function BlogControls({
               </Form.Group>
               <Button
                 variant='primary'
-                onClick={() => setIsExpanded(false)}
+                onClick={() => setShowModal(false)}
                 size='sm'
               >
                 Apply
               </Button>
             </Form>
           </Card>
-        </div>
-      </Collapse>
+        </Modal.Body>
+      </Modal>
     </div>
   )
 }

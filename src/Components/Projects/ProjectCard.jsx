@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import { Card, Badge, ListGroup } from 'react-bootstrap'
 import { User } from '../User/User.jsx'
 import { useProject } from '../../contexts/ProjectContext.jsx'
-//import { Navigate } from 'react-router-dom'
+import { useState } from 'react'
 
 function createHexColor(id) {
   const cleanedId = id.replace(/\s/g, '')
@@ -20,6 +20,7 @@ export function ProjectCard({
   members,
 }) {
   const { setCurrentProject } = useProject()
+  const [hover, setHover] = useState(false)
 
   const handleProjectClick = () => {
     setCurrentProject(projectId)
@@ -30,50 +31,75 @@ export function ProjectCard({
   return (
     <Card
       onClick={handleProjectClick}
+      className='shadow-sm h-100'
       style={{
-        margin: '1vw',
-        width: '18rem',
         cursor: 'pointer',
-        backgroundColor: cardBgColor,
-        transition: 'transform 0.2s',
+        backgroundColor: hover ? cardBgColor + '30' : cardBgColor,
+        borderWidth: '2.5px',
+        borderColor: '#000',
       }}
-      className='shadow-sm hover:scale-105'
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
-      <Card.Body>
-        <Card.Title className='d-flex justify-content-between align-items-center'>
-          {title}
-          <Badge bg='secondary' className='ms-2'>
+      <Card.Body className='p-3'>
+        <div className='d-flex justify-content-between align-items-start mb-2'>
+          <Card.Title className='h6 mb-0' style={{ maxWidth: '75%' }}>
+            {title}
+          </Card.Title>
+          <Badge
+            bg='none'
+            className='text-nowrap'
+            style={{
+              borderWidth: '2px',
+              borderColor: '#000',
+              borderRadius: '2rem',
+              borderStyle: 'solid',
+              padding: '0.5rem',
+              backgroundColor: '#000',
+              color: '#fff',
+            }}
+          >
             {projectId.slice(-6)}
           </Badge>
-        </Card.Title>
+        </div>
 
         {description && (
-          <Card.Subtitle className='mb-2 text-muted'>
+          <Card.Subtitle className='small text-muted mb-2'>
             Created by <User id={createdBy} />
           </Card.Subtitle>
         )}
-
-        <Card.Text className='mt-2'>
-          <strong>Team Members:</strong>
-        </Card.Text>
 
         <ListGroup variant='flush'>
           {members.map((member) => (
             <ListGroup.Item
               key={member.user}
-              className='d-flex justify-content-between align-items-center px-0'
+              className='d-flex justify-content-between align-items-center px-0 flex-wrap gap-2'
+              style={{ backgroundColor: 'transparent', border: 'none' }}
             >
-              <div>
+              <div className='text-truncate'>
                 <User id={member.user} />
               </div>
               <Badge
-                bg={
-                  member.role === 'admin'
-                    ? 'danger'
-                    : member.role === 'reviewer'
-                      ? 'warning'
-                      : 'primary'
-                }
+                bg='none'
+                className='text-nowrap'
+                style={{
+                  borderWidth: '2px',
+                  borderColor:
+                    member.role === 'admin'
+                      ? '#ad0000'
+                      : member.role === 'reviewer'
+                        ? '#186545'
+                        : '#000',
+                  borderRadius: '2rem',
+                  borderStyle: 'solid',
+                  padding: '0.5rem',
+                  color:
+                    member.role === 'admin'
+                      ? '#ad0000'
+                      : member.role === 'reviewer'
+                        ? '#186545'
+                        : '#000',
+                }}
               >
                 {member.role}
               </Badge>
@@ -98,3 +124,5 @@ ProjectCard.propTypes = {
     }),
   ).isRequired,
 }
+
+export default ProjectCard

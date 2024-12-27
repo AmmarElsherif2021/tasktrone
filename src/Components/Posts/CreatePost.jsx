@@ -1,18 +1,19 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Form, Button, Alert, Card, Collapse } from 'react-bootstrap'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Form, Button, Alert, Modal } from 'react-bootstrap'
 import { createPost } from '../../API/posts'
 import { useAuth } from '../../contexts/AuthContext'
-import createPostIcon from '../../assets/create-post.svg'
 import { useProject } from '../../contexts/ProjectContext'
-import IconButton from '../../Ui/IconButton'
+import createPostIcon from '../../assets/create-post.svg'
+
 export function CreatePost() {
   const [title, setTitle] = useState('')
   const [contents, setContents] = useState('')
   const [token] = useAuth()
   const queryClient = useQueryClient()
-  const [open, setOpen] = useState(false)
+  const [showModal, setShowModal] = useState(false)
   const { currentProjectId } = useProject()
+
   const createPostMutation = useMutation({
     mutationFn: () =>
       createPost(token, currentProjectId.toString(), { title, contents }),
@@ -20,7 +21,7 @@ export function CreatePost() {
       queryClient.invalidateQueries(['posts'])
       setTitle('')
       setContents('')
-      setOpen(false)
+      setShowModal(false)
     },
   })
 
@@ -34,62 +35,75 @@ export function CreatePost() {
   }
 
   return (
-    <>
-      <IconButton
-        src={createPostIcon}
-        alt={open ? 'Hide Create Post' : 'Create New Post'}
-        onClick={() => setOpen(!open)}
-        className={'mb-1 pb-3'}
-        iconWidthREM={15}
-        color='#000000'
-      />
-      <Collapse in={open}>
-        <div id='create-post-collapse'>
-          <Card className='mb-1'>
-            <h3>{currentProjectId.toString()}</h3>
-            <Card.Body>
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className='mb-3'>
-                  <Form.Label htmlFor='create-title'>Title</Form.Label>
-                  <Form.Control
-                    type='text'
-                    id='create-title'
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder='Enter post title'
-                  />
-                </Form.Group>
+    <div className='mx-1'>
+      <Button
+        variant='none'
+        size='lg'
+        className='phase-button'
+        style={{
+          borderWidth: '2px',
+          borderColor: '#000',
+          borderRadius: '2rem',
+          backgroundColor: '#5EE5AD',
+        }}
+        onClick={() => setShowModal(true)}
+      >
+        <img
+          src={createPostIcon}
+          width={25}
+          alt={`Create Post`}
+          className='phase-button-icon'
+        />
+        <span className='phase-button-text' style={{ color: '#000' }}>
+          <strong>Create Post</strong>
+        </span>
+      </Button>
 
-                <Form.Group className='mb-3'>
-                  <Form.Label>Contents</Form.Label>
-                  <Form.Control
-                    as='textarea'
-                    rows={3}
-                    value={contents}
-                    onChange={(e) => setContents(e.target.value)}
-                    placeholder='Write your post content here...'
-                  />
-                </Form.Group>
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Create Post</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className='mb-3'>
+              <Form.Label htmlFor='create-title'>Title</Form.Label>
+              <Form.Control
+                type='text'
+                id='create-title'
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder='Enter post title'
+              />
+            </Form.Group>
 
-                <Button
-                  type='submit'
-                  variant='primary'
-                  disabled={!title || createPostMutation.isPending}
-                  className='btn-custom'
-                >
-                  {createPostMutation.isPending ? 'Creating...' : 'Create Post'}
-                </Button>
+            <Form.Group className='mb-3'>
+              <Form.Label>Contents</Form.Label>
+              <Form.Control
+                as='textarea'
+                rows={3}
+                value={contents}
+                onChange={(e) => setContents(e.target.value)}
+                placeholder='Write your post content here...'
+              />
+            </Form.Group>
 
-                {createPostMutation.isSuccess && (
-                  <Alert variant='success' className='mt-3'>
-                    Post created successfully!
-                  </Alert>
-                )}
-              </Form>
-            </Card.Body>
-          </Card>
-        </div>
-      </Collapse>
-    </>
+            <Button
+              type='submit'
+              variant='primary'
+              disabled={!title || createPostMutation.isPending}
+              className='btn-custom'
+            >
+              {createPostMutation.isPending ? 'Creating...' : 'Create Post'}
+            </Button>
+          </Form>
+
+          {createPostMutation.isSuccess && (
+            <Alert variant='success' className='mt-3'>
+              Post created successfully!
+            </Alert>
+          )}
+        </Modal.Body>
+      </Modal>
+    </div>
   )
 }

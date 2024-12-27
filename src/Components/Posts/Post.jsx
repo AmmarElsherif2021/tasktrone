@@ -3,6 +3,7 @@ import { Button, Card, Image } from 'react-bootstrap'
 import { User } from '../User/User'
 import { useState } from 'react'
 import userIcon from '../../assets/person-icon.svg'
+import StaticRoundBtn from '../../Ui/StaticRoundBtn'
 
 export function Post({ title, contents, author, taskId = '' }) {
   const [explicitUserInfo, setExplicitUserInfo] = useState(false)
@@ -30,7 +31,7 @@ export function Post({ title, contents, author, taskId = '' }) {
             alt='user'
             roundedCircle
             className='me-2'
-            style={{ width: '3rem' }}
+            style={{ width: '3rem', backgroundColor: '#FFDE4C' }}
           />
           <User id={author} explicit={explicitUserInfo} />
         </Button>
@@ -44,10 +45,16 @@ export function Post({ title, contents, author, taskId = '' }) {
       </Card.Body>
       {taskId ? (
         <Card.Footer className='text-muted bg-transparent border-0'>
-          <small>Related Task ID: {taskId}</small>
+          <small>Related Task ID: </small>
+          <StaticRoundBtn src={''} handleClick={() => {}} alt={taskId} />
         </Card.Footer>
       ) : (
-        'public'
+        <StaticRoundBtn
+          src={''}
+          handleClick={() => {}}
+          alt={'public'}
+          backgroundColor={'#99FACA'}
+        />
       )}
     </Card>
   )

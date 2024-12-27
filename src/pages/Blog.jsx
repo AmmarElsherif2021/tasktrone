@@ -15,7 +15,13 @@ export function Blog() {
   const [sortOrder, setSortOrder] = useState('descending')
   const [token] = useAuth()
   const { currentProjectId } = useProject()
-
+  const controllerStyle = {
+    width: '7rem',
+    marginRight: '2rem',
+    marginLeft: '2rem',
+    padding: 0,
+    height: '3.5rem',
+  }
   const postsQuery = useQuery({
     queryKey: [
       'posts',
@@ -31,39 +37,26 @@ export function Blog() {
 
   return (
     <Card
-      className='h-100 shadow-sm'
-      style={{ maxHeight: '95vh', overflowY: 'scroll' }}
+      className='h-100 shadow-sm '
+      style={{ maxHeight: '97vh', overflowY: 'scroll', paddingLeft: '1rem' }}
     >
       <Card.Body>
         <Container fluid>
-          <Row className='mb-1 pl-1 pt-0 '>
-            <div
-              style={{
-                backgroundColor: '#e6f7ff',
-                borderColor: '#000',
-                borderWidth: '2px',
-                borderRadius: '1rem',
-                borderStyle: 'solid',
-                maxHeight: '3.5rem',
-                width: '9rem',
-                marginLeft: '1rem',
-                paddingBottom: '1rem',
-              }}
-            >
+          <Row className='mt-0 pt-0 '>
+            <div style={controllerStyle}>
               <CreatePost />
             </div>
-          </Row>
-
-          <Row>
-            <BlogControls
-              author={author}
-              onAuthorChange={setAuthor}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              sortOrder={sortOrder}
-              onSortOrderChange={setSortOrder}
-              sortFields={['createdAt', 'updatedAt']}
-            />
+            <div style={controllerStyle}>
+              <BlogControls
+                author={author}
+                onAuthorChange={setAuthor}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                sortOrder={sortOrder}
+                onSortOrderChange={setSortOrder}
+                sortFields={['createdAt', 'updatedAt']}
+              />
+            </div>
           </Row>
 
           <Row>

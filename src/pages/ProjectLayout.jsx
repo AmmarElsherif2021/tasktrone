@@ -24,16 +24,17 @@ export const ProjectLayout = () => {
         <Col
           xs={2}
           lg={1}
-          className='d-flex flex-column align-items-center bg-light p-2'
+          className='d-flex flex-column align-items-center  p-2'
           style={{
-            height: 'calc(100vh - 5rem)',
+            height: 'calc(100vh - 4rem)',
             position: 'fixed',
-            top: '5rem',
+            top: '4rem',
             left: 0,
             zIndex: 1000,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-around',
+            backgroundColor: '#ffffff',
           }}
         >
           <IconButton
@@ -49,15 +50,16 @@ export const ProjectLayout = () => {
         {/* Blog Panel */}
         <Col
           xs={10}
-          lg={showBlog ? 3 : 1}
-          className={`bg-light p-2 ${showBlog ? 'd-block' : 'd-none'}`}
+          lg={showBlog ? 4 : 1}
+          className={` p-2 ${showBlog ? 'd-block' : 'd-none'}`}
           style={{
             height: 'calc(100vh - 5rem)',
             position: 'fixed',
-            top: '5rem',
+            top: '4.5rem',
             left: '5rem',
             overflowY: 'auto',
             zIndex: 999,
+            backgroundColor: '#ffffff',
           }}
         >
           <Blog />
@@ -67,11 +69,17 @@ export const ProjectLayout = () => {
         <Col
           xs={10}
           lg={11}
-          className='h-100'
+          className=' w-99'
           style={{
-            marginLeft: '4rem',
-            paddingTop: '1rem',
+            height: 'auto',
+            position: 'fixed',
+            top: '4.5rem',
+            left: '5rem',
+            paddingTop: 0,
+            marginTop: 0,
+            marginLeft: '2rem',
             paddingBottom: '1rem',
+            overflowY: 'auto',
           }}
         >
           <Board />

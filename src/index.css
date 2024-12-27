@@ -293,3 +293,23 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+/* customStyles.css */
+.btn-primary {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: #fff !important;
+  color: #000 !important;
+  border-color: #000 !important;
+  border-width: 2px !important;
+}
+.primary {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+}

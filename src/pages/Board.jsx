@@ -126,11 +126,8 @@ export function Board() {
   }
 
   return (
-    <Container fluid className='py-4'>
-      <Toolbar />
-      <Metrics />
-
-      <Card className='shadow-sm'>
+    <Container fluid className='py-0'>
+      <Card className='sm'>
         <Card.Body>
           {isTasksLoading && !currentTasks?.length ? (
             <div className='text-center py-5'>
@@ -139,8 +136,12 @@ export function Board() {
               </Spinner>
             </div>
           ) : (
-            <Container fluid>
-              <Row className='g-4'>
+            <Container fluid className='py-0 my-0'>
+              <Row>
+                <Toolbar />
+                <Metrics />
+              </Row>
+              <Row className='g-2'>
                 {/* Story Column */}
                 <KanbanColumn phase='story' />
                 {/* In Progress Column */}

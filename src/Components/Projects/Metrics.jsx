@@ -117,7 +117,7 @@ export const Metrics = () => {
             className='w-25 mr-2'
             min={0}
           />
-          <Button onClick={onWipSubmit} variant='outline-primary' size='sm'>
+          <Button onClick={onWipSubmit} className='btn-primary' size='sm'>
             <image src={refreshIcon} />
             Update WIP
           </Button>

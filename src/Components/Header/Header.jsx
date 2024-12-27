@@ -4,18 +4,22 @@ import {
   Navbar,
   Nav,
   Container,
-  Button,
+  //Button,
   Row,
   Col,
   Image,
 } from 'react-bootstrap'
-import { User } from '../User/User'
+//import { User } from '../User/User'
 import logo from '../../assets/logo-negative.svg'
 import { useProject } from '../../contexts/ProjectContext'
-import { jwtDecode } from 'jwt-decode'
-
+//import { jwtDecode } from 'jwt-decode'
+import IconButton from '../../Ui/IconButton'
+import logoutIcon from '../../assets/logout.svg'
+import dashboardIcon from '../../assets/negative-dashboard.svg'
+import { useUserHome } from '../../contexts/UserHomeContext'
 export function Header() {
   const [token, setToken] = useAuth()
+  const { currentUser } = useUserHome()
   const navigate = useNavigate()
   const { setCurrentProjectId } = useProject()
 
@@ -25,7 +29,7 @@ export function Header() {
   }
 
   const renderAuthenticatedLinks = () => {
-    const { sub } = jwtDecode(token)
+    //const { sub } = jwtDecode(token)
     return (
       <Nav
         className='ml-auto'
@@ -34,15 +38,32 @@ export function Header() {
           justifyContent: 'space-between',
         }}
       >
-        <Nav.Item as='span' className='navbar-text me-2'>
-          Logged in as <User id={sub} />
+        <Nav.Item as='span' className='navbar-text me-2 py-3'>
+          <span style={{ fontSize: '0.8em' }}>
+            Logged in as {currentUser.username}
+          </span>
         </Nav.Item>
         <Nav.Link as={Link} to='/dashboard' className='nav-link'>
-          Dashboard
+          <IconButton
+            src={dashboardIcon}
+            alt='Dashboard'
+            onClick={() => {}}
+            className='py-4'
+            iconWidthREM={7}
+            color='#ffffff'
+          />
         </Nav.Link>
-        <Button variant='outline-light' onClick={handleLogout} className='ms-2'>
-          Sign out
-        </Button>
+        <Nav.Link>
+          {' '}
+          <IconButton
+            src={logoutIcon}
+            alt='Sign out'
+            onClick={handleLogout}
+            className='py-4'
+            iconWidthREM={3}
+            color='#ffffff'
+          />
+        </Nav.Link>
       </Nav>
     )
   }
