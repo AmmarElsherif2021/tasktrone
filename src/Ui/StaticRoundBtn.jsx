@@ -16,8 +16,8 @@ const StaticRoundBtn = ({
         borderWidth: '2px',
         borderColor: color, //'#ad0000',
         borderRadius: '2rem',
-        maxWidth: '4rem',
-        margin: '1rem',
+        maxWidth: '7rem',
+        margin: '0.4rem',
         backgroundColor: backgroundColor,
       }}
       onClick={handleClick}
