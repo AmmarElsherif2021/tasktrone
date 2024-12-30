@@ -264,3 +264,45 @@ A Kanban board is a visual tool used to manage workflows and tasks in a project.
 - Contact information
 - Issue reporting procedure
 - Resolution timeframes
+
+# Features could be added for further development:
+
+manufacturing-specific features could be added to make project management tool fit manufaturing process:
+
+Production-Specific Task Categories:
+
+Design review workflows
+Quality control checkpoints
+Machine maintenance scheduling
+Inventory tracking cards
+Production bottleneck alerts
+
+Data Integration Features:
+
+Import/export CAD files (STEP, IGES, STL)
+CNC program attachment support
+Quality inspection report generation
+Integration with common manufacturing software APIs
+
+Enhanced Analytics:
+
+Machine utilization tracking
+Production cycle time visualization
+Quality metrics dashboard
+Resource allocation charts
+Bottleneck identification tools
+
+Specialized User Roles:
+
+Design engineer views
+Machine operator dashboards
+Quality inspector workflows
+Maintenance technician schedules
+
+Manufacturing KPIs:
+
+Real-time production status
+Defect rate tracking
+Machine downtime monitoring
+Inventory level alerts
+Lead time calculations

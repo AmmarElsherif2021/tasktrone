@@ -60,10 +60,13 @@ export function CreatePost() {
       </Button>
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
+        <Modal.Header
+          style={{ borderWidth: '2px', borderColor: '#000' }}
+          closeButton
+        >
           <Modal.Title>Create Post</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={{ borderWidth: '2px', borderColor: '#000' }}>
           <Form onSubmit={handleSubmit}>
             <Form.Group className='mb-3'>
               <Form.Label htmlFor='create-title'>Title</Form.Label>
@@ -73,6 +76,7 @@ export function CreatePost() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder='Enter post title'
+                style={{ borderWidth: '2px', borderColor: '#000' }}
               />
             </Form.Group>
 
@@ -81,6 +85,7 @@ export function CreatePost() {
               <Form.Control
                 as='textarea'
                 rows={3}
+                style={{ borderWidth: '2px', borderColor: '#000' }}
                 value={contents}
                 onChange={(e) => setContents(e.target.value)}
                 placeholder='Write your post content here...'

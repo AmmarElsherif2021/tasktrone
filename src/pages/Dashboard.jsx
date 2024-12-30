@@ -9,17 +9,17 @@ import {
   Tooltip,
   Row,
   Col,
+  Modal,
 } from 'react-bootstrap'
 import { PreviewProjects } from './PreviewProjects'
-import {
-  FolderPlus,
-  User as UserIcon,
-  Clock,
-  AlertCircle,
-  BarChart3,
-  Boxes,
-  ClipboardCheck,
-} from 'lucide-react'
+
+import folderPlusIcon from '../assets/folderPlus.svg'
+import userInfoIcon from '../assets/userInfo.svg'
+import clockIcon from '../assets/clock.svg'
+import boxesIcon from '../assets/boxes.svg'
+import chartIcon from '../assets/charts.svg'
+import alertIcon from '../assets/alert.svg'
+import clipboardCheckIcon from '../assets/clipboardCheck.svg'
 import { User } from '../Components/User/User'
 import { CreateProject } from '../Components/Projects/CreateProject'
 import { useAuth } from '../contexts/AuthContext'
@@ -59,7 +59,7 @@ export function Dashboard() {
     setUserData(decodeToken(token))
   }, [token])
 
-  const MetricCard = ({ icon: Icon, title, value, color }) => (
+  const MetricCard = ({ icon, title, value, color }) => (
     <Card
       className='mb-3 shadow-sm'
       style={{
@@ -77,7 +77,12 @@ export function Dashboard() {
           </h5>
           <h3 className='mb-0'>{value}</h3>
         </div>
-        <Icon size={40} style={{ color: '#000' }} />
+        <img
+          className='d-flex align-items-center'
+          style={{ width: '3rem' }}
+          src={icon}
+          alt={title}
+        />
       </Card.Body>
     </Card>
   )
@@ -93,7 +98,7 @@ export function Dashboard() {
           <Row className='mb-4'>
             <Col md={3} sm={6}>
               <MetricCard
-                icon={Clock}
+                icon={clockIcon}
                 title='In Progress'
                 value={metrics.tasksInProgress}
                 color='#7DDA58'
@@ -101,7 +106,7 @@ export function Dashboard() {
             </Col>
             <Col md={3} sm={6}>
               <MetricCard
-                icon={AlertCircle}
+                icon={alertIcon}
                 title='Critical Tasks'
                 value={metrics.criticalTasks}
                 color='#FF4A4A'
@@ -109,7 +114,7 @@ export function Dashboard() {
             </Col>
             <Col md={3} sm={6}>
               <MetricCard
-                icon={ClipboardCheck}
+                icon={clipboardCheckIcon}
                 title='Quality Issues'
                 value={metrics.qualityIssues}
                 color='#FFDE4C'
@@ -117,7 +122,7 @@ export function Dashboard() {
             </Col>
             <Col md={3} sm={6}>
               <MetricCard
-                icon={Boxes}
+                icon={boxesIcon}
                 title='Inventory Alerts'
                 value={metrics.inventoryAlerts}
                 color='#99FACA'
@@ -146,10 +151,10 @@ export function Dashboard() {
                 }}
               >
                 <div className='d-flex align-items-center'>
-                  <UserIcon
-                    size={24}
-                    className='me-2'
-                    style={{ color: '#ad0000' }}
+                  <img
+                    src={userInfoIcon}
+                    alt={'user info'}
+                    style={{ width: '3rem' }}
                   />
                   <h4 className='mb-0'>Personal Information</h4>
                 </div>
@@ -254,10 +259,11 @@ export function Dashboard() {
                   }}
                 >
                   <div className='d-flex align-items-center'>
-                    <FolderPlus
-                      size={24}
+                    <img
+                      src={folderPlusIcon}
+                      alt={'add project'}
                       className='me-2'
-                      style={{ color: '#186545' }}
+                      style={{ width: '3rem', color: '#000' }}
                     />
                     <h4 className='mb-0'> Projects </h4>
                   </div>
@@ -266,12 +272,13 @@ export function Dashboard() {
                       placement='top'
                       overlay={<Tooltip>View Analytics</Tooltip>}
                     >
-                      <Button
-                        variant='outline-secondary'
+                      <IconButton
+                        onClick={() => {}}
                         className='d-flex align-items-center'
-                      >
-                        <BarChart3 size={20} />
-                      </Button>
+                        color='#000'
+                        src={chartIcon}
+                        alt='Visualize data'
+                      />
                     </OverlayTrigger>
                     <OverlayTrigger
                       placement='top'
@@ -283,26 +290,44 @@ export function Dashboard() {
                         color='#186545'
                         src={addNewIcon}
                         alt='Create new project'
-                      ></IconButton>
+                      />
                     </OverlayTrigger>
                   </div>
                 </Card.Header>
+
                 {showCreateProject && (
-                  <Card.Body className='border-bottom'>
-                    <CreateProject
-                      onClose={() => setShowCreateProject(false)}
-                    />
-                  </Card.Body>
+                  <Modal
+                    className='custom-modal'
+                    show={showCreateProject}
+                    onHide={() => setShowCreateProject(false)}
+                    size={'xl'}
+                  >
+                    <Modal.Header className='custom-modal' closeButton>
+                      <Modal.Title>Create project</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body
+                      style={{
+                        width: '70vw',
+                      }}
+                      className='custom-modal'
+                    >
+                      <CreateProject
+                        onClose={() => setShowCreateProject(false)}
+                      />
+                    </Modal.Body>
+                  </Modal>
                 )}
+
                 {userProjects && userProjects.length ? (
                   <PreviewProjects />
                 ) : (
                   <Card.Body className='text-center'>
                     <div className='d-flex flex-column align-items-center justify-content-center'>
-                      <FolderPlus
-                        size={48}
-                        className='mb-3'
-                        style={{ color: '#186545' }}
+                      <img
+                        src={folderPlusIcon}
+                        alt={'add project'}
+                        className='me-2'
+                        style={{ width: '3rem', color: '#186545' }}
                       />
                       <p className='mb-3' style={{ color: '#666' }}>
                         No manufacturing projects found. Create your first

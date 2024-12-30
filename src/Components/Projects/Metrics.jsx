@@ -3,7 +3,6 @@
 import {
   Container,
   Card,
-  Button,
   Form,
   OverlayTrigger,
   Tooltip,
@@ -23,6 +22,7 @@ import leadTimeIcon from '../../assets/leadTime.svg'
 import doneIcon from '../../assets/done.svg'
 import flowIcon from '../../assets/flow.svg'
 import refreshIcon from '../../assets/refresh-icon.svg'
+import StaticRoundBtn from '../../Ui/StaticRoundBtn'
 const MetricsCard = ({
   title,
   value,
@@ -33,16 +33,23 @@ const MetricsCard = ({
 }) => (
   <OverlayTrigger placement='top' overlay={<Tooltip>{tooltip}</Tooltip>}>
     <Card
-      className='bg-white text-center p-2 mb-4'
-      style={{ borderWidth: '2px', borderColor: color, width: '8rem' }}
+      className=' text-center p-1 mb-4'
+      style={{
+        borderWidth: '2px',
+        borderColor: '#000',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
     >
       <Card.Body>
         <div
           className='d-flex justify-content-center align-items-center mb-1'
           style={{
-            width: '5rem',
-            height: '5rem',
-            borderColor: color,
+            width: '4rem',
+            height: '4rem',
+            borderColor: '#000',
             borderWidth: '2px',
             borderRadius: '50%',
             backgroundColor: backgroundColor,
@@ -57,7 +64,7 @@ const MetricsCard = ({
         <Card.Title className='mb-1'>
           <strong style={{ color: color, fontSize: '0.5em' }}>{title}</strong>
         </Card.Title>
-        <Card.Text className='h2'>{value}</Card.Text>
+        <Card.Text className='h3 mb-2'>{value}</Card.Text>
       </Card.Body>
     </Card>
   </OverlayTrigger>
@@ -116,16 +123,20 @@ export const Metrics = () => {
             onChange={(e) => onWipChange(e.target.value)}
             className='w-25 mr-2'
             min={0}
+            style={{ borderWidth: '2px', borderColor: '#000', height: '2rem' }}
           />
-          <Button onClick={onWipSubmit} className='btn-primary' size='sm'>
-            <image src={refreshIcon} />
-            Update WIP
-          </Button>
+          <StaticRoundBtn
+            src={refreshIcon}
+            alt='Update WIP'
+            handleClick={onWipSubmit}
+            color='#000'
+            backgroundColor='#60B8BB'
+          />
         </Col>
       </Row>
 
       <Row>
-        <Col md={4} lg={2}>
+        <Col md={4} lg={2} sm={4} xs={6}>
           <MetricsCard
             title='Total Tasks'
             value={currentProject?.tasks?.length || 0}
@@ -135,7 +146,7 @@ export const Metrics = () => {
             backgroundColor={'#dddddd'}
           />
         </Col>
-        <Col md={4} lg={2}>
+        <Col md={4} lg={2} sm={4} xs={6}>
           <MetricsCard
             title='In Progress'
             value={tasksInProgress}
@@ -145,7 +156,7 @@ export const Metrics = () => {
             backgroundColor={'#e6f7ff'}
           />
         </Col>
-        <Col md={4} lg={2}>
+        <Col md={4} lg={2} sm={4} xs={6}>
           <MetricsCard
             title='Cycle Time'
             value={`${
@@ -157,7 +168,7 @@ export const Metrics = () => {
             backgroundColor={'#BCF5F7'}
           />
         </Col>
-        <Col md={4} lg={2}>
+        <Col md={4} lg={2} sm={4} xs={6}>
           <MetricsCard
             title='Lead Time'
             value={`${
@@ -169,7 +180,7 @@ export const Metrics = () => {
             backgroundColor={'#FFEEAA'}
           />
         </Col>
-        <Col md={4} lg={2}>
+        <Col md={4} lg={2} sm={4} xs={6}>
           <MetricsCard
             title='Throughput'
             value={throughput.toFixed(1)}
@@ -179,7 +190,7 @@ export const Metrics = () => {
             backgroundColor={'#e6f7ff'}
           />
         </Col>
-        <Col md={4} lg={2}>
+        <Col md={4} lg={2} sm={4} xs={6}>
           <MetricsCard
             title='Flow Efficiency'
             value={`${flowEfficiency.toFixed(0)}%`}

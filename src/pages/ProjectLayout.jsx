@@ -17,7 +17,7 @@ export const ProjectLayout = () => {
   }
 
   return (
-    <Container fluid className='vh-100 d-flex flex-column'>
+    <Container fluid className='vh-100 d-flex flex-column mx-0 px-0'>
       <Header />
       <Row className='flex-grow-1 g-0'>
         {/* Sidebar */}
@@ -71,8 +71,8 @@ export const ProjectLayout = () => {
           lg={11}
           className=' w-99'
           style={{
-            height: 'auto',
-            position: 'fixed',
+            mineight: '100%',
+            position: 'absolute',
             top: '4.5rem',
             left: '5rem',
             paddingTop: 0,

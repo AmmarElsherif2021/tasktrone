@@ -81,16 +81,16 @@ export function Header() {
 
   return (
     <Navbar
-      bg='dark'
-      variant='dark'
       expand='lg'
       sticky='top'
-      className='mb-4'
+      className='mb-3'
       style={{
         paddingRight: '3rem',
+        paddingLeft: 0,
         postion: 'fixed',
         left: 0,
         width: '100vw',
+        backgroundColor: '#000',
       }}
     >
       <Container fluid>

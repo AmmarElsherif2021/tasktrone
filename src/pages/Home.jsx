@@ -95,7 +95,7 @@ export function Home() {
   }
 
   return (
-    <div className='min-vh-100 bg-light' style={{ width: '100vw' }}>
+    <div className='min-vh-100 ' style={{ width: '100vw' }}>
       <Container fluid className='py-4'>
         {
           !currentProjectId && <Dashboard />
