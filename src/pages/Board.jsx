@@ -127,7 +127,7 @@ export function Board() {
 
   return (
     <Container fluid className='py-0'>
-      <Card className='sm'>
+      <Card className='sm' style={{ borderStyle: 'none' }}>
         <Card.Body>
           {isTasksLoading && !currentTasks?.length ? (
             <div className='text-center py-5'>

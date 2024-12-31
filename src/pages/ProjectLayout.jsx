@@ -35,6 +35,9 @@ export const ProjectLayout = () => {
             flexDirection: 'column',
             justifyContent: 'space-around',
             backgroundColor: '#ffffff',
+            borderRightWidth: !showBlog && '3px',
+            borderRightColor: !showBlog && '#000',
+            borderRightStyle: !showBlog && 'solid',
           }}
         >
           <IconButton
@@ -60,6 +63,9 @@ export const ProjectLayout = () => {
             overflowY: 'auto',
             zIndex: 999,
             backgroundColor: '#ffffff',
+            borderRightWidth: '3px',
+            borderRightColor: '#000',
+            borderRightStyle: 'solid',
           }}
         >
           <Blog />

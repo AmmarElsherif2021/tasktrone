@@ -43,28 +43,34 @@ export function ProjectCard({
     >
       <Card.Body className='p-3'>
         <div className='d-flex justify-content-between align-items-start mb-2'>
-          <Card.Title className='h6 mb-0' style={{ maxWidth: '75%' }}>
+          <Card.Title
+            className='h6 mb-0'
+            style={{ fontSize: '1.2em', maxWidth: '99%' }}
+          >
             {title}
           </Card.Title>
-          <Badge
-            bg='none'
-            className='text-nowrap'
-            style={{
-              borderWidth: '2px',
-              borderColor: '#000',
-              borderRadius: '2rem',
-              borderStyle: 'solid',
-              padding: '0.5rem',
-              backgroundColor: '#000',
-              color: '#fff',
-            }}
-          >
-            {projectId.slice(-6)}
-          </Badge>
         </div>
 
+        <Badge
+          bg='none'
+          className='text-nowrap'
+          style={{
+            borderWidth: '2px',
+            borderColor: '#000',
+            borderRadius: '1rem',
+            borderStyle: 'solid',
+            padding: '0.5rem',
+            margin: '1px',
+            backgroundColor: '#000',
+            color: '#fff',
+            //maxWidth: '25%',
+            width: '5rem',
+          }}
+        >
+          {projectId.slice(-6)}
+        </Badge>
         {description && (
-          <Card.Subtitle className='small text-muted mb-2'>
+          <Card.Subtitle className='small text-muted my-2'>
             Created by <User id={createdBy} />
           </Card.Subtitle>
         )}
@@ -74,7 +80,11 @@ export function ProjectCard({
             <ListGroup.Item
               key={member.user}
               className='d-flex justify-content-between align-items-center px-0 flex-wrap gap-2'
-              style={{ backgroundColor: 'transparent', border: 'none' }}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                fontSize: '0.8em',
+              }}
             >
               <div className='text-truncate'>
                 <User id={member.user} />

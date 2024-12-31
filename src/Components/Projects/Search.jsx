@@ -26,6 +26,7 @@ const Search = () => {
               type='text'
               placeholder='Search...'
               aria-label='Search'
+              className='custom-modal'
             />
           </InputGroup>
         </Nav.Item>

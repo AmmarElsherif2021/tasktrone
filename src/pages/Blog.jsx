@@ -38,7 +38,12 @@ export function Blog() {
   return (
     <Card
       className='h-100 shadow-sm '
-      style={{ maxHeight: '97vh', overflowY: 'scroll', paddingLeft: '1rem' }}
+      style={{
+        maxHeight: '97vh',
+        overflowY: 'scroll',
+        paddingLeft: '1rem',
+        borderStyle: 'none',
+      }}
     >
       <Card.Body>
         <Container fluid>
