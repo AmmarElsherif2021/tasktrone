@@ -3,8 +3,8 @@ import { useMutation } from '@tanstack/react-query'
 import { useNavigate, Link } from 'react-router-dom'
 import { signup } from '../API/users'
 import { Form, Alert, Row, Col, Container, Button } from 'react-bootstrap'
+import ImageUpload from '../Components/User/ImageUpload'
 
-// Define teams and roles from the schema
 const teams = [
   'Design Team',
   'Manufacturing Team',
@@ -37,10 +37,24 @@ export function Signup() {
   const [email, setEmail] = useState('')
   const [team, setTeam] = useState('')
   const [role, setRole] = useState('')
+  const [profileImage, setProfileImage] = useState(null)
   const navigate = useNavigate()
 
   const signupMutation = useMutation({
-    mutationFn: () => signup({ username, password, email, team, role }),
+    mutationFn: () => {
+      const formData = new FormData()
+      formData.append('username', username)
+      formData.append('password', password)
+      formData.append('email', email)
+      formData.append('team', team)
+      formData.append('role', role)
+      if (profileImage) {
+        formData.append('profileImage', profileImage)
+      } else {
+        formData.append('profileImage', {})
+      }
+      return signup(formData)
+    },
     onSuccess: () => navigate('/login'),
     onError: () => alert('Failed to sign up! Please check your information.'),
   })
@@ -67,6 +81,8 @@ export function Signup() {
           <Col xs={12}>
             <h2 className='mb-4 text-center'>Sign Up</h2>
             <Form onSubmit={handleSubmit}>
+              <ImageUpload onImageSelect={setProfileImage} previewUrl={null} />
+
               <Form.Group
                 controlId='create-username'
                 className='mb-3'
@@ -118,7 +134,7 @@ export function Signup() {
                   value={team}
                   onChange={(e) => {
                     setTeam(e.target.value)
-                    setRole('') // Reset role when team changes
+                    setRole('')
                   }}
                   required
                 >

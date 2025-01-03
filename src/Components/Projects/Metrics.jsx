@@ -30,16 +30,16 @@ const COMMON_STYLES = {
     //paddingBottom: '1rem',
   },
   card: {
-    borderWidth: '3px',
-    borderColor: '#000',
+    borderWidth: '4px',
+    borderColor: '#000', //#729B87',
+    backgroundColor: '#141911', //'#E1F9ED',
     maxWidth: '7rem',
     minWidth: '6.5rem',
-    height: '13rem',
+    height: '11rem',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'space-evenly',
-    backgroundColor: '#fff',
     paddingLeft: '2rem',
     paddingRight: '2rem',
   },
@@ -64,15 +64,31 @@ const COMMON_STYLES = {
   wipInput: {
     borderWidth: '2px',
     borderColor: '#000',
-    width: '4rem',
+    width: '3rem',
     height: '2rem',
     textAlign: 'center',
+    backgroundColor: '#fff',
+    padding: 0,
+    marginRight: '1px',
+  },
+  wipBtn: {
     backgroundColor: 'transparent',
+    borderRadius: '0.5rem',
+    //borderColor: '#000',
+    borderWidth: '2px',
+    width: '1.5rem',
+    height: '2rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 }
 
 const WipControl = ({ value, onChange, onSubmit }) => (
-  <div className='d-flex flex-column align-items-center'>
+  <div
+    className='d-flex flex-row align-items-center pt-2'
+    style={{ height: '2.5rem', width: '4.5rem' }}
+  >
     <Form.Control
       type='number'
       value={value}
@@ -83,19 +99,8 @@ const WipControl = ({ value, onChange, onSubmit }) => (
     />
     <button
       onClick={onSubmit}
-      className='btn p-1'
-      style={{
-        backgroundColor: '#000',
-        borderRadius: '0.5rem',
-        borderColor: '#000',
-        color: '#fff',
-        borderWidth: '2px',
-        width: '2rem',
-        height: '2rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      className='btn pb-3'
+      style={COMMON_STYLES.wipBtn}
     >
       <img
         src={updateIcon}
@@ -212,7 +217,7 @@ const MetricsCard = ({
               backgroundColor: '#000',
               borderRadius: '0.6rem',
             }}
-            className='h3 mb-4'
+            className='h3 mb-1'
           >
             {value}
           </Card.Text>

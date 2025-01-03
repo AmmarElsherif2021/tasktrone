@@ -1,8 +1,7 @@
-export const signup = async ({ username, password, email, team, role }) => {
+export const signup = async (formData) => {
   const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/signup`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password, email, team, role }),
+    body: formData,
   })
   if (!res.ok) throw new Error('failed to sign up')
   return await res.json()
@@ -47,4 +46,20 @@ export const getAllUsers = async () => {
 
   console.error('Unexpected users data format:', data)
   return []
+}
+//Get user profile image
+export const getUserProfileImage = async (userId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/users/${userId}/profile-image`,
+    )
+    if (!response.ok) {
+      throw new Error('failed to fetch profile image')
+    }
+    const avatarData = await response.blob()
+    return avatarData
+  } catch (error) {
+    console.error(`Failed to fetch profile image for user ${userId}:`, error)
+    throw error
+  }
 }

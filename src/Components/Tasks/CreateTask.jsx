@@ -18,6 +18,7 @@ import { createTask, uploadTaskAttachment } from '../../API/tasks'
 import { useAuth } from '../../contexts/AuthContext'
 import createTaskIcon from '../../assets/create-task.svg'
 import { useProject } from '../../contexts/ProjectContext'
+import IconButton from '../../Ui/IconButton'
 
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 Bytes'
@@ -200,28 +201,14 @@ export function CreateTask() {
 
   return (
     <div className='mx-1'>
-      <Button
-        variant='none'
-        size='lg'
-        className='phase-button'
-        style={{
-          borderWidth: '2px',
-          borderColor: '#000',
-          borderRadius: '2rem',
-          backgroundColor: '#5EE5AD',
-        }}
+      <IconButton
+        src={createTaskIcon}
+        alt='Create Task'
         onClick={() => setShow(true)}
-      >
-        <img
-          src={createTaskIcon}
-          width={25}
-          alt='Create Task'
-          className='phase-button-icon'
-        />
-        <span className='phase-button-text' style={{ color: '#000' }}>
-          <strong>Create Task</strong>
-        </span>
-      </Button>
+        className=''
+        iconWidthREM={7}
+        color='#000'
+      />
 
       <Modal show={show} onHide={() => setShow(false)} size='lg'>
         <Modal.Header

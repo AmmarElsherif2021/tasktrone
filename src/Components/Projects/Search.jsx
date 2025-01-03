@@ -26,7 +26,10 @@ const Search = () => {
               type='text'
               placeholder='Search...'
               aria-label='Search'
-              className='custom-modal'
+              style={{
+                borderColor: '#729B87',
+                borderWidth: '2.5px',
+              }}
             />
           </InputGroup>
         </Nav.Item>

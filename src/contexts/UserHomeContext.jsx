@@ -66,7 +66,7 @@ export const UserHomeProvider = ({ children }) => {
     if (Object.keys(current).length > 0) {
       setCurrentUser(current)
       console.log(
-        `--------------------------------currentUser ${JSON.stringify(
+        `-------=============------$$$$$$$----------===================---------currentUser ${JSON.stringify(
           currentUser,
         )}`,
       )

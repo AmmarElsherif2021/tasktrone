@@ -2,6 +2,7 @@ import { Dropdown } from 'react-bootstrap'
 import refreshProjectIcon from '../../assets/refresh-icon.svg'
 import IconButton from '../../Ui/IconButton'
 import refreshDashboard from '../../assets/refreshDash.svg'
+import refreshProject from '../../assets/refreshProject.svg'
 import syncIcon from '../../assets/sync.svg'
 import { useProject } from '../../contexts/ProjectContext.jsx'
 import { useState } from 'react'
@@ -17,8 +18,15 @@ const RefreshProject = () => {
     flexDirection: 'column',
     alignItems: 'center',
     width: '8rem',
-    padding: '1rem',
-    fontSize: '0.7em',
+    minWidth: '6rem',
+    maxWidth: '14rem',
+
+    fontSize: '0.9em',
+    marginTop: '1rem',
+
+    borderColor: '#729B87',
+    backgroundColor: '#E1F9ED',
+    borderWidth: '3px',
   }
 
   const handleRefreshTasks = () => {
@@ -29,7 +37,7 @@ const RefreshProject = () => {
   return (
     <Dropdown
       id='dropdown-basic-button'
-      className='custom-modal h-100'
+      className=' h-100'
       show={isOpen}
       onToggle={handleToggle}
     >
@@ -44,27 +52,27 @@ const RefreshProject = () => {
       />
       {isOpen && (
         <Dropdown.Menu
-          className='custom-modal flex-column align-center pl-3'
+          className=' flex-column align-center pl-3'
           style={dropStyle}
         >
           <IconButton
-            src={syncIcon}
-            alt='Refresh Project Tasks'
-            iconWidthREM={6}
+            src={refreshProject}
+            alt='Refresh Tasks'
+            iconWidthREM={8}
             className='ml-1 my-1 h-100'
             onClick={handleRefreshTasks}
           />
           <IconButton
             src={refreshDashboard}
-            alt='Refresh Project Dashboard'
-            iconWidthREM={6}
+            alt='Refresh Dashboard'
+            iconWidthREM={8}
             className='ml-1 my-1 h-100'
             onClick={() => setIsOpen(false)}
           />
           <IconButton
             src={syncIcon}
             alt='Full Sync'
-            iconWidthREM={6}
+            iconWidthREM={8}
             className='ml-1 my-1 h-100'
             onClick={() => setIsOpen(false)}
           />

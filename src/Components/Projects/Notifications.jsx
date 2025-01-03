@@ -14,17 +14,21 @@ const Notifications = () => {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    width: '8rem',
-    padding: '1rem',
+    width: '7rem',
+    minWidth: '6rem',
+    maxWidth: '8rem',
+    paddingLeft: '2rem',
     fontSize: '0.7em',
+
+    marginTop: '1rem',
+    marginLeft: '0.5rem',
+    borderColor: '#729B87',
+    backgroundColor: '#E1F9ED',
+    borderWidth: '3px',
   }
 
   return (
-    <Dropdown
-      className='custom-modal h-100'
-      show={isOpen}
-      onToggle={handleToggle}
-    >
+    <Dropdown className=' h-100' show={isOpen} onToggle={handleToggle}>
       <Dropdown.Toggle
         as={IconButton}
         src={notificationIcon}
@@ -36,7 +40,7 @@ const Notifications = () => {
       />
       {isOpen && (
         <Dropdown.Menu
-          className='custom-modal flex-column align-center pl-3'
+          className=' flex-column align-center pl-0'
           style={dropStyle}
         >
           <IconButton

@@ -37,12 +37,13 @@ export function Blog() {
 
   return (
     <Card
-      className='h-100 shadow-sm '
+      className='h-100 '
       style={{
         maxHeight: '97vh',
         overflowY: 'scroll',
         paddingLeft: '1rem',
         borderStyle: 'none',
+        backgroundColor: '#EEFBF4',
       }}
     >
       <Card.Body>

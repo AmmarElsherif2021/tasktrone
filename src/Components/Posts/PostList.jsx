@@ -5,7 +5,7 @@ import { Post } from './Post'
 
 export function PostList({ posts = [] }) {
   return (
-    <Stack gap={3}>
+    <Stack style={{ backgroundColor: 'none' }} gap={3}>
       {posts.map((post) => (
         <Fragment key={post._id}>
           <Post {...post} />

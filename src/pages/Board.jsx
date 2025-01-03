@@ -130,11 +130,7 @@ export function Board() {
       <Card className='sm' style={{ borderStyle: 'none' }}>
         <Card.Body>
           {isTasksLoading && !currentTasks?.length ? (
-            <div className='text-center py-5'>
-              <Spinner animation='border' role='status' variant='primary'>
-                <span className='visually-hidden'>Loading tasks...</span>
-              </Spinner>
-            </div>
+            <BoardSkeleton />
           ) : (
             <Container fluid className='py-0 my-0'>
               <Row>

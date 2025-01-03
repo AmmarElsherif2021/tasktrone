@@ -28,6 +28,7 @@ import charts from '../assets/charts.svg'
 import alert from '../assets/alert.svg'
 import clipboardCheck from '../assets/clipboardCheck.svg'
 import addNew from '../assets/addNew.svg'
+import { ProfileImage } from '../Components/User/ProfileImage'
 const METRICS_DATA = [
   {
     icon: clock,
@@ -104,7 +105,7 @@ const CardHeader = ({ icon, title, children }) => (
 )
 
 export function Dashboard() {
-  const { userProjects } = useUserHome()
+  const { userProjects, currentUser } = useUserHome()
   const [token] = useAuth()
   const [userData, setUserData] = useState(null)
   const [showCreateProject, setShowCreateProject] = useState(false)
@@ -222,7 +223,10 @@ export function Dashboard() {
               <CardHeader icon={userInfo} title='Personal Information' />
               <Card.Body>
                 {userData ? (
-                  <User id={userData.userId} explicit={true} />
+                  <>
+                    <ProfileImage user={currentUser} />
+                    <User id={userData.userId} explicit={true} />
+                  </>
                 ) : (
                   <Alert
                     variant='warning'

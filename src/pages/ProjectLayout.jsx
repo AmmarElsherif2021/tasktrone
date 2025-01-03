@@ -34,9 +34,9 @@ export const ProjectLayout = () => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-around',
-            backgroundColor: '#ffffff',
-            borderRightWidth: !showBlog && '3px',
-            borderRightColor: !showBlog && '#000',
+            backgroundColor: '#EEFBF4',
+            borderRightWidth: !showBlog && '4px',
+            borderRightColor: !showBlog && '#729B87',
             borderRightStyle: !showBlog && 'solid',
           }}
         >
@@ -62,9 +62,9 @@ export const ProjectLayout = () => {
             left: '5rem',
             overflowY: 'auto',
             zIndex: 999,
-            backgroundColor: '#ffffff',
-            borderRightWidth: '3px',
-            borderRightColor: '#000',
+            backgroundColor: '#EEFBF4',
+            borderRightWidth: '4px',
+            borderRightColor: '#729B87',
             borderRightStyle: 'solid',
           }}
         >

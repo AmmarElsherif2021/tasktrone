@@ -1,12 +1,23 @@
 import PropTypes from 'prop-types'
-import { Button, Card, Image } from 'react-bootstrap'
+import { Button, Card } from 'react-bootstrap'
 import { User } from '../User/User'
-import { useState } from 'react'
-import userIcon from '../../assets/person-icon.svg'
+import { useEffect, useState } from 'react'
+//import userIcon from '../../assets/person-icon.svg'
 import StaticRoundBtn from '../../Ui/StaticRoundBtn'
+
+import { useProject } from '../../contexts/ProjectContext'
+import { ProfileImage } from '../User/ProfileImage'
 
 export function Post({ title, contents, author, taskId = '' }) {
   const [explicitUserInfo, setExplicitUserInfo] = useState(false)
+  const { currentProjectMembers } = useProject()
+  const [currentUserData, setCurrentUserData] = useState(null)
+  useEffect(() => {
+    if (currentProjectMembers && currentProjectMembers.length) {
+      const user = currentProjectMembers.find((x) => x.id === author)
+      setCurrentUserData(user)
+    }
+  }, [])
   return (
     <Card
       className='mb-3 shadow-sm'
@@ -21,17 +32,23 @@ export function Post({ title, contents, author, taskId = '' }) {
             display: 'flex',
             flexDirection: 'row',
             fontSize: explicitUserInfo ? '0.6em' : '1em',
-
-            //borderColor: 'none',
+            //borderTopLeftRadius: '0.5rem',
+            //borderBottomLeftRadius: '0.5rem',
+            borderBottomLeftRadius: 0, //'0.5rem',
+            borderBottomRightRadius: 0, // '0.5rem',
+            borderBottomWidth: '2px',
+            borderBottomColor: '#729B87',
             //borderWidth: '1px',
+            paddingLeft: '0.5rem',
+            //backgroundColor: '#99FACA',
           }}
         >
-          <Image
-            src={userIcon}
-            alt='user'
-            roundedCircle
-            className='me-2'
-            style={{ width: '3rem', backgroundColor: '#FFDE4C' }}
+          <ProfileImage
+            user={currentUserData}
+            size={4}
+            style={{
+              marginRight: '1rem',
+            }}
           />
           <User id={author} explicit={explicitUserInfo} />
         </Button>
@@ -40,7 +57,7 @@ export function Post({ title, contents, author, taskId = '' }) {
         <Card.Title>
           <h2>{title}</h2>
         </Card.Title>
-        <hr />
+        <hr style={{ borderWidth: '2px', color: '#729B87' }} />
         <Card.Text>{contents}</Card.Text>
       </Card.Body>
       {taskId ? (
@@ -54,6 +71,7 @@ export function Post({ title, contents, author, taskId = '' }) {
           handleClick={() => {}}
           alt={'public'}
           backgroundColor={'#99FACA'}
+          color='#729B87'
         />
       )}
     </Card>

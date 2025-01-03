@@ -13,17 +13,17 @@ const StaticRoundBtn = ({
       variant='none'
       size='sm'
       style={{
-        borderWidth: '2px',
+        borderWidth: '1px',
         borderColor: color, //'#ad0000',
         borderRadius: '2rem',
-        maxWidth: '7rem',
+        maxWidth: '6rem',
         margin: '0.4rem',
         backgroundColor: backgroundColor,
       }}
       onClick={handleClick}
     >
       {src && <img src={src} width={2} alt={alt} />}
-      <span style={{ color: color }}>
+      <span style={{ color: '#000' }}>
         <small>{alt}</small>
       </span>
     </Button>
