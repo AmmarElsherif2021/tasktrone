@@ -151,12 +151,18 @@ export function Board() {
       <Card className='sm' style={BOARD_STYLES.container}>
         <Card.Body>
           <Container fluid className='py-0 my-0'>
-            <Row>
+            <Row
+              style={{
+                borderBottomColor: '#a11',
+                borderBottomStyle: 'dashed',
+                paddingBottom: '10px',
+              }}
+            >
               <Toolbar project={currentProject} />
-              <Col>
+              <Col lg={4}>
                 <Metrics />
               </Col>
-              <Col>
+              <Col lg={8}>
                 <Target />
               </Col>
             </Row>

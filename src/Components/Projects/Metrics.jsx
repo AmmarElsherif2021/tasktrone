@@ -1,20 +1,11 @@
 /* eslint-disable react/prop-types */
 
-import {
-  Container,
-  Card,
-  Form,
-  OverlayTrigger,
-  Tooltip,
-  Row,
-  Col,
-} from 'react-bootstrap'
+import { Card, Form, OverlayTrigger, Tooltip, Row, Col } from 'react-bootstrap'
 import { useProject } from '../../contexts/ProjectContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateProject } from '../../API/projects'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-//import tasksIcon from '../../assets/tasks.svg'
 import inProgressIcon from '../../assets/inProgress.svg'
 import cycleTimeIcon from '../../assets/cycleTime.svg'
 import leadTimeIcon from '../../assets/leadTime.svg'
@@ -22,93 +13,84 @@ import doneIcon from '../../assets/done.svg'
 import flowIcon from '../../assets/flow.svg'
 import updateIcon from '../../assets/update.svg'
 import wipIcon from '../../assets/wip.svg'
+
 const COMMON_STYLES = {
   nav: {
-    borderBottomStyle: 'dashed',
-    borderBottomColor: '#EC4F50',
-    borderWidth: '2px',
-    //paddingBottom: '1rem',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: '#adf222',
-    padding: 0,
-  },
-  card: {
-    borderWidth: '2px',
-    borderColor: '#000', //#729B87',
-    backgroundColor: '#101010', //'#E1F9ED',
-    width: '5rem',
-    height: '11rem',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-    paddingLeft: '1rem',
-    paddingRight: '1rem',
-    margin: '5px',
-  },
-  iconContainer: {
-    width: '3rem',
-    height: '3rem',
     borderColor: '#000',
     borderWidth: '2px',
-    borderRadius: '50%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#fff',
+    height: '80vh',
+  },
+  metricItem: {
+    border: '2px solid #000',
+    borderRadius: '8px',
+    padding: '0.5rem',
+    textAlign: 'center',
+    //backgroundColor: '#fff',
+    fontColor: '#000',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    cursor: 'pointer',
+    margin: '0.25rem',
+    height: '100%',
+    minWidth: '6rem',
+  },
+  metricItemHover: {
+    transform: 'scale(1.05)',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
   icon: {
     width: '2rem',
     height: '2rem',
+    marginBottom: '0.5rem',
   },
   title: {
-    fontSize: '0.5em',
-    width: '3rem',
-    minHeight: '1rem',
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: '0.25rem',
   },
-  wipInput: {
-    borderWidth: '1.5px',
-    borderColor: '#000',
-    width: '2.5rem',
-    height: '2rem',
-    textAlign: 'center',
-    backgroundColor: '#fff',
-    padding: 0,
-    marginRight: '1px',
+  value: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    color: '#000',
   },
-  wipBtn: {
-    backgroundColor: 'transparent',
-    borderRadius: '0.5rem',
-    //borderColor: '#000',
-    borderWidth: '2px',
-    width: '2rem',
-    height: '2rem',
+  wipControl: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: '0.25rem',
+    marginTop: '0.5rem',
+  },
+  wipInput: {
+    width: '3rem',
+    textAlign: 'center',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    padding: '0.25rem',
+  },
+  wipButton: {
+    backgroundColor: '#000',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '0.25rem 0.5rem',
+    cursor: 'pointer',
   },
 }
 
 const WipControl = ({ value, onChange, onSubmit }) => (
-  <div
-    className='d-flex flex-row align-items-center pt-2'
-    style={{ height: '2.5rem', width: '4.5rem' }}
-  >
+  <div style={COMMON_STYLES.wipControl}>
     <Form.Control
       type='number'
       value={value}
       onChange={(e) => onChange(e.target.value)}
       min={0}
       style={COMMON_STYLES.wipInput}
-      className='mb-2'
     />
-    <button
-      onClick={onSubmit}
-      className='btn pb-3'
-      style={COMMON_STYLES.wipBtn}
-    >
+    <button onClick={onSubmit} style={COMMON_STYLES.wipButton}>
       <img
         src={updateIcon}
         alt='Update WIP'
@@ -125,31 +107,8 @@ const METRICS_CONFIG = [
     getValue: (project) => project?.wip || 0,
     icon: wipIcon,
     tooltip: 'Set Work in Progress Limit',
-    color: '#DE2C2D',
-    backgroundColor: '#F83C3D',
+    color: '#ee6352', // Pale Red
     customContent: WipControl,
-  },
-  {
-    id: 'inProgress',
-    title: 'In Progress',
-    getValue: (project) =>
-      project?.tasks?.filter((t) => t.status === 'inProgress')?.length || 0,
-    icon: inProgressIcon,
-    tooltip: 'Current tasks in progress',
-    color: '#49DB78',
-    backgroundColor: '#49DB78',
-  },
-  {
-    id: 'cycleTime',
-    title: 'Cycle Time',
-    getValue: (_, metrics) =>
-      !isNaN(metrics.currentAvgCycleTime)
-        ? `${metrics.currentAvgCycleTime.toFixed(1)}d`
-        : '0d',
-    icon: cycleTimeIcon,
-    tooltip: "Average time from 'In Progress' to 'Done'",
-    color: '#04EBBD',
-    backgroundColor: '#04EBBD',
   },
   {
     id: 'leadTime',
@@ -160,9 +119,29 @@ const METRICS_CONFIG = [
         : '0d',
     icon: leadTimeIcon,
     tooltip: 'Average time from task creation to completion',
-    color: '#FE9900',
-    backgroundColor: '#FE9900',
+    color: '#f7b801',
   },
+  {
+    id: 'inProgress',
+    title: 'In Progress',
+    getValue: (project) =>
+      project?.tasks?.filter((t) => t.status === 'inProgress')?.length || 0,
+    icon: inProgressIcon,
+    tooltip: 'Current tasks in progress',
+    color: '#12EAA3',
+  },
+  {
+    id: 'cycleTime',
+    title: 'Cycle Time',
+    getValue: (_, metrics) =>
+      !isNaN(metrics.currentAvgCycleTime)
+        ? `${metrics.currentAvgCycleTime.toFixed(1)}d`
+        : '0d',
+    icon: cycleTimeIcon,
+    tooltip: "Average time from 'In Progress' to 'Done'",
+    color: '#3fa7d6',
+  },
+
   {
     id: 'throughput',
     title: 'Throughput',
@@ -173,8 +152,7 @@ const METRICS_CONFIG = [
     },
     icon: doneIcon,
     tooltip: 'Average number of tasks completed per day',
-    color: '#49DB78',
-    backgroundColor: '#49DB78',
+    color: '#12EAA3',
   },
   {
     id: 'flowEfficiency',
@@ -188,51 +166,9 @@ const METRICS_CONFIG = [
     },
     icon: flowIcon,
     tooltip: 'Ratio of active work time to total lead time',
-    color: '#DE2C2D',
-    backgroundColor: '#F83C3D',
+    color: '#f35b04',
   },
 ]
-
-const MetricsCard = ({
-  title,
-  value,
-  src,
-  color,
-  backgroundColor,
-  tooltip,
-  CustomContent,
-  customProps,
-}) => (
-  <OverlayTrigger placement='top' overlay={<Tooltip>{tooltip}</Tooltip>}>
-    <Card className='text-center p-1 mb-4 mx-4' style={COMMON_STYLES.card}>
-      <Card.Body>
-        <div
-          className='d-flex justify-content-center align-items-center mb-1'
-          style={{ ...COMMON_STYLES.iconContainer, backgroundColor }}
-        >
-          <img src={src} alt={title} style={COMMON_STYLES.icon} />
-        </div>
-        <Card.Title className='mb-1'>
-          <h5 style={{ color, ...COMMON_STYLES.title }}>{title}</h5>
-        </Card.Title>
-        {CustomContent ? (
-          <CustomContent {...customProps} />
-        ) : (
-          <Card.Text
-            style={{
-              color: color !== '#000' ? color : '#aaa',
-              backgroundColor: '#000',
-              borderRadius: '0.6rem',
-            }}
-            className='h3 mb-1'
-          >
-            {value}
-          </Card.Text>
-        )}
-      </Card.Body>
-    </Card>
-  </OverlayTrigger>
-)
 
 export const Metrics = () => {
   const queryClient = useQueryClient()
@@ -268,47 +204,74 @@ export const Metrics = () => {
   const metrics = { currentAvgCycleTime, currentAvgLeadTime }
 
   return (
-    <Container className='w-100' style={COMMON_STYLES.nav}>
-      <Row className='mb-4'>
-        <Col>
-          <h4 className='font-weight-bold'>Project Metrics</h4>
-
-          <Row>
-            {' '}
-            <Col>
-              <strong>
-                <strong>Total tasks: </strong>
-                {currentProject?.tasks?.length || 0}
-              </strong>
+    <Card style={COMMON_STYLES.nav}>
+      <Card.Header className='custom-modal w-100'>
+        <Card.Title>Project Metrics</Card.Title>
+      </Card.Header>
+      <Card.Body>
+        <Row className='d-flex flex-wrap justify-content-center'>
+          {METRICS_CONFIG.map((metric) => (
+            <Col
+              key={metric.id}
+              md={4} // 3 columns on medium screens
+              sm={6} // 2 columns on small screens
+              xs={6} // 2 columns on extra small screens
+              className='mb-3 d-flex align-items-stretch' // Ensure all items stretch to the same height
+            >
+              <OverlayTrigger
+                placement='top'
+                overlay={<Tooltip>{metric.tooltip}</Tooltip>}
+              >
+                <div
+                  style={{
+                    ...COMMON_STYLES.metricItem,
+                    backgroundColor: metric.color,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform =
+                      COMMON_STYLES.metricItemHover.transform
+                    e.currentTarget.style.boxShadow =
+                      COMMON_STYLES.metricItemHover.boxShadow
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'none'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }}
+                >
+                  <img
+                    src={metric.icon}
+                    alt={metric.title}
+                    style={COMMON_STYLES.icon}
+                  />
+                  <div style={COMMON_STYLES.title}>{metric.title}</div>
+                  {metric.customContent ? (
+                    <metric.customContent
+                      value={wipLimit}
+                      onChange={setWipLimit}
+                      onSubmit={handleWipSubmit}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        ...COMMON_STYLES.value,
+                      }}
+                    >
+                      {metric.getValue(currentProject, metrics)}
+                    </div>
+                  )}
+                </div>
+              </OverlayTrigger>
             </Col>
-          </Row>
-        </Col>
-      </Row>
-      <Row className='w-100'>
-        {METRICS_CONFIG.map((metric) => (
-          <Col key={metric.id} md={3} lg={2} sm={4} xs={6}>
-            <MetricsCard
-              title={metric.title}
-              value={metric.getValue(currentProject, metrics)}
-              tooltip={metric.tooltip}
-              src={metric.icon}
-              color={metric.color}
-              backgroundColor={metric.backgroundColor}
-              CustomContent={metric.customContent}
-              customProps={
-                metric.id === 'wipLimit'
-                  ? {
-                      value: wipLimit,
-                      onChange: setWipLimit,
-                      onSubmit: handleWipSubmit,
-                    }
-                  : undefined
-              }
-            />
-          </Col>
-        ))}
-      </Row>
-    </Container>
+          ))}
+        </Row>
+      </Card.Body>
+      <Card.Footer className='custom-modal w-100'>
+        <p>
+          <strong>Total tasks: </strong>
+          {currentProject?.tasks?.length || 0}
+        </p>
+      </Card.Footer>
+    </Card>
   )
 }
 
