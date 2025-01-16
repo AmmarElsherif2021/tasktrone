@@ -1,0 +1,321 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+/* Global font family for the entire project */
+:root {
+  --font-family-primary: 'Roboto', sans-serif;
+  --font-weight-thin: 100;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+  --primary-color: #186545;
+  --text-color: rgba(16, 16, 16, 0.87);
+  --background-color: #eeeeee;
+}
+
+body {
+  font-family: var(--font-family-primary), Inter, system-ui, Avenir, Helvetica,
+    Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: var(--font-weight-regular);
+  color-scheme: light dark;
+  color: var(--text-color);
+  background-color: #fff;
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Style the scrollbar */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #000 transparent; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+  background: #f4f4f4; /* Color of the scrollbar track */
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 6px; /* Roundness of the scrollbar thumb */
+  border: 3px solid #f4f4f4; /* Padding around scrollbar thumb */
+}
+
+body::-webkit-scrollbar-thumb:horizontal {
+  background-color: #ccc; /* Color of the horizontal scrollbar thumb */
+}
+
+/* Typography classes */
+.roboto-thin {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-thin);
+}
+
+.roboto-light {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.roboto-regular {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-regular);
+}
+
+.roboto-medium {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.roboto-bold {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.roboto-black {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-black);
+}
+
+.roboto-thin-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-thin);
+  font-style: italic;
+}
+
+.roboto-light-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-light);
+  font-style: italic;
+}
+
+.roboto-regular-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-regular);
+  font-style: italic;
+}
+
+.roboto-medium-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-medium);
+  font-style: italic;
+}
+
+.roboto-bold-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-bold);
+  font-style: italic;
+}
+
+.roboto-black-italic {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-black);
+  font-style: italic;
+}
+
+/* Other global styles */
+a {
+  font-weight: 500;
+  color: #44886f;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #ffffff;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #000;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* custom.css */
+.btn-custom {
+  background-color: #000000;
+  border-color: #393939;
+  color: white;
+}
+.btn-icon {
+  background-color: #000000;
+  padding: 0.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-custom:hover {
+  background-color: '#ffffff';
+  color: black;
+}
+.phase-button {
+  color: #000000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition:
+    color ease,
+    max-width 0.3s ease,
+    opacity 0.3s ease;
+  min-width: 40px;
+  overflow: hidden;
+  border-width: 2px;
+}
+
+.phase-button-text {
+  max-width: 0;
+  opacity: 0;
+  white-space: nowrap;
+  transition:
+    max-width 0.3s ease,
+    opacity 0.3s ease;
+  font-size: 0.6em;
+}
+
+.phase-button:hover .phase-button-text {
+  max-width: 200px;
+  opacity: 1;
+}
+
+.phase-button:hover {
+}
+
+.phase-button-icon {
+  flex-shrink: 0;
+}
+.split-pane {
+  display: flex;
+}
+.pane-left,
+.pane-right {
+  overflow: auto;
+}
+
+/* icon button*/
+.icon-button {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  background: none;
+  padding: 0;
+}
+.icon-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+.icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7rem;
+  height: 100%;
+  border: none;
+  background-color: none;
+}
+
+.icon-image {
+  height: 2rem;
+  min-width: 1rem;
+  min-height: 1rem;
+  max-width: 3rem;
+  max-height: 3rem;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.icon-text {
+  font-size: 0.8em;
+  position: absolute;
+  opacity: 0;
+  transform: translatex(30px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  white-space: nowrap;
+  border: none;
+  background: none;
+}
+
+.icon-button:hover .icon-image {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.icon-button:hover .icon-text {
+  opacity: 1;
+  transform: translateY(0);
+}
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #575757;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+/* customStyles.css */
+.btn-primary {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: #fff !important;
+  color: #000 !important;
+  border-color: #000 !important;
+  border-width: 2px !important;
+}
+.primary {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+}
+.custom-modal {
+  color: #000 !important;
+  border-color: #404c46 !important;
+  border-width: 2px !important;
+}
