@@ -9,7 +9,7 @@ import { Alert } from 'react-bootstrap'
 function Three({
   modelPath = 'src/UI/gear.stl', // Default STL file path
   width = '100%',
-  height = '500px',
+  height = '315px',
 }) {
   const containerRef = useRef(null)
   const rendererRef = useRef(null)
@@ -36,7 +36,7 @@ function Three({
 
     // Initialize scene
     sceneRef.current = new THREE.Scene()
-    sceneRef.current.background = new THREE.Color(0xf0f0f0) // Light gray background
+    sceneRef.current.background = new THREE.Color(0x000) // Light gray background
 
     // Initialize camera
     const container = containerRef.current

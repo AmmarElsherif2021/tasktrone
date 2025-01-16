@@ -20,7 +20,7 @@ const THEME = {
 const COMMON_STYLES = {
   navbar: {
     borderStyle: 'solid',
-    borderColor: THEME.colors.primary,
+    borderColor: '#000', //THEME.colors.primary,
     backgroundColor: THEME.colors.muted,
     borderWidth: '2px',
     padding: '1rem',
