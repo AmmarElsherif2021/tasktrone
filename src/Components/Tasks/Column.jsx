@@ -32,6 +32,7 @@ export const Column = ({ tasks }) => {
             taskId={task._id}
             title={task.title}
             author={task.author}
+            taskType={task.taskType}
             leadTime={task.leadTime}
             startDate={task.startDate}
             dueDate={task.dueDate}

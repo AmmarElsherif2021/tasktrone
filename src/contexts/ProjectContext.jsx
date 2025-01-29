@@ -69,6 +69,7 @@ export const ProjectProvider = ({ children }) => {
         project: task.project,
         title: task.title,
         author: task.author,
+        taskType: task.taskType,
         leadTime: task.leadTime,
         cycleTime: task.cycleTime,
         startDate: task?.startDate,

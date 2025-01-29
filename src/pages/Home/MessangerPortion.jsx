@@ -9,8 +9,8 @@ import {
   Alert,
   ListGroup,
 } from 'react-bootstrap'
-import { getAllUsers } from '../API/users'
-import flowIcon from '../assets/flow.svg'
+import { getAllUsers } from '../../API/users'
+import flowIcon from '../../assets/flow.svg'
 
 export default function MessangerPortion() {
   const [showNotifyModal, setShowNotifyModal] = useState(false)

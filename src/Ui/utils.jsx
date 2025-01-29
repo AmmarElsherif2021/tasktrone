@@ -32,57 +32,50 @@ export function invertHex(hex) {
   )}`
 }
 
-// Helper function for decimal to hex conversion
+// Helper function to convert decimal to 2-digit hex
 function decimalToHex(decimal) {
-  let hex = decimal.toString(16)
-  return hex.length === 1 ? '0' + hex : hex // Ensure two characters
+  const hex = decimal.toString(16) // Convert to hex
+  return hex.padStart(2, '0') // Ensure 2 digits
 }
 
-// Generate hex color based on ID and phase
-export function getHexBackground(id, phase = 'story', hoverDecrease = 0) {
-  const intesityInt = {
-    story: 160 - hoverDecrease,
-    inProgress: 140 - hoverDecrease,
-    reviewing: 100 - hoverDecrease,
-    done: 95 - hoverDecrease,
+// Helper function to generate a number from a string's ASCII values
+// function stringToAscii(str) {
+//   return [...str].reduce((acc, char) => acc + char.charCodeAt(0), 0) // Sum ASCII values
+// }
+
+// Generate a hex color based on ID, type, and phase
+export function getHexBackground(
+  type = 'default',
+  phase = 'story',
+  hoverInt = 0,
+) {
+  // Intensity values for each phase, increasing with phase progression
+  const intensity = {
+    story: 10 + hoverInt, // Lowest intensity
+    inProgress: 30 + hoverInt, // Medium intensity
+    reviewing: 50 + hoverInt, // Higher intensity
+    done: 70 + hoverInt, // Highest intensity
   }
 
-  // Id to integer
-  const integer = parseInt(id, 16) % 217
-
-  // Random pick R, G, or B
-  let ptr = integer % 3
-  let subPtr = integer % 2
-  let significantInex =
-    ((integer + 140) % intesityInt[phase]) + intesityInt[phase]
-  let color = []
-
-  // Switch to set the color array based on the random pointers
-  switch (ptr) {
-    case 0:
-      color =
-        subPtr === 0
-          ? [255, intesityInt[phase], significantInex]
-          : [255, significantInex, intesityInt[phase]]
-      break
-    case 1:
-      color =
-        subPtr === 0
-          ? [intesityInt[phase], 255, significantInex]
-          : [significantInex, 255, intesityInt[phase]]
-      break
-    case 2:
-      color =
-        subPtr === 0
-          ? [intesityInt[phase], significantInex, 255]
-          : [significantInex, intesityInt[phase], 255]
-      break
+  // Base colors for each type (red, orange, yellow, green, blue, grey)
+  const typeColors = {
+    design: [255, 170, 170], // Red variant
+    production: [255, 185, 100], // Orange variant
+    quality: [255, 230, 130], // Yellow variant
+    maintenance: [160, 240, 160], // Green variant
+    default: [140, 255, 200], // Grey (fallback)
   }
 
-  const hexColor = `#${decimalToHex(color[0])}${decimalToHex(
-    color[1],
-  )}${decimalToHex(color[2])}`
-  return hexColor
+  // Get the base color based on the type
+  const baseColor = typeColors[type] || typeColors.default
+
+  // Adjust the base color based on phase and type
+  const color = baseColor.map((channel) =>
+    channel < 255 ? channel - intensity[phase] : 255,
+  )
+
+  // Convert RGB to hex color
+  return `#${color.map(decimalToHex).join('')}`
 }
 
 // Utility function to calculate lead time

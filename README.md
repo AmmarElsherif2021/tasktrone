@@ -123,30 +123,11 @@ The Kanban tool, Tasktrone, is designed as a web-based application with mobile c
 
 #### Phases in Manufacturing Machine Timeline
 
-| **Phase**                    | **Timeline**         | **Teams Involved**           | **Roles Involved**                 | **Deliverables**                                     | **Possible Events** |
-| ---------------------------- | -------------------- | ---------------------------- | ---------------------------------- | ---------------------------------------------------- | ------------------- |
-| **1. Concept & Design**      | Design Team          | – Design Engineers           | – Concept Designs                  | Initial brainstorming, design sketches, CAD modeling |
-|                              |                      |                              | – CAD Technicians                  | – Design Specifications                              |                     |
-|                              |                      |                              |                                    | – CAD Models                                         |                     |
-| **2. Prototyping**           | Manufacturing Team   | – CNC Programmers            | – Prototypes                       | Building first prototypes, prototype testing         |
-|                              |                      | Quality Control Team         | – Quality Control Inspectors       | – Prototype Testing Reports                          |                     |
-|                              |                      |                              |                                    |                                                      |                     |
-| **3. Production Planning**   | Manufacturing Team   | – Manufacturing Engineers    | – Production Plan                  | Finalizing production plan, creating BOM             |
-|                              |                      | Support Teams                | – Production Planners              | – Bill of Materials (BOM)                            |                     |
-|                              |                      |                              |                                    | – Process Layout                                     |                     |
-| **4. Tooling Setup**         | Manufacturing Team   | – CNC Programmers            | – Tooling and Fixture Requirements | Tooling and fixture setup, trial runs                |
-|                              |                      |                              | – Machinists                       | – Tooling Setup Sheets                               |                     |
-|                              |                      |                              | – Machine Operators                |                                                      |                     |
-| **5. Pilot Production**      | Manufacturing Team   | – Manufacturing Engineers    | – Pilot Run Reports                | Producing initial batch, validating processes        |
-|                              |                      | Quality Control Team         | – Quality Control Inspectors       | – Process Validation                                 |                     |
-|                              |                      |                              | – Production Supervisors           | – Production Workflow                                |                     |
-| **6. Full-Scale Production** | Manufacturing Team   | – Machine Operators          | – Production Output Reports        | Full-scale manufacturing, quality checks             |
-|                              |                      | Quality Control Team         | – Quality Control Inspectors       | – Quality Inspection Reports                         |                     |
-|                              |                      |                              | – Machinists                       |                                                      |                     |
-| **7. Quality Assurance**     | Quality Control Team | – Quality Control Inspectors | – Quality Assurance Reports        | Continuous quality monitoring, audits                |
-|                              |                      |                              | – Metrology Engineers              | – Non-Conformance Reports                            |                     |
-| **8. Maintenance**           | Support Teams        | – Maintenance Technicians    | – Maintenance Logs                 | Regular maintenance, equipment calibration           |
-|                              |                      |                              | – Metrology Engineers              | – Equipment Calibration Records                      |                     |
+| **Phase**               | **Teams Involved** | **Roles Involved** | **Deliverables**        | **File Types**         | **Possible Events**                                  |
+| ----------------------- | ------------------ | ------------------ | ----------------------- | ---------------------- | ---------------------------------------------------- |
+| **1. Concept & Design** | Design Team        | – Design Engineers | – Concept Designs       | `.dwg`, `.stp`, `.pdf` | Initial brainstorming, design sketches, CAD modeling |
+|                         |                    | – CAD Technicians  | – Design Specifications | `.docx`, `.pdf`        |                                                      |
+|                         |                    |                    | – CAD Models            | `.dwg`, `.stp`         |                                                      |
 
 ### 3.2 Kanban Board Organization
 

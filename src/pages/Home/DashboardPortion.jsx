@@ -1,5 +1,5 @@
 import { Card } from 'react-bootstrap'
-import dashboardIcon from '../assets/dashboard-icon.svg' // Replace with your dashboard icon
+import dashboardIcon from '../../assets/dashboard-icon.svg'
 import { useNavigate } from 'react-router-dom'
 export default function DashboardPortion() {
   const navigate = useNavigate()

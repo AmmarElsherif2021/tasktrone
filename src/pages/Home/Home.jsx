@@ -3,10 +3,10 @@ import NewMemberExplorer from './NewMemberExplorer'
 import { Container, Button } from 'react-bootstrap'
 import OldMemberExplorer from './OldMemberExplorer'
 import { Link } from 'react-router-dom'
-import { useUserHome } from '../contexts/UserHomeContext'
-import { useAuth } from '../contexts/AuthContext'
+import { useUserHome } from '../../contexts/UserHomeContext'
+import { useAuth } from '../../contexts/AuthContext'
 import { jwtDecode } from 'jwt-decode'
-import logo from '../assets/logo.svg'
+import logo from '../../assets/logo.svg'
 
 const WelcomeScreen = () => (
   <Container
@@ -55,7 +55,6 @@ const WelcomeScreen = () => (
     </div>
   </Container>
 )
-
 export function Home() {
   const { userProjects } = useUserHome()
   const [token] = useAuth()

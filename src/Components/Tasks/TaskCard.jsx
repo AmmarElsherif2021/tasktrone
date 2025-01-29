@@ -21,6 +21,7 @@ export function TaskCard({
   author,
   leadTime,
   cycleTime,
+  taskType,
   phase,
 }) {
   const [token] = useAuth()
@@ -89,8 +90,8 @@ export function TaskCard({
         className='task-card shadow-sm'
         style={{
           backgroundColor: hover
-            ? getHexBackground(taskId, phase, 30)
-            : getHexBackground(taskId, phase),
+            ? getHexBackground(taskType, phase, 20)
+            : getHexBackground(taskType, phase, 0),
           cursor: 'pointer',
           borderWidth: '2.5px',
           borderColor: '#000',
@@ -278,6 +279,7 @@ TaskCard.propTypes = {
       contentType: PropTypes.string.isRequired,
     }),
   ),
+  taskType: PropTypes.string,
   startDate: PropTypes.string,
   dueDate: PropTypes.string,
   createdAt: PropTypes.string,

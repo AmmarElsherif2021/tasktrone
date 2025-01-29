@@ -51,6 +51,41 @@ const BOARD_STYLES = {
 // Board phases configuration
 const BOARD_PHASES = ['story', 'inProgress', 'reviewing', 'done']
 
+// Helper function to calculate metrics
+const calculateMetrics = (
+  tasks,
+  setCurrentAvgCycleTime,
+  setCurrentAvgLeadTime,
+) => {
+  if (!tasks?.length) return
+
+  const totalCycleTime = tasks.reduce(
+    (acc, task) => acc + (task.cycleTime || 0),
+    0,
+  )
+  const totalLeadTime = tasks.reduce(
+    (acc, task) => acc + (task.leadTime || 0),
+    0,
+  )
+
+  setCurrentAvgCycleTime(tasks.length > 0 ? totalCycleTime / tasks.length : 0)
+  setCurrentAvgLeadTime(tasks.length > 0 ? totalLeadTime / tasks.length : 0)
+}
+
+// Helper function to organize tasks by phase
+const getTasksByPhase = (tasks) => {
+  return tasks?.reduce(
+    (acc, task) => {
+      if (!acc[task.phase]) {
+        acc[task.phase] = []
+      }
+      acc[task.phase].push(task)
+      return acc
+    },
+    BOARD_PHASES.reduce((acc, phase) => ({ ...acc, [phase]: [] }), {}),
+  )
+}
+
 export function Board() {
   const {
     currentProjectId,
@@ -65,44 +100,17 @@ export function Board() {
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [isFirstRender, setIsFirstRender] = useState(true)
 
-  // Calculate metrics helper
-  const calculateMetrics = (tasks) => {
-    if (!tasks?.length) return
-
-    const totalCycleTime = tasks.reduce(
-      (acc, task) => acc + (task.cycleTime || 0),
-      0,
-    )
-    const totalLeadTime = tasks.reduce(
-      (acc, task) => acc + (task.leadTime || 0),
-      0,
-    )
-
-    setCurrentAvgCycleTime(tasks.length > 0 ? totalCycleTime / tasks.length : 0)
-    setCurrentAvgLeadTime(tasks.length > 0 ? totalLeadTime / tasks.length : 0)
-  }
-
-  // Organize tasks by phase
-  const getTasksByPhase = (tasks) => {
-    return tasks?.reduce(
-      (acc, task) => {
-        if (!acc[task.phase]) {
-          acc[task.phase] = []
-        }
-        acc[task.phase].push(task)
-        return acc
-      },
-      BOARD_PHASES.reduce((acc, phase) => ({ ...acc, [phase]: [] }), {}),
-    )
-  }
-
   // Effects
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
 
   useEffect(() => {
-    calculateMetrics(currentTasks)
+    calculateMetrics(
+      currentTasks,
+      setCurrentAvgCycleTime,
+      setCurrentAvgLeadTime,
+    )
   }, [currentTasks])
 
   useEffect(() => {

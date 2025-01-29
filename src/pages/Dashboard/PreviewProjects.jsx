@@ -1,8 +1,8 @@
 import { Row, Col } from 'react-bootstrap'
-import { ProjectCard } from '../Components/Projects/ProjectCard'
+import { ProjectCard } from '../../Components/Projects/ProjectCard'
 //import { useProject } from '../contexts/ProjectContext'
 //import { useNavigate } from 'react-router-dom'
-import { useUserHome } from '../contexts/UserHomeContext'
+import { useUserHome } from '../../contexts/UserHomeContext'
 
 export const PreviewProjects = () => {
   const { userProjects } = useUserHome()
