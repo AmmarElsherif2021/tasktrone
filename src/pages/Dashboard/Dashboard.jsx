@@ -11,27 +11,74 @@ import {
   Col,
   Modal,
 } from 'react-bootstrap'
-//import Three from '../Ui/CAD/Three'
 import { PreviewProjects } from './PreviewProjects'
-import { User } from '../Components/User/User'
-import { CreateProject } from '../Components/Projects/CreateProject'
-import { useAuth } from '../contexts/AuthContext'
-import { useUserHome } from '../contexts/UserHomeContext'
+import { User } from '../../Components/User/User'
+import { CreateProject } from '../../Components/Projects/CreateProject'
+import { useAuth } from '../../contexts/AuthContext'
+import { useUserHome } from '../../contexts/UserHomeContext'
 import { jwtDecode } from 'jwt-decode'
-import { Header } from '../Components/Header/Header'
-import IconButton from '../Ui/IconButton'
-import StaticRoundBtn from '../Ui/StaticRoundBtn'
-import folderPlus from '../assets/folderPlus.svg'
-import userInfo from '../assets/userInfo.svg'
-import clock from '../assets/clock.svg'
-import boxes from '../assets/boxes.svg'
-import charts from '../assets/charts.svg'
-import alert from '../assets/alert.svg'
-import clipboardCheck from '../assets/clipboardCheck.svg'
-import addNew from '../assets/addNew.svg'
-import { ProfileImage } from '../Components/User/ProfileImage'
-import DashboardSkeleton from '../Ui/LoadingSkeletons/DashboardSkeleton'
+import { Header } from '../../Components/Header/Header'
+import IconButton from '../../Ui/IconButton'
+import StaticRoundBtn from '../../Ui/StaticRoundBtn'
+import folderPlus from '../../assets/folderPlus.svg'
+import userInfo from '../../assets/userInfo.svg'
+import clock from '../../assets/clock.svg'
+import boxes from '../../assets/boxes.svg'
+import charts from '../../assets/charts.svg'
+import alert from '../../assets/alert.svg'
+import clipboardCheck from '../../assets/clipboardCheck.svg'
+import addNew from '../../assets/addNew.svg'
+import { ProfileImage } from '../../Components/User/ProfileImage'
+import DashboardSkeleton from '../../Ui/LoadingSkeletons/DashboardSkeleton'
+import { colors } from '../../Ui/colors'
+// ==================== STYLES ====================
+const CARD_STYLES = {
+  borderWidth: '2.5px',
+  borderColor: '#404C46',
+  transition: 'background-color 0.2s',
+  backgroundColor: colors.cardBackgroundColor,
+}
 
+const METRIC_CARD_STYLES = {
+  width: '15rem',
+}
+
+const HOVER_CARD_STYLES = {
+  backgroundColor: colors.hoverCardBackgroundColor,
+}
+
+const CARD_HEADER_STYLES = {
+  backgroundColor: 'transparent',
+  borderBottom: '2.5px solid #000',
+}
+
+const ALERT_STYLES = {
+  borderWidth: '2px',
+  borderColor: '#ad0000',
+  backgroundColor: 'transparent',
+  color: '#ad0000',
+}
+
+const BUTTON_STYLES = {
+  borderWidth: '2px',
+  borderColor: '#186545',
+  borderRadius: '2rem',
+  color: '#186545',
+}
+
+const ICON_STYLES = {
+  width: '3rem',
+}
+
+const SMALL_TEXT_STYLES = {
+  fontSize: '0.7em',
+}
+
+const MEDIUM_TEXT_STYLES = {
+  fontSize: '0.8em',
+}
+
+// ==================== CONSTANTS ====================
 const METRICS_DATA = [
   {
     icon: clock,
@@ -66,26 +113,26 @@ const QUICK_ACCESS_BUTTONS = [
   { title: 'Inventory', color: '#000' },
 ]
 
-const MetricCard = ({ icon, title, value, color }) => (
+// ==================== REUSABLE COMPONENTS ====================
+const MetricCard = ({ metric, value }) => (
   <Card
     className='mb-3 shadow-sm'
     style={{
-      width: '15rem',
-      borderWidth: '2.5px',
-      borderColor: '#404C46',
-      backgroundColor: color,
+      ...CARD_STYLES,
+      ...METRIC_CARD_STYLES,
+      backgroundColor: metric.color,
     }}
   >
     <Card.Body className='d-flex justify-content-between align-items-center'>
       <div>
-        <h5 className='mb-1'>{title}</h5>
+        <h5 className='mb-1'>{metric.title}</h5>
         <h3 className='mb-0'>{value}</h3>
       </div>
       <img
         className='d-flex align-items-center'
-        style={{ width: '3rem' }}
-        src={icon}
-        alt={title}
+        style={ICON_STYLES}
+        src={metric.icon}
+        alt={metric.title}
       />
     </Card.Body>
   </Card>
@@ -94,19 +141,40 @@ const MetricCard = ({ icon, title, value, color }) => (
 const CardHeader = ({ icon, title, children }) => (
   <Card.Header
     className='d-flex align-items-center justify-content-between py-3'
-    style={{
-      backgroundColor: 'transparent',
-      borderBottom: '2.5px solid #000',
-    }}
+    style={CARD_HEADER_STYLES}
   >
     <div className='d-flex align-items-center'>
-      {icon && <img src={icon} alt={title} style={{ width: '3rem' }} />}
+      {icon && <img src={icon} alt={title} style={ICON_STYLES} />}
       <h4 className='mb-0'>{title}</h4>
     </div>
     {children}
   </Card.Header>
 )
 
+const StyledCard = ({
+  children,
+  hoverKey,
+  hoverStates,
+  handleHover,
+  style,
+}) => (
+  <Card
+    className='mb-1 shadow-sm'
+    style={{
+      ...CARD_STYLES,
+      backgroundColor: hoverStates[hoverKey]
+        ? HOVER_CARD_STYLES.backgroundColor
+        : CARD_STYLES.backgroundColor,
+      ...style,
+    }}
+    onMouseEnter={() => handleHover(hoverKey, true)}
+    onMouseLeave={() => handleHover(hoverKey, false)}
+  >
+    {children}
+  </Card>
+)
+
+// ==================== MAIN COMPONENT ====================
 export function Dashboard() {
   const { userProjects, currentUser, isUserLoading, areProjectsLoading } =
     useUserHome()
@@ -119,7 +187,6 @@ export function Dashboard() {
   })
   const [isLoading, setIsLoading] = useState(true)
 
-  // Mock metrics data
   const metrics = {
     tasksInProgress: 12,
     criticalTasks: 3,
@@ -140,7 +207,7 @@ export function Dashboard() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false)
-    }, 1000) // Minimum 1 second delay
+    }, 1000)
 
     return () => clearTimeout(timer)
   }, [])
@@ -149,7 +216,6 @@ export function Dashboard() {
     setHoverStates((prev) => ({ ...prev, [key]: value }))
   }
 
-  // Loading states
   if (!currentUser || isLoading || isUserLoading || areProjectsLoading) {
     return (
       <>
@@ -194,7 +260,7 @@ export function Dashboard() {
         <img
           src={folderPlus}
           alt='add project'
-          style={{ width: '3rem', color: '#186545' }}
+          style={{ ...ICON_STYLES, color: '#186545' }}
         />
         <p className='mb-3' style={{ color: '#666' }}>
           No manufacturing projects found. Create your first project to get
@@ -203,12 +269,7 @@ export function Dashboard() {
         <Button
           variant='none'
           onClick={() => setShowCreateProject(true)}
-          style={{
-            borderWidth: '2px',
-            borderColor: '#186545',
-            borderRadius: '2rem',
-            color: '#186545',
-          }}
+          style={BUTTON_STYLES}
         >
           Create Project
         </Button>
@@ -225,30 +286,23 @@ export function Dashboard() {
         <Row className='mb-3'>
           {METRICS_DATA.map((metric) => (
             <Col md={3} sm={6} key={metric.title}>
-              <MetricCard {...metric} value={metrics[metric.key]} />
+              <MetricCard metric={metric} value={metrics[metric.key]} />
             </Col>
           ))}
         </Row>
 
         <Row className='mb-3'>
           <Col lg={4} md={5} sm={12} className='mb-4'>
-            {/* Personal Information Card */}
-            <Card
-              className='mb-1 h-40'
-              style={{
-                borderWidth: '2.5px',
-                borderColor: '#404C46',
-                backgroundColor: hoverStates.info ? '#fafafa' : '#fff',
-                transition: 'background-color 0.2s',
-                padding: '1rem',
-              }}
-              onMouseEnter={() => handleHover('info', true)}
-              onMouseLeave={() => handleHover('info', false)}
+            <StyledCard
+              hoverKey='info'
+              hoverStates={hoverStates}
+              handleHover={handleHover}
+              style={{ padding: '1rem' }}
             >
               <CardHeader icon={userInfo} title='Personal Information' />
-              <Card.Body style={{ fontSize: '0.8em' }}>
+              <Card.Body style={MEDIUM_TEXT_STYLES}>
                 {userData ? (
-                  <div className='d-flex flex-row '>
+                  <div className='d-flex flex-row'>
                     <ProfileImage
                       user={currentUser}
                       style={{ marginRight: '1rem' }}
@@ -257,38 +311,25 @@ export function Dashboard() {
                     <User id={userData.userId} explicit={true} />
                   </div>
                 ) : (
-                  <Alert
-                    variant='warning'
-                    style={{
-                      borderWidth: '2px',
-                      borderColor: '#ad0000',
-                      backgroundColor: 'transparent',
-                      color: '#ad0000',
-                    }}
-                  >
+                  <Alert variant='warning' style={ALERT_STYLES}>
                     User data not available
                   </Alert>
                 )}
               </Card.Body>
-            </Card>
+            </StyledCard>
 
-            {/* Quick Access Card */}
-            <Card
-              className='mb-1 h-30'
-              style={{
-                borderWidth: '2.5px',
-                borderColor: '#404C46',
-                backgroundColor: hoverStates.info ? '#fafafa' : '#fff',
-                transition: 'background-color 0.2s',
-                padding: '1rem',
-              }}
+            <StyledCard
+              hoverKey='info'
+              hoverStates={hoverStates}
+              handleHover={handleHover}
+              style={{ padding: '1rem' }}
             >
               <CardHeader title='Quick Access' />
               <Card.Body>
                 <div className='mt-3'>
                   <small
                     className='d-flex flex-wrap gap-2'
-                    style={{ fontSize: '0.7em' }}
+                    style={SMALL_TEXT_STYLES}
                   >
                     {QUICK_ACCESS_BUTTONS.map(({ title, color }) => (
                       <StaticRoundBtn
@@ -303,21 +344,14 @@ export function Dashboard() {
                   </small>
                 </div>
               </Card.Body>
-            </Card>
+            </StyledCard>
           </Col>
 
-          {/* Projects Card */}
           <Col lg={8} md={7} sm={12}>
-            <Card
-              className='shadow-sm'
-              style={{
-                borderWidth: '2.5px',
-                borderColor: '#404C46',
-                backgroundColor: hoverStates.projects ? '#fafafa' : '#fff',
-                transition: 'background-color 0.2s',
-              }}
-              onMouseEnter={() => handleHover('projects', true)}
-              onMouseLeave={() => handleHover('projects', false)}
+            <StyledCard
+              hoverKey='projects'
+              hoverStates={hoverStates}
+              handleHover={handleHover}
             >
               <Card.Body>
                 <CardHeader icon={folderPlus} title='Projects'>
@@ -330,11 +364,10 @@ export function Dashboard() {
                   renderEmptyProjects()
                 )}
               </Card.Body>
-            </Card>
+            </StyledCard>
           </Col>
         </Row>
 
-        {/* Create Project Modal */}
         <Modal
           show={showCreateProject}
           onHide={() => setShowCreateProject(false)}

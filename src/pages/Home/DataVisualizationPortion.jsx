@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Card, Modal } from 'react-bootstrap'
-import dataVisualizationIcon from '../assets/preferences.svg' // Replace with your data visualization icon
-
+import dataVisualizationIcon from '../../assets/preferences.svg'
 export default function DataVisualizationPortion() {
   const [showVisualizationModal, setShowVisualizationModal] = useState(false)
 

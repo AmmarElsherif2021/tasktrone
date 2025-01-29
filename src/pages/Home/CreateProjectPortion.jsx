@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Card, Modal } from 'react-bootstrap'
-import folderPlus from '../assets/folderPlus.svg'
-import { CreateProject } from '../Components/Projects/CreateProject'
+import folderPlus from '../../assets/folderPlus.svg'
+import { CreateProject } from '../../Components/Projects/CreateProject'
 
 export default function CreateProjectPortion() {
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false)
