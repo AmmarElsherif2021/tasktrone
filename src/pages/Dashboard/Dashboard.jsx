@@ -11,6 +11,7 @@ import {
   Col,
   Modal,
 } from 'react-bootstrap'
+import '../../index.css'
 import { PreviewProjects } from './PreviewProjects'
 import { User } from '../../Components/User/User'
 import { CreateProject } from '../../Components/Projects/CreateProject'
@@ -30,26 +31,36 @@ import clipboardCheck from '../../assets/clipboardCheck.svg'
 import addNew from '../../assets/addNew.svg'
 import { ProfileImage } from '../../Components/User/ProfileImage'
 import DashboardSkeleton from '../../Ui/LoadingSkeletons/DashboardSkeleton'
-import { colors } from '../../Ui/colors'
+//import { colors } from '../../Ui/colors'
+import { StyledCard } from '../../Ui/StyledCard'
 // ==================== STYLES ====================
-const CARD_STYLES = {
-  borderWidth: '2.5px',
-  borderColor: '#404C46',
-  transition: 'background-color 0.2s',
-  backgroundColor: colors.cardBackgroundColor,
-}
+// const CARD_STYLES = {
+//   borderWidth: '2.5px',
+//   borderColor: '#557263',
+//   transition: 'background-color 0.2s',
+//   backgroundColor: colors.cardBackgroundColor,
+// }
 
 const METRIC_CARD_STYLES = {
-  width: '15rem',
+  width: '10rem',
+  height: '10rem',
+  bordercolor: '#557263',
+  borderWidth: '3px',
+  borderRadius: '30%',
+  color: '#000',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
 }
 
-const HOVER_CARD_STYLES = {
-  backgroundColor: colors.hoverCardBackgroundColor,
-}
+// const HOVER_CARD_STYLES = {
+//   backgroundColor: colors.hoverCardBackgroundColor,
+// }
 
 const CARD_HEADER_STYLES = {
   backgroundColor: 'transparent',
-  borderBottom: '2.5px solid #000',
+  borderBottom: '2.5px solid #557263',
 }
 
 const ALERT_STYLES = {
@@ -84,25 +95,25 @@ const METRICS_DATA = [
     icon: clock,
     title: 'In Progress',
     key: 'tasksInProgress',
-    color: '#7DDA58',
+    color: '#37EB4C',
   },
   {
     icon: alert,
     title: 'Critical Tasks',
     key: 'criticalTasks',
-    color: '#FF4A4A',
+    color: '#E53300',
   },
   {
     icon: clipboardCheck,
     title: 'Quality Issues',
     key: 'qualityIssues',
-    color: '#FFDE4C',
+    color: '#E7C900',
   },
   {
     icon: boxes,
     title: 'Inventory Alerts',
     key: 'inventoryAlerts',
-    color: '#99FACA',
+    color: '#00C37C',
   },
 ]
 
@@ -110,7 +121,7 @@ const QUICK_ACCESS_BUTTONS = [
   { title: 'Design Tasks', color: '#E4080A' },
   { title: 'Manufacturing', color: '#0F5A38' },
   { title: 'Quality Control', color: '#FF6201' },
-  { title: 'Inventory', color: '#000' },
+  { title: 'Inventory', color: '#1f3f4f' },
 ]
 
 // ==================== REUSABLE COMPONENTS ====================
@@ -118,23 +129,18 @@ const MetricCard = ({ metric, value }) => (
   <Card
     className='mb-3 shadow-sm'
     style={{
-      ...CARD_STYLES,
       ...METRIC_CARD_STYLES,
       backgroundColor: metric.color,
     }}
   >
-    <Card.Body className='d-flex justify-content-between align-items-center'>
-      <div>
-        <h5 className='mb-1'>{metric.title}</h5>
-        <h3 className='mb-0'>{value}</h3>
-      </div>
-      <img
-        className='d-flex align-items-center'
-        style={ICON_STYLES}
-        src={metric.icon}
-        alt={metric.title}
-      />
-    </Card.Body>
+    <img
+      className='d-flex column align-items-center mb-3'
+      style={ICON_STYLES}
+      src={metric.icon}
+      alt={metric.title}
+    />
+    <h5 className='mb-1'>{metric.title}</h5>
+    <h3 className='mb-0'>{value}</h3>
   </Card>
 )
 
@@ -151,31 +157,9 @@ const CardHeader = ({ icon, title, children }) => (
   </Card.Header>
 )
 
-const StyledCard = ({
-  children,
-  hoverKey,
-  hoverStates,
-  handleHover,
-  style,
-}) => (
-  <Card
-    className='mb-1 shadow-sm'
-    style={{
-      ...CARD_STYLES,
-      backgroundColor: hoverStates[hoverKey]
-        ? HOVER_CARD_STYLES.backgroundColor
-        : CARD_STYLES.backgroundColor,
-      ...style,
-    }}
-    onMouseEnter={() => handleHover(hoverKey, true)}
-    onMouseLeave={() => handleHover(hoverKey, false)}
-  >
-    {children}
-  </Card>
-)
-
 // ==================== MAIN COMPONENT ====================
 export function Dashboard() {
+  //Dashboard
   const { userProjects, currentUser, isUserLoading, areProjectsLoading } =
     useUserHome()
   const [token] = useAuth()
@@ -235,7 +219,7 @@ export function Dashboard() {
       >
         <IconButton
           onClick={() => {}}
-          color='#000'
+          color='#557263'
           src={charts}
           alt='Visualize data'
         />
@@ -283,7 +267,7 @@ export function Dashboard() {
       <Container fluid className='py-4'>
         <h1 className='mb-4'>Welcome back</h1>
 
-        <Row className='mb-3'>
+        <Row className='mx-4 mb-3'>
           {METRICS_DATA.map((metric) => (
             <Col md={3} sm={6} key={metric.title}>
               <MetricCard metric={metric} value={metrics[metric.key]} />
@@ -338,7 +322,6 @@ export function Dashboard() {
                         alt={title}
                         handleClick={() => {}}
                         color={color}
-                        backgroundColor='#fff'
                       />
                     ))}
                   </small>

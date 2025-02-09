@@ -14,6 +14,50 @@ import TaskModal from './TaskModal.jsx'
 import { DeleteWarningModal } from './DeleteTaskModal.jsx'
 import { useProject } from '../../contexts/ProjectContext.jsx'
 import IconButton from '../../Ui/IconButton.jsx'
+
+const badgeStyle = {
+  borderWidth: '2px',
+  borderRadius: '2rem',
+  borderStyle: 'solid',
+  padding: '0.5rem',
+}
+
+const leadTimeBadgeStyle = {
+  ...badgeStyle,
+  borderColor: '#186545',
+  color: '#186545',
+}
+
+const cycleTimeBadgeStyle = {
+  ...badgeStyle,
+  borderColor: '#ad0000',
+  color: '#ad0000',
+}
+
+const phaseButtonStyle = {
+  borderWidth: '2px',
+  borderRadius: '2rem',
+}
+
+const backwardButtonStyle = {
+  ...phaseButtonStyle,
+  borderColor: '#ad0000',
+}
+
+const forwardButtonStyle = {
+  ...phaseButtonStyle,
+  borderColor: '#000',
+}
+
+const cardStyle = (hover, taskType, phase) => ({
+  backgroundColor: hover
+    ? getHexBackground(taskType, phase, 20)
+    : getHexBackground(taskType, phase, 0),
+  cursor: 'pointer',
+  borderWidth: '2.5px',
+  borderColor: '#000',
+})
+
 export function TaskCard({
   taskId,
   projectId,
@@ -31,6 +75,7 @@ export function TaskCard({
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [hover, setHover] = useState(false)
+
   const phaseMutation = useMutation({
     mutationFn: ({ token, projectId, taskId, phase }) =>
       updateTask(token, projectId, taskId, { phase }),
@@ -88,21 +133,21 @@ export function TaskCard({
     <>
       <Card
         className='task-card shadow-sm'
-        style={{
-          backgroundColor: hover
-            ? getHexBackground(taskType, phase, 20)
-            : getHexBackground(taskType, phase, 0),
-          cursor: 'pointer',
-          borderWidth: '2.5px',
-          borderColor: '#000',
-        }}
+        style={cardStyle(hover, taskType, phase)}
         onClick={() => setShowTaskModal(true)}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
       >
         <Card.Body className='p-3'>
           <div className='d-flex justify-content-between align-items-start mb-2'>
-            <Card.Title className='h6 mb-0' style={{ maxWidth: '75%' }}>
+            <Card.Title
+              className='h6 mb-0'
+              style={{
+                fontFamily: 'var(--font-family-mono)',
+                fontWeight: 'var(--font-weight-bold)',
+                maxWidth: '75%',
+              }}
+            >
               {title}
             </Card.Title>
             <br />
@@ -125,46 +170,17 @@ export function TaskCard({
                 ? 'Expires soon!'
                 : ''}
           </Card.Subtitle>
-          <Card.Text className='small text-muted mb-2'>
-            {/*<small style={{ size: '0.4em' }}>{taskId}</small> */}
-          </Card.Text>
           <div className='d-flex gap-2 mb-2'>
-            <Badge
-              bg='none'
-              style={{
-                borderWidth: '2px',
-                borderColor: '#186545',
-                borderRadius: '2rem',
-                borderStyle: 'solid',
-                padding: '0.5rem',
-                color: '#186545',
-
-                // backgroundColor: '#e6f5e9',
-              }}
-            >
-              {' '}
-              Lead: {leadTime}d{' '}
+            <Badge bg='none' style={leadTimeBadgeStyle}>
+              Lead: {leadTime}d
             </Badge>
-            <Badge
-              bg='none'
-              style={{
-                borderWidth: '2px',
-                borderColor: '#ad0000',
-                borderRadius: '2rem',
-                borderStyle: 'solid',
-                padding: '0.5rem',
-                color: '#ad0000',
-                //backgroundColor: 'none',
-              }}
-            >
-              {' '}
-              Cycle: {cycleTime}d{' '}
+            <Badge bg='none' style={cycleTimeBadgeStyle}>
+              Cycle: {cycleTime}d
             </Badge>
           </div>
           {author && (
             <div className='small text-muted mb-2'>
               <span>
-                {' '}
                 By <User id={author} />
               </span>
             </div>
@@ -175,11 +191,7 @@ export function TaskCard({
                 variant='none'
                 size='sm'
                 className='phase-button'
-                style={{
-                  borderWidth: '2px',
-                  borderColor: '#ad0000',
-                  borderRadius: '2rem',
-                }}
+                style={backwardButtonStyle}
                 onClick={(e) => {
                   e.stopPropagation()
                   const prevPhase = getPreviousPhase(phase)
@@ -216,14 +228,10 @@ export function TaskCard({
                     handlePhaseChange(nextPhase)
                   }
                 }}
-                style={{
-                  borderWidth: '2px',
-                  borderColor: '#000',
-                  borderRadius: '2rem',
-                }}
+                style={forwardButtonStyle}
               >
                 <span className='phase-button-text' style={{ color: '#000' }}>
-                  <strong> Move to {getPhaseLabel(getNextPhase(phase))}</strong>
+                  <strong>Move to {getPhaseLabel(getNextPhase(phase))}</strong>
                 </span>
                 <Image
                   src={forwardArrow}

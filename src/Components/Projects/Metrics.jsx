@@ -13,19 +13,25 @@ import doneIcon from '../../assets/done.svg'
 import flowIcon from '../../assets/flow.svg'
 import updateIcon from '../../assets/update.svg'
 import wipIcon from '../../assets/wip.svg'
-
+import { colors } from '../../Ui/colors'
+import { StyledCard } from '../../Ui/StyledCard'
 const COMMON_STYLES = {
-  nav: {
-    borderColor: '#000',
-    borderWidth: '2px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    height: '80vh',
+  card: {
+    borderWidth: '2.5px',
+    borderColor: '#557263',
+    transition: 'background-color 0.2s',
+    backgroundColor: colors.cardBackgroundColor,
   },
+  cardHeader: {
+    backgroundColor: 'transparent',
+    borderBottom: '2.5px solid #557263',
+    fontFamily: 'var(--font-family-mono)',
+    fontWeight: 'var(--font-weight-bold)',
+    fontSize: '0.9rem',
+  },
+
   metricItem: {
-    border: '2px solid #000',
+    border: '2px solid #000', // #557263',
     borderRadius: '8px',
     padding: '0.5rem',
     textAlign: 'center',
@@ -39,7 +45,7 @@ const COMMON_STYLES = {
   },
   metricItemHover: {
     transform: 'scale(1.05)',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    //boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
   },
   icon: {
     width: '2rem',
@@ -47,8 +53,10 @@ const COMMON_STYLES = {
     marginBottom: '0.5rem',
   },
   title: {
-    fontSize: '0.8rem',
-    fontWeight: 'bold',
+    fontFamily: 'var(--font-family-mono)',
+    fontWeight: 'var(--font-weight-bold)',
+    fontSize: '0.7rem',
+
     color: '#000',
     marginBottom: '0.25rem',
   },
@@ -70,6 +78,9 @@ const COMMON_STYLES = {
     border: '1px solid #ddd',
     borderRadius: '4px',
     padding: '0.25rem',
+    fontFamily: 'var(--font-family-mono)',
+    fontWeight: 'var(--font-weight-bold)',
+    fontSize: '0.7rem',
   },
   wipButton: {
     backgroundColor: '#000',
@@ -78,6 +89,13 @@ const COMMON_STYLES = {
     borderRadius: '4px',
     padding: '0.25rem 0.5rem',
     cursor: 'pointer',
+  },
+  announcement: {
+    backgroundColor: '#fff',
+    marginTop: '0.5rem',
+    overflowY: 'scroll',
+    maxHeight: '6rem',
+    fontFamily: 'var()',
   },
 }
 
@@ -178,8 +196,17 @@ export const Metrics = () => {
     currentAvgLeadTime,
     currentProjectId,
     currentProject,
+    posts,
+    isPostsLoading,
   } = useProject()
   const [token] = useAuth()
+  const [hoverStates, setHoverStates] = useState({
+    metrics: false,
+  })
+
+  const handleHover = (key, value) => {
+    setHoverStates((prev) => ({ ...prev, [key]: value }))
+  }
 
   const wipMutation = useMutation({
     mutationFn: ({ token, projectId, wip }) =>
@@ -203,9 +230,19 @@ export const Metrics = () => {
 
   const metrics = { currentAvgCycleTime, currentAvgLeadTime }
 
+  // Find the latest public post by the project creator
+  const latestPublicPost = posts
+    ?.filter((post) => post?.author === currentProject?.createdBy)
+    ?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))?.[0]
+
   return (
-    <Card style={COMMON_STYLES.nav}>
-      <Card.Header className='custom-modal w-100'>
+    <StyledCard
+      hoverKey='metrics'
+      hoverStates={hoverStates}
+      handleHover={handleHover}
+      style={{ height: '85vh' }}
+    >
+      <Card.Header style={COMMON_STYLES.cardHeader} className='w-100'>
         <Card.Title>Project Metrics</Card.Title>
       </Card.Header>
       <Card.Body>
@@ -213,10 +250,10 @@ export const Metrics = () => {
           {METRICS_CONFIG.map((metric) => (
             <Col
               key={metric.id}
-              md={4} // 3 columns on medium screens
-              sm={6} // 2 columns on small screens
-              xs={6} // 2 columns on extra small screens
-              className='mb-3 d-flex align-items-stretch' // Ensure all items stretch to the same height
+              md={4}
+              sm={6}
+              xs={6}
+              className='mb-3 d-flex align-items-stretch'
             >
               <OverlayTrigger
                 placement='top'
@@ -251,11 +288,7 @@ export const Metrics = () => {
                       onSubmit={handleWipSubmit}
                     />
                   ) : (
-                    <div
-                      style={{
-                        ...COMMON_STYLES.value,
-                      }}
-                    >
+                    <div style={COMMON_STYLES.value}>
                       {metric.getValue(currentProject, metrics)}
                     </div>
                   )}
@@ -264,15 +297,35 @@ export const Metrics = () => {
             </Col>
           ))}
         </Row>
+        <Row>
+          <Col>
+            <strong>Total tasks: {currentProject?.tasks?.length || 0}</strong>
+          </Col>
+        </Row>
+        <Row>
+          {!isPostsLoading && (
+            <Card
+              style={{ ...COMMON_STYLES.card, ...COMMON_STYLES.announcement }}
+            >
+              <strong style={{ fontFamily: ` var(--font-family-mono)` }}>
+                Announcement:{' '}
+              </strong>
+
+              <strong>
+                {latestPublicPost?.title || 'No public announcement yet!'}
+              </strong>
+              <small style={{ fontFamily: ` var(--font-family-mono)` }}>
+                {latestPublicPost?.contents}
+              </small>
+              {latestPublicPost && (
+                <small className='d-block text-muted'>
+                  {new Date(latestPublicPost.createdAt).toLocaleDateString()}
+                </small>
+              )}
+            </Card>
+          )}
+        </Row>
       </Card.Body>
-      <Card.Footer className='custom-modal w-100'>
-        <p>
-          <strong>Total tasks: </strong>
-          {currentProject?.tasks?.length || 0}
-        </p>
-      </Card.Footer>
-    </Card>
+    </StyledCard>
   )
 }
-
-export default Metrics

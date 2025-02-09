@@ -2,40 +2,43 @@ import PropTypes from 'prop-types'
 import { Button, Card } from 'react-bootstrap'
 import { User } from '../User/User'
 import { useEffect, useState } from 'react'
-//import userIcon from '../../assets/person-icon.svg'
 import StaticRoundBtn from '../../Ui/StaticRoundBtn'
-
 import { useProject } from '../../contexts/ProjectContext'
 import { ProfileImage } from '../User/ProfileImage'
 
 export function Post({ title, contents, author, taskId = '' }) {
   const [explicitUserInfo, setExplicitUserInfo] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   const { currentProjectMembers } = useProject()
   const [postUserData, setPostUserData] = useState(null)
+
   useEffect(() => {
     if (currentProjectMembers && currentProjectMembers.length) {
       const user = currentProjectMembers.find((x) => x.id === author)
       setPostUserData(user)
     }
-  }, [])
+  }, [currentProjectMembers, author])
+
+  const truncatedContent = contents?.slice(0, 50)
+  const shouldShowToggle = contents?.length > 50
+
   return (
     <Card
       className='mb-3 shadow-sm'
-      style={{ borderColor: '#729B87', borderWidth: '2px' }}
+      style={{ borderColor: '#000', borderWidth: '2px' }}
     >
       <Card.Header className='d-flex align-items-center bg-transparent border-0'>
         <Button
           variant='none'
           onClick={() => setExplicitUserInfo(!explicitUserInfo)}
           style={{
-            //width: '99%',
             display: 'flex',
             flexDirection: 'row',
             fontSize: explicitUserInfo ? '0.6em' : '1em',
-            borderBottomLeftRadius: 0, //'0.5rem',
-            borderBottomRightRadius: 0, // '0.5rem',
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
             borderBottomWidth: '2px',
-            borderBottomColor: '#729B87',
+            borderBottomColor: '#000',
             paddingLeft: '0.5rem',
           }}
         >
@@ -54,7 +57,32 @@ export function Post({ title, contents, author, taskId = '' }) {
           <h2>{title}</h2>
         </Card.Title>
         <hr style={{ borderWidth: '2px', color: '#729B87' }} />
-        <Card.Text>{contents}</Card.Text>
+        <Card.Text
+          style={{
+            fontFamily: 'var(--font-family-mono)',
+            fontWeight: 'var(--font-weight-bold)',
+            fontSize: '0.9em',
+          }}
+        >
+          {isExpanded ? contents : truncatedContent}
+          {!isExpanded && contents?.length > 50 && '...'}
+
+          {shouldShowToggle && (
+            <Button
+              variant='link'
+              onClick={() => setIsExpanded(!isExpanded)}
+              className='ms-2'
+              style={{
+                fontSize: '0.8em',
+                textDecoration: 'none',
+                color: '#729B87',
+                padding: 0,
+              }}
+            >
+              {isExpanded ? 'Read less' : 'Read more'}
+            </Button>
+          )}
+        </Card.Text>
       </Card.Body>
       {taskId ? (
         <Card.Footer className='text-muted bg-transparent border-0'>

@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useQuery, useMutation, QueryClient } from '@tanstack/react-query'
 import { getProjectById, updateTasksCycleTime } from '../API/projects'
+import { getPosts } from '../API/posts'
 import { getUserInfo } from '../API/users'
 import { useAuth } from '../contexts/AuthContext'
 import { listTasks } from '../API/tasks'
@@ -19,6 +20,11 @@ export const ProjectProvider = ({ children }) => {
   const [currentAvgCycleTime, setCurrentAvgCycleTime] = useState(0)
   const [currentTasks, setCurrentTasks] = useState([])
   const [isTasksLoading, setIsTasksLoading] = useState(false)
+  // Blog-specific states
+  const [postAuthorFilter, setPostAuthorFilter] = useState('')
+  const [postSortBy, setPostSortBy] = useState('createdAt')
+  const [postSortOrder, setPostSortOrder] = useState('descending')
+
   const queryClient = new QueryClient()
   // Project query
   const currentProjectQuery = useQuery({
@@ -84,8 +90,38 @@ export const ProjectProvider = ({ children }) => {
     staleTime: 30000, // caching to prevent unnecessary refreshes
     retry: 2,
   })
+  // refresh posts
+  const refetchPosts = () => {
+    postsQuery.refetch()
+  }
+  // Blog posts query
+  const postsQuery = useQuery({
+    queryKey: [
+      'posts',
+      {
+        projectId: currentProjectId,
+        author: postAuthorFilter,
+        sortBy: postSortBy,
+        sortOrder: postSortOrder,
+      },
+    ],
+    queryFn: () =>
+      getPosts(token, currentProjectId, {
+        author: postAuthorFilter,
+        sortBy: postSortBy,
+        sortOrder: postSortOrder,
+      }),
+    enabled: !!token && !!currentProjectId,
+    staleTime: 1000 * 60,
+  })
 
-  // Trigger users fetch when project is loaded
+  //posts updates
+  const updatePostFilters = ({ author, sortBy, sortOrder }) => {
+    if (author !== undefined) setPostAuthorFilter(author)
+    if (sortBy !== undefined) setPostSortBy(sortBy)
+    if (sortOrder !== undefined) setPostSortOrder(sortOrder)
+  }
+  // Trigger users fetch when project is loaded ...........................................................................
   useEffect(() => {
     if (currentProject?.members?.length) {
       usersDataQuery.refetch()
@@ -150,6 +186,13 @@ export const ProjectProvider = ({ children }) => {
         setIsTasksLoading,
         usersDataQuery,
         refreshTasks,
+        posts: postsQuery.data ?? [],
+        postAuthorFilter,
+        postSortBy,
+        postSortOrder,
+        updatePostFilters,
+        isPostsLoading: postsQuery.isLoading,
+        refetchPosts,
       }}
     >
       {children}

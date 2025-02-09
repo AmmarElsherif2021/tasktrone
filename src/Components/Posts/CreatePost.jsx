@@ -12,7 +12,7 @@ export function CreatePost() {
   const [token] = useAuth()
   const queryClient = useQueryClient()
   const [showModal, setShowModal] = useState(false)
-  const { currentProjectId } = useProject()
+  const { currentProjectId, refetchPosts } = useProject()
 
   const createPostMutation = useMutation({
     mutationFn: () =>
@@ -22,6 +22,7 @@ export function CreatePost() {
       setTitle('')
       setContents('')
       setShowModal(false)
+      refetchPosts()
     },
   })
 

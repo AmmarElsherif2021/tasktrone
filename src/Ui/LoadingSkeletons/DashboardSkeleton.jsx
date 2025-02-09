@@ -30,27 +30,30 @@ const MetricCardSkeleton = () => (
   <Card
     className='mb-3 shadow-sm'
     style={{
-      width: '15rem',
-      borderWidth: '2.5px',
-      borderColor: THEME.colors.primary,
+      width: '10rem',
+      height: '10rem',
+      borderWidth: '3px',
+      borderColor: '#000',
+      borderRadius: '30%',
       backgroundColor: THEME.colors.muted,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
       ...ANIMATION_STYLES.fadeIn,
     }}
   >
-    <Card.Body className='d-flex justify-content-between align-items-center'>
-      <div className='h3 py-10 my-10'>
-        <TextRegister width={6} />
-      </div>
-      <div
-        style={{
-          width: '3rem',
-          height: '3rem',
-          backgroundColor: THEME.colors.secondary,
-          borderRadius: '50%',
-          ...ANIMATION_STYLES.pulse,
-        }}
-      />
-    </Card.Body>
+    <div
+      style={{
+        width: '3rem',
+        height: '3rem',
+        backgroundColor: THEME.colors.primary,
+        borderRadius: '50%',
+        ...ANIMATION_STYLES.pulse,
+      }}
+    />
+    <TextRegister width={6} />
+    <TextRegister width={4} />
   </Card>
 )
 
@@ -59,7 +62,7 @@ const CardHeaderSkeleton = ({ title }) => (
     className='d-flex align-items-center justify-content-between py-3'
     style={{
       backgroundColor: 'transparent',
-      borderBottom: '2.5px solid #404C46',
+      borderBottom: '2.5px solid #000',
       ...ANIMATION_STYLES.pulse,
     }}
   >
@@ -112,13 +115,13 @@ export function DashboardSkeleton() {
       }}
     >
       <style>{createKeyframes(THEME)}</style>
-      <Container fluid className='my-1'>
+      <Container fluid className='py-4'>
         <h1 className='mb-4' style={ANIMATION_STYLES.fadeIn}>
           <TextRegister width={14} />
         </h1>
 
         {/* Metrics Row */}
-        <Row className='mb-3'>
+        <Row className='mx-4 mb-3'>
           {[1, 2, 3, 4].map((_, index) => (
             <Col md={3} sm={6} key={index}>
               <MetricCardSkeleton />
@@ -132,25 +135,25 @@ export function DashboardSkeleton() {
           <Col lg={4} md={5} sm={12} className='mb-4'>
             {/* Personal Information Card */}
             <Card
-              className='mb-1 h-40'
+              className='mb-3 shadow-sm'
               style={{
                 borderWidth: '2.5px',
-                borderColor: THEME.colors.primary,
+                borderColor: '#000',
                 backgroundColor: THEME.colors.secondary,
-                transition: 'background-color 0.2s',
                 padding: '1rem',
                 ...ANIMATION_STYLES.fadeIn,
               }}
             >
               <CardHeaderSkeleton title='Personal Information' />
               <Card.Body>
-                <div className='d-flex flex-column align-items-center'>
+                <div className='d-flex flex-row align-items-center'>
                   <div
                     style={{
-                      width: '5rem',
-                      height: '5rem',
+                      width: '4rem',
+                      height: '4rem',
                       backgroundColor: THEME.colors.primary,
                       borderRadius: '50%',
+                      marginRight: '1rem',
                       ...ANIMATION_STYLES.pulse,
                     }}
                   />
@@ -161,12 +164,11 @@ export function DashboardSkeleton() {
 
             {/* Quick Access Card */}
             <Card
-              className='mb-1 h-30'
+              className='mb-3 shadow-sm'
               style={{
                 borderWidth: '2.5px',
-                borderColor: THEME.colors.primary,
+                borderColor: '#000',
                 backgroundColor: THEME.colors.secondary,
-                transition: 'background-color 0.2s',
                 padding: '1rem',
                 ...ANIMATION_STYLES.fadeIn,
               }}
@@ -194,29 +196,35 @@ export function DashboardSkeleton() {
           {/* Projects Column */}
           <Col lg={8} md={7} sm={12}>
             <Card
+              className='shadow-sm'
               style={{
                 borderWidth: '2.5px',
-                borderColor: THEME.colors.primary,
+                borderColor: '#000',
                 backgroundColor: THEME.colors.secondary,
-                transition: 'background-color 0.2s',
                 ...ANIMATION_STYLES.fadeIn,
               }}
             >
               <Card.Body>
                 <CardHeaderSkeleton title='Projects' />
-                <div className='d-flex flex-wrap gap-2 pt-5'>
-                  {[1, 2, 3].map((_, index) => (
-                    <Col
-                      key={index}
-                      style={{
-                        width: '10%',
-                        height: '20rem',
-                        backgroundColor: THEME.colors.primary,
-                        borderRadius: '0.5rem',
-                        ...ANIMATION_STYLES.pulse,
-                      }}
-                    />
-                  ))}
+                <div
+                  className='p-3'
+                  style={{ maxHeight: '61.5vh', overflowY: 'auto' }}
+                >
+                  <Row xs={1} sm={2} md={2} lg={3} xl={4} className='g-4'>
+                    {[1, 2, 3].map((_, index) => (
+                      <Col key={index}>
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '20rem',
+                            backgroundColor: THEME.colors.primary,
+                            borderRadius: '0.5rem',
+                            ...ANIMATION_STYLES.pulse,
+                          }}
+                        />
+                      </Col>
+                    ))}
+                  </Row>
                 </div>
               </Card.Body>
             </Card>

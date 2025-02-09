@@ -145,3 +145,31 @@ export const deletePost = async (token, postId) => {
 
   return res
 }
+
+//Get last post by author
+export const getLastPostByAuthor = async (token, projectId, authorId) => {
+  const searchParams = new URLSearchParams({
+    author: authorId,
+    sortBy: 'createdAt',
+    sortOrder: 'descending',
+  })
+
+  const res = await fetch(
+    `${
+      import.meta.env.VITE_BACKEND_URL
+    }/projects/${projectId}/posts?${searchParams}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  )
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch latest post')
+  }
+
+  const posts = await res.json()
+  console.log(`>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`, posts)
+  return posts[0] || null
+}
