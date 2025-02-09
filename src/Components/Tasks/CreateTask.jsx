@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import { useState, useRef, useEffect } from 'react'
@@ -209,7 +210,7 @@ export function CreateTask() {
         alt='Create Task'
         onClick={() => setShow(true)}
         className=''
-        iconWidthREM={7}
+        iconWidthREM={6}
         color='#000'
       />
 

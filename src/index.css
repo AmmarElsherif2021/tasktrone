@@ -1,9 +1,9 @@
 /* Import Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 /* Global font family for the entire project */
 :root {
   --font-family-primary: 'Roboto', sans-serif;
+  --font-family-mono: 'Roboto Mono', monospace;
   --font-weight-thin: 100;
   --font-weight-light: 300;
   --font-weight-regular: 400;
@@ -57,73 +57,91 @@ body::-webkit-scrollbar-thumb:horizontal {
 }
 
 /* Typography classes */
+/* Roboto Font Classes */
 .roboto-thin {
   font-family: var(--font-family-primary);
   font-weight: var(--font-weight-thin);
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'wdth' 100;
 }
 
 .roboto-light {
   font-family: var(--font-family-primary);
   font-weight: var(--font-weight-light);
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'wdth' 100;
 }
 
 .roboto-regular {
   font-family: var(--font-family-primary);
   font-weight: var(--font-weight-regular);
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'wdth' 100;
 }
 
 .roboto-medium {
   font-family: var(--font-family-primary);
   font-weight: var(--font-weight-medium);
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'wdth' 100;
 }
 
 .roboto-bold {
   font-family: var(--font-family-primary);
   font-weight: var(--font-weight-bold);
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'wdth' 100;
 }
 
 .roboto-black {
   font-family: var(--font-family-primary);
   font-weight: var(--font-weight-black);
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'wdth' 100;
 }
 
-.roboto-thin-italic {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-thin);
-  font-style: italic;
+/* Roboto Mono Font Classes */
+.roboto-mono-thin {
+  font-family: var(--font-family-mono);
+  font-weight: 100;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
-.roboto-light-italic {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-light);
-  font-style: italic;
+.roboto-mono-light {
+  font-family: var(--font-family-mono);
+  font-weight: 300;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
-.roboto-regular-italic {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-regular);
-  font-style: italic;
+.roboto-mono-regular {
+  font-family: var(--font-family-mono);
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
-.roboto-medium-italic {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-medium);
-  font-style: italic;
+.roboto-mono-medium {
+  font-family: var(--font-family-mono);
+  font-weight: 500;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
-.roboto-bold-italic {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-bold);
-  font-style: italic;
+.roboto-mono-bold {
+  font-family: var(--font-family-mono);
+  font-weight: 700;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
-.roboto-black-italic {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-black);
-  font-style: italic;
-}
-
-/* Other global styles */
 a {
   font-weight: 500;
   color: #44886f;
@@ -316,6 +334,76 @@ button:focus-visible {
 }
 .custom-modal {
   color: #000 !important;
-  border-color: #404c46 !important;
+  border-color: #557263 !important;
   border-width: 2px !important;
+}
+/*tabs*/
+.nav-tabs {
+  border: none;
+}
+
+.nav-tabs .nav-link {
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-bold);
+  font-size: 0.8rem;
+  border: 2px solid #557263;
+  border-radius: 8px;
+  margin-right: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  color: #000;
+  transition: all 0.2s;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #557263;
+  color: #fff;
+  border: 2px solid #557263;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+  border: 2px solid #557263;
+  background-color: rgba(85, 114, 99, 0.1);
+}
+
+#scale {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 12px;
+  background: transparent;
+  margin: 10px 0;
+  accent-color: black; /* Added line */
+}
+
+#scale::-webkit-slider-runnable-track {
+  background: #f4f4f4;
+  border-radius: 6px;
+  height: 12px;
+}
+
+#scale::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #000;
+  border-radius: 50%;
+  border: 3px solid #f4f4f4;
+  margin-top: -0.3px;
+  cursor: grab;
+}
+
+/* Firefox */
+#scale::-moz-range-track {
+  background: #f4f4f4;
+  border-radius: 6px;
+  height: 12px;
+}
+
+#scale::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #000;
+  border-radius: 50%;
+  border: 3px solid #f4f4f4;
+  cursor: grab;
 }

@@ -5,6 +5,7 @@ import { Board } from './Board'
 import { Header } from '../Components/Header/Header'
 import BlogIcon from '../assets/blogIcon.svg'
 import BlogIconFlipped from '../assets/blogIconFlipped.svg'
+import toUp from '../assets/up.svg'
 import IconButton from '../Ui/IconButton'
 import { CreateTask } from '../Components/Tasks/CreateTask'
 import { ProjectDashboard } from '../Components/Projects/ProjectDashboard'
@@ -24,27 +25,44 @@ export const ProjectLayout = () => {
         <Col
           xs={2}
           lg={1}
-          className='d-flex flex-column align-items-center  p-2'
+          className='d-flex flex-column align-items-center'
           style={{
-            height: 'calc(100vh - 4rem)',
+            height: '100%',
             position: 'fixed',
-            top: '4rem',
+            paddingTop: 0, //'4rem',
+            paddingRight: '1rem',
+            top: 0,
             left: 0,
             zIndex: 1000,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-around',
+            justifyContent: 'space-evenly',
             backgroundColor: '#EEFBF4',
             borderRightWidth: !showBlog && '2px',
-            borderRightColor: !showBlog && '#729B87',
+            borderRightColor: !showBlog && '#000', // '#729B87',
             borderRightStyle: !showBlog && 'solid',
           }}
         >
+          <div
+            style={{
+              position: 'absolute',
+              top: '0',
+              margin: '1rem',
+            }}
+          >
+            <IconButton
+              src={toUp}
+              alt={'scroll up'}
+              onClick={() => window.scrollTo(0, 0)}
+              iconWidthREM={6}
+            />
+          </div>
+
           <IconButton
             src={showBlog ? BlogIconFlipped : BlogIcon}
             alt={showBlog ? 'Hide Blog' : 'Show Blog'}
             onClick={toggleBlog}
-            iconWidthREM={7}
+            iconWidthREM={6}
           />
           <CreateTask />
           <ProjectDashboard />
@@ -54,17 +72,18 @@ export const ProjectLayout = () => {
         <Col
           xs={10}
           lg={showBlog ? 4 : 1}
-          className={` p-2 ${showBlog ? 'd-block' : 'd-none'}`}
+          className={` ${showBlog ? 'd-block' : 'd-none'}`}
           style={{
-            height: 'calc(100vh - 5rem)',
+            height: '100vh',
             position: 'fixed',
-            top: '4.5rem',
+            top: 0,
+            paddingTop: 0,
             left: '5rem',
             overflowY: 'auto',
             zIndex: 999,
             backgroundColor: '#EEFBF4',
             borderRightWidth: '2px',
-            borderRightColor: '#729B87',
+            borderRightColor: '#000', // '#729B87',
             borderRightStyle: 'solid',
           }}
         >
@@ -79,9 +98,9 @@ export const ProjectLayout = () => {
           style={{
             mineight: '100%',
             position: 'absolute',
-            top: '4.5rem',
+            top: 0,
             left: '5rem',
-            paddingTop: 0,
+            paddingTop: '5rem',
             marginTop: 0,
             marginLeft: '2rem',
             paddingBottom: '1rem',

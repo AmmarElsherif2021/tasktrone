@@ -5,8 +5,8 @@ const StaticRoundBtn = ({
   src = '',
   alt,
   handleClick = () => {},
-  color = '#000000',
-  backgroundColor = '#fff',
+  color = '#fff',
+  backgroundColor = 'transparent',
 }) => {
   return (
     <Button
@@ -15,17 +15,16 @@ const StaticRoundBtn = ({
       style={{
         borderWidth: '2px',
         borderColor: color, //'#ad0000',
-        borderRadius: '2rem',
-        maxWidth: '6rem',
+        color: color,
+        borderRadius: '10px',
+        maxWidth: '7rem',
         margin: '0.4rem',
         backgroundColor: backgroundColor,
       }}
       onClick={handleClick}
     >
       {src && <img src={src} width={2} alt={alt} />}
-      <span style={{ color: '#000' }}>
-        <small>{alt}</small>
-      </span>
+      <span style={{ color: color }}>{alt}</span>
     </Button>
   )
 }

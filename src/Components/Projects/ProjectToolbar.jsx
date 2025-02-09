@@ -20,22 +20,24 @@ const THEME = {
 const COMMON_STYLES = {
   navbar: {
     borderStyle: 'solid',
-    borderColor: '#000', //THEME.colors.primary,
-    backgroundColor: THEME.colors.muted,
+    borderColor: THEME.colors.dark, //'#55ff63',
+    backgroundColor: THEME.colors.primary,
     borderWidth: '2px',
     padding: '1rem',
     borderRadius: '0.5rem',
-    height: '4rem',
+    height: '5rem',
   },
   metricBox: {
     padding: '0.25rem 0.5rem',
     borderRadius: '0.25rem',
     borderStyle: 'solid',
-    borderColor: THEME.colors.primary,
-    borderWidth: '1px',
+    borderColor: THEME.colors.dark,
+    borderWidth: '2px',
     backgroundColor: THEME.colors.secondary,
-    color: THEME.colors.dark,
-    fontSize: '0.875rem',
+    color: '#000',
+    fontFamily: ` var(--font-family-mono)`,
+    fontWeight: ' var(--font-weight-bold)',
+    fontSize: '0.9em',
     textAlign: 'center',
   },
 }
@@ -77,10 +79,22 @@ const Toolbar = ({ project }) => {
               {activeIntegrations > 0 ? '✓' : '!'}
             </div>
             <div>
-              <h5 style={{ margin: 0 }}>{title}</h5>
-              <small className='text-muted'>
+              <h5
+                style={{
+                  fontFamily: ` var(--font-family-mono)`,
+                }}
+              >
+                {title}
+              </h5>
+              <span
+                style={{
+                  fontFamily: ` var(--font-family-mono)`,
+                  fontWeight: ' var(--font-weight-bold)',
+                  fontSize: '0.9em',
+                }}
+              >
                 {formatDate(startDate)} - {formatDate(endDate)}
-              </small>
+              </span>
             </div>
           </div>
 

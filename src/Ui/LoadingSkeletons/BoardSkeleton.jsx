@@ -6,19 +6,21 @@ import { MetricsSkeleton } from './MetricsSkeleton'
 import welcome from '../../assets/welcome.gif'
 import { createKeyframes, ANIMATION_STYLES } from './animations'
 
+const COLORS = {
+  primary: '#729B87',
+  secondary: '#E1F9ED',
+  accent: '#EC4F50',
+  dark: '#404C46',
+  muted: '#1aaa8F',
+}
+
 const THEME = {
-  colors: {
-    primary: '#729B87',
-    secondary: '#E1F9ED',
-    accent: '#EC4F50',
-    dark: '#404C46',
-    muted: '#C4E2D3',
-  },
+  colors: COLORS,
   metrics: [
-    { id: 'wipLimit', color: '#DE2C2D', backgroundColor: '#F83C3D' },
-    { id: 'inProgress', color: '#12AF44', backgroundColor: '#49DB78' },
-    { id: 'cycleTime', color: '#0FC6A2', backgroundColor: '#04EBBD' },
-    { id: 'leadTime', color: '#FE9900', backgroundColor: '#FE9900' },
+    { id: 'wipLimit', color: '#AE2C2D', backgroundColor: '#A83C3D' },
+    { id: 'inProgress', color: '#11AF44', backgroundColor: '#29DB78' },
+    { id: 'cycleTime', color: '#0AC6A2', backgroundColor: '#01EBBD' },
+    { id: 'leadTime', color: '#FA9900', backgroundColor: '#FA9900' },
     { id: 'throughput', color: '#186545', backgroundColor: '#49DB78' },
     { id: 'flowEfficiency', color: '#DE2C2D', backgroundColor: '#F83C3D' },
   ],
@@ -36,13 +38,80 @@ export const BoardSkeleton = ({ phase = 'loading' }) => {
         <div style={ANIMATION_STYLES.fadeIn}>
           <ToolbarSkeleton />
           <MetricsSkeleton />
-          <Card style={{ borderStyle: 'none' }}>
+          <Card
+            className='shadow-sm mb-4'
+            style={{
+              borderWidth: '2.5px',
+              borderColor: '#C2D4CA',
+              backgroundColor: THEME.colors.secondary,
+              padding: '1rem',
+            }}
+          >
+            <Card.Header
+              className='d-flex align-items-center justify-content-between py-3'
+              style={{
+                backgroundColor: 'transparent',
+                borderBottom: '2.5px solid #C2D4CA',
+                ...ANIMATION_STYLES.pulse,
+              }}
+            >
+              <div className='d-flex align-items-center'>
+                <div
+                  style={{
+                    width: '3rem',
+                    height: '3rem',
+                    backgroundColor: THEME.colors.muted,
+                    borderRadius: '50%',
+                    marginRight: '1rem',
+                    ...ANIMATION_STYLES.pulse,
+                  }}
+                />
+                <h4 className='mb-0' style={{ color: THEME.colors.dark }}>
+                  Project Board
+                </h4>
+              </div>
+              <div className='d-flex gap-2'>
+                <div
+                  style={{
+                    width: '2rem',
+                    height: '2rem',
+                    backgroundColor: THEME.colors.muted,
+                    borderRadius: '50%',
+                    ...ANIMATION_STYLES.pulse,
+                  }}
+                />
+                <div
+                  style={{
+                    width: '2rem',
+                    height: '2rem',
+                    backgroundColor: THEME.colors.primary,
+                    borderRadius: '50%',
+                    ...ANIMATION_STYLES.pulse,
+                  }}
+                />
+              </div>
+            </Card.Header>
             <Card.Body>
               <div className='text-center py-5'>
-                <Spinner animation='border' role='status' variant='#000'>
+                <Spinner
+                  animation='border'
+                  style={{
+                    color: THEME.colors.muted,
+                    width: '3rem',
+                    height: '3rem',
+                    borderWidth: '0.25rem',
+                  }}
+                >
                   <span className='visually-hidden'>Loading...</span>
                 </Spinner>
-                <p className='mt-3' style={ANIMATION_STYLES.fadeIn}>
+                <p
+                  className='mt-3'
+                  style={{
+                    color: THEME.colors.dark,
+                    fontSize: '1.1rem',
+                    ...ANIMATION_STYLES.fadeIn,
+                  }}
+                >
                   Loading project board...
                 </p>
               </div>
@@ -51,28 +120,79 @@ export const BoardSkeleton = ({ phase = 'loading' }) => {
         </div>
       ) : (
         <Card
-          className='p-4'
+          className='shadow-sm'
           style={{
-            borderStyle: 'none',
+            borderWidth: '2.5px',
+            borderColor: '#C2D4CA',
+            backgroundColor: THEME.colors.secondary,
+            padding: '1rem',
             ...ANIMATION_STYLES.scaleIn,
           }}
         >
+          <Card.Header
+            className='d-flex align-items-center justify-content-between py-3'
+            style={{
+              backgroundColor: 'transparent',
+              borderBottom: '2.5px solid #C2D4CA',
+              ...ANIMATION_STYLES.pulse,
+            }}
+          >
+            <div className='d-flex align-items-center'>
+              <div
+                style={{
+                  width: '3rem',
+                  height: '3rem',
+                  backgroundColor: THEME.colors.muted,
+                  borderRadius: '50%',
+                  marginRight: '1rem',
+                  ...ANIMATION_STYLES.pulse,
+                }}
+              />
+            </div>
+            <div className='d-flex gap-2'>
+              <div
+                style={{
+                  width: '2rem',
+                  height: '2rem',
+                  backgroundColor: THEME.colors.muted,
+                  borderRadius: '50%',
+                  ...ANIMATION_STYLES.pulse,
+                }}
+              />
+              <div
+                style={{
+                  width: '2rem',
+                  height: '2rem',
+                  backgroundColor: THEME.colors.primary,
+                  borderRadius: '50%',
+                  ...ANIMATION_STYLES.pulse,
+                }}
+              />
+            </div>
+          </Card.Header>
           <Card.Body
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              padding: '2rem 1rem',
             }}
           >
             <img
               alt='newProject'
               src={welcome}
-              className='mb-3'
-              style={ANIMATION_STYLES.fadeIn}
+              className='mb-4'
+              style={{
+                maxWidth: '300px',
+                ...ANIMATION_STYLES.fadeIn,
+              }}
             />
             <h1
               style={{
                 textAlign: 'center',
+                color: THEME.colors.dark,
+                fontSize: '1.75rem',
+                maxWidth: '800px',
                 ...ANIMATION_STYLES.slideIn,
               }}
             >

@@ -1,5 +1,5 @@
 export const colors = {
-  cardBackgroundColor: '#BAFFCF',
-  hoverCardBackgroundColor: '#9AFFB8',
+  cardBackgroundColor: '#E4EBFA',
+  hoverCardBackgroundColor: '#D3EADE',
 }
 export const headerFooterStyle = { borderColor: '#000' }

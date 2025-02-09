@@ -79,15 +79,15 @@ export const ProjectDashboard = () => {
     <>
       <IconButton
         src={projectDashboardIcon}
-        alt='Project dashboard'
+        alt='Set Project'
         className='mb-0 p-0 border-0'
         onClick={handleShow}
-        iconWidthREM={7}
+        iconWidthREM={6}
       />
 
       <Modal show={show} onHide={handleClose} centered size='lg'>
         <Modal.Header closeButton>
-          <Modal.Title>Project Dashboard</Modal.Title>
+          <Modal.Title>Set project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Container fluid>
