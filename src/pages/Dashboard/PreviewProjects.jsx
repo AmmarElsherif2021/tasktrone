@@ -19,7 +19,7 @@ export const PreviewProjects = () => {
 
   return (
     <div className='p-3' style={{ maxHeight: '61.5vh', overflowY: 'auto' }}>
-      <Row xs={1} sm={2} md={2} lg={3} xl={4} className='g-4'>
+      <Row xs={1} sm={1} md={2} lg={3} xl={4} className='g-1'>
         {userProjects.map((project) => (
           <Col key={project._id}>
             <ProjectCard

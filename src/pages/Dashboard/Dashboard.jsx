@@ -33,6 +33,7 @@ import { ProfileImage } from '../../Components/User/ProfileImage'
 import DashboardSkeleton from '../../Ui/LoadingSkeletons/DashboardSkeleton'
 //import { colors } from '../../Ui/colors'
 import { StyledCard } from '../../Ui/StyledCard'
+import { MessengerRegister } from './MessangerRegister'
 // ==================== STYLES ====================
 // const CARD_STYLES = {
 //   borderWidth: '2.5px',
@@ -44,16 +45,18 @@ import { StyledCard } from '../../Ui/StyledCard'
 const METRIC_CARD_STYLES = {
   width: '10rem',
   height: '10rem',
-  bordercolor: '#557263',
-  borderWidth: '3px',
-  borderRadius: '30%',
+  borderWidth: '2px',
+  borderColor: '#000',
+  borderStyle: 'solid',
+  borderRadius: '10px',
+  fontWeight: 'var(--font-weight-bold)',
+  fontSize: '1.2em',
   color: '#000',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
 }
-
 // const HOVER_CARD_STYLES = {
 //   backgroundColor: colors.hoverCardBackgroundColor,
 // }
@@ -61,6 +64,10 @@ const METRIC_CARD_STYLES = {
 const CARD_HEADER_STYLES = {
   backgroundColor: 'transparent',
   borderBottom: '2.5px solid #557263',
+  fontFamily: 'var(--font-family-mono)',
+  fontWeight: 'var(--font-weight-bold)',
+  fontSize: '0.9rem',
+  color: '#000',
 }
 
 const ALERT_STYLES = {
@@ -126,8 +133,8 @@ const QUICK_ACCESS_BUTTONS = [
 
 // ==================== REUSABLE COMPONENTS ====================
 const MetricCard = ({ metric, value }) => (
-  <Card
-    className='mb-3 shadow-sm'
+  <div
+    className='mb-3 '
     style={{
       ...METRIC_CARD_STYLES,
       backgroundColor: metric.color,
@@ -141,11 +148,11 @@ const MetricCard = ({ metric, value }) => (
     />
     <h5 className='mb-1'>{metric.title}</h5>
     <h3 className='mb-0'>{value}</h3>
-  </Card>
+  </div>
 )
 
 const CardHeader = ({ icon, title, children }) => (
-  <Card.Header
+  <div
     className='d-flex align-items-center justify-content-between py-3'
     style={CARD_HEADER_STYLES}
   >
@@ -154,7 +161,7 @@ const CardHeader = ({ icon, title, children }) => (
       <h4 className='mb-0'>{title}</h4>
     </div>
     {children}
-  </Card.Header>
+  </div>
 )
 
 // ==================== MAIN COMPONENT ====================
@@ -348,6 +355,14 @@ export function Dashboard() {
                 )}
               </Card.Body>
             </StyledCard>
+            <MessengerRegister
+              users={[
+                { id: 'u1', name: 'Alice Chen', role: 'engineer' },
+                { id: 'u2', name: 'Bob Wilson', role: 'designer' },
+                { id: 'u3', name: 'Carol Martinez', role: 'manager' },
+              ]}
+              onClose={() => {}}
+            />
           </Col>
         </Row>
 
