@@ -9,7 +9,7 @@ import RefreshProject from './RefreshProject'
 
 const THEME = {
   colors: {
-    primary: '#BBD3C7',
+    primary: '#7CBF9E',
     secondary: '#EAF9ED',
     accent: '#EC4F50',
     dark: '#404C46',

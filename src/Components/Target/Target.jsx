@@ -33,7 +33,7 @@ const COMMON_STYLES = {
     borderBottomColor: 'transparent',
     bottom: '-2px',
     zIndex: 1000,
-    backgroundColor: '#D3EADE',
+    backgroundColor: '#D8F9E6',
   },
   navLinkActive: {
     backgroundColor: '#557263',
