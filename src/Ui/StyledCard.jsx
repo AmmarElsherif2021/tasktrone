@@ -4,7 +4,7 @@ import { colors } from './colors'
 
 const CARD_STYLES = {
   borderWidth: '2.5px',
-  borderColor: '#557263',
+  borderColor: '#000', //'#557263',
   transition: 'background-color 0.2s',
   backgroundColor: colors.cardBackgroundColor,
   padding: '0.5rem',

@@ -18,7 +18,7 @@ import { StyledCard } from '../../Ui/StyledCard'
 const COMMON_STYLES = {
   card: {
     borderWidth: '2.5px',
-    borderColor: '#557263',
+    borderColor: '#000',
     transition: 'background-color 0.2s',
     backgroundColor: colors.cardBackgroundColor,
   },
@@ -92,9 +92,9 @@ const COMMON_STYLES = {
   },
   announcement: {
     backgroundColor: '#fff',
-    marginTop: '0.5rem',
+    marginBottom: '1rem',
     overflowY: 'scroll',
-    maxHeight: '6rem',
+    height: '8rem',
     fontFamily: 'var()',
   },
 }
@@ -240,7 +240,7 @@ export const Metrics = () => {
       hoverKey='metrics'
       hoverStates={hoverStates}
       handleHover={handleHover}
-      style={{ height: '85vh' }}
+      style={{ height: '90vh' }}
     >
       <Card.Header style={COMMON_STYLES.cardHeader} className='w-100'>
         <Card.Title>Project Metrics</Card.Title>
@@ -297,11 +297,7 @@ export const Metrics = () => {
             </Col>
           ))}
         </Row>
-        <Row>
-          <Col>
-            <strong>Total tasks: {currentProject?.tasks?.length || 0}</strong>
-          </Col>
-        </Row>
+
         <Row>
           {!isPostsLoading && (
             <Card
@@ -324,6 +320,16 @@ export const Metrics = () => {
               )}
             </Card>
           )}
+        </Row>
+        <Row
+          style={{
+            fontFamily: 'var(--font-family-mono)',
+            fontWeight: 'var(--font-weight-bold)',
+            fontSize: '0.8rem',
+            marginTop: '1rem',
+          }}
+        >
+          <small>Total tasks: {currentProject?.tasks?.length || 0}</small>
         </Row>
       </Card.Body>
     </StyledCard>
