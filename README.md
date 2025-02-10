@@ -123,11 +123,16 @@ The Kanban tool, Tasktrone, is designed as a web-based application with mobile c
 
 #### Phases in Manufacturing Machine Timeline
 
-| **Phase**               | **Teams Involved** | **Roles Involved** | **Deliverables**        | **File Types**         | **Possible Events**                                  |
-| ----------------------- | ------------------ | ------------------ | ----------------------- | ---------------------- | ---------------------------------------------------- |
-| **1. Concept & Design** | Design Team        | – Design Engineers | – Concept Designs       | `.dwg`, `.stp`, `.pdf` | Initial brainstorming, design sketches, CAD modeling |
-|                         |                    | – CAD Technicians  | – Design Specifications | `.docx`, `.pdf`        |                                                      |
-|                         |                    |                    | – CAD Models            | `.dwg`, `.stp`         |                                                      |
+| Phase                          | Teams Involved                                                            | Deliverables                                                              | File Types                                              | Possible Events                                                                |
+| ------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **1. Concept and Design**      | Design Engineers<br>CAD Technicians                                       | Concept Designs<br>Design Specifications<br>CAD Models                    | .PDF, .JPG/.PNG<br>.DOCX, .PDF<br>.STEP, .IGES, .SLDPRT | Initial brainstorming<br>Design sketches<br>CAD modeling                       |
+| **2. Prototyping**             | Manufacturing Engineers<br>CNC Programmers<br>Machinists<br>QC Inspectors | Prototypes<br>CNC Programs<br>Inspection Reports                          | .STL, .OBJ<br>.NC, .GCODE<br>.PDF, .XLSX                | Prototype production<br>Testing and evaluation<br>Iterations based on feedback |
+| **3. Pre-Production Planning** | Production Planners<br>Inventory Managers<br>Production Supervisors       | Production Schedules<br>Material Requirement Plans<br>Resource Allocation | .XLSX, .PDF<br>.XLSX, .CSV<br>.XLSX, .PDF               | Planning for production runs<br>Scheduling<br>Resource allocation              |
+| **4. Production**              | Machine Operators<br>Production Supervisors<br>QC Inspectors              | Finished Machine Parts<br>Inspection Reports<br>Production Records        | .STEP, .IGES (CAD)<br>.PDF, .XLSX<br>.XLSX, .CSV        | Machine setup<br>Continuous production<br>Quality checks                       |
+| **5. Quality Control**         | QC Inspectors<br>Metrology Engineers                                      | Quality Metrics<br>Compliance Documentation                               | .XLSX, .CSV<br>.PDF, .DOCX                              | Detailed inspections<br>Compliance checks<br>Final adjustments                 |
+| **6. Assembly and Testing**    | Assembly Technicians<br>Test Engineers                                    | Assembled Machines<br>Test Reports                                        | .PDF (Assembly Guides)<br>.PDF, .DOCX                   | Assembly of parts<br>Functional testing<br>Troubleshooting                     |
+| **7. Packaging and Shipping**  | Logistics Coordinators<br>Inventory Managers                              | Packaged Machines<br>Shipping Documentation                               | .PDF (Packaging Specs)<br>.PDF, .CSV, .XLSX             | Packaging<br>Coordination with shipping<br>Inventory management                |
+| **8. Maintenance and Support** | Maintenance Technicians<br>Support Teams                                  | Maintenance Logs<br>Support Documentation                                 | .PDF, .DOCX<br>.PDF, .TXT                               | Scheduled maintenance<br>Technical support<br>Troubleshooting                  |
 
 ### 3.2 Kanban Board Organization
 

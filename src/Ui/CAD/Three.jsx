@@ -8,8 +8,8 @@ import { Alert } from 'react-bootstrap'
 
 function Three({
   modelPath = 'src/UI/gear.stl', // Default STL file path
-  width = '100%',
-  height = '315px',
+  width = '99%',
+  height = '60vh',
 }) {
   const containerRef = useRef(null)
   const rendererRef = useRef(null)
@@ -219,18 +219,26 @@ function Three({
       ) : (
         <>
           {/* Slider for size control */}
-          <div style={{ marginBottom: '10px' }}>
-            <label htmlFor='scale'>Scale: </label>
+          <div
+            style={{
+              fontFamily: ` var(--font-family-mono)`,
+              fontWeight: ' var(--font-weight-bold)',
+              fontSize: '0.9em',
+            }}
+          >
+            <label htmlFor='scale'>
+              Scale: <span> {scale.toFixed(1)}</span>{' '}
+            </label>
             <input
+              className='form-range'
               type='range'
               id='scale'
-              min='0.1'
-              max='5'
-              step='0.1'
+              min='1'
+              max='100'
+              step='1'
               value={scale}
               onChange={handleScaleChange}
             />
-            <span> {scale.toFixed(1)}</span>
           </div>
 
           {/* Container for Three.js renderer */}
@@ -238,8 +246,9 @@ function Three({
             ref={containerRef}
             style={{
               width: '100%',
-              height: 'calc(100% - 30px)', // Adjust height to accommodate the slider
+              height: 'calc(100% - 30px)',
               overflow: 'hidden',
+              borderRadius: '7px',
             }}
           />
         </>

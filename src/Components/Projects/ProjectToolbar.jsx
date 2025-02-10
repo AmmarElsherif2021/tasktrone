@@ -9,7 +9,7 @@ import RefreshProject from './RefreshProject'
 
 const THEME = {
   colors: {
-    primary: '#1aaa8F',
+    primary: '#BBD3C7',
     secondary: '#EAF9ED',
     accent: '#EC4F50',
     dark: '#404C46',
@@ -20,7 +20,7 @@ const THEME = {
 const COMMON_STYLES = {
   navbar: {
     borderStyle: 'solid',
-    borderColor: THEME.colors.dark, //'#55ff63',
+    borderColor: '#000',
     backgroundColor: THEME.colors.primary,
     borderWidth: '2px',
     padding: '1rem',
@@ -31,7 +31,7 @@ const COMMON_STYLES = {
     padding: '0.25rem 0.5rem',
     borderRadius: '0.25rem',
     borderStyle: 'solid',
-    borderColor: THEME.colors.dark,
+    borderColor: '#000', //THEME.colors.dark,
     borderWidth: '2px',
     backgroundColor: THEME.colors.secondary,
     color: '#000',
@@ -39,6 +39,17 @@ const COMMON_STYLES = {
     fontWeight: ' var(--font-weight-bold)',
     fontSize: '0.9em',
     textAlign: 'center',
+  },
+  activeStyle: {
+    width: '2.5rem',
+    height: '2.5rem',
+    backgroundColor: THEME.colors.secondary,
+    borderRadius: '4px',
+    borderColor: '#000',
+    borderWidth: '1px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 }
 
@@ -62,26 +73,17 @@ const Toolbar = ({ project }) => {
   return (
     <Navbar expand='lg' className='mb-2 ' style={COMMON_STYLES.navbar}>
       <Container fluid className='px-3'>
-        <div className='d-flex align-items-center justify-content-between w-100 py-2'>
+        <div className='d-flex align-items-center justify-content-between w-100 py-1'>
           {/* Left section - Project Info */}
           <div className='d-flex align-items-center'>
-            <div
-              className='rounded-circle me-3'
-              style={{
-                width: '2.5rem',
-                height: '2.5rem',
-                backgroundColor: THEME.colors.secondary,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
+            <span className=' me-3' style={COMMON_STYLES.activeStyle}>
               {activeIntegrations > 0 ? '✓' : '!'}
-            </div>
+            </span>
             <div>
               <h5
                 style={{
                   fontFamily: ` var(--font-family-mono)`,
+                  color: '#000',
                 }}
               >
                 {title}
