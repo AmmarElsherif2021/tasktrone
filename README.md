@@ -25,12 +25,12 @@ The Kanban tool, Tasktrone, is designed as a web-based application with mobile c
 
 #### Primary User Groups:
 
-1. Design Team
+1. **Design Team**
 
    - Design Engineers
    - CAD Technicians
 
-2. Manufacturing Team
+2. **Manufacturing Team**
 
    - CNC Programmers
    - Manufacturing Engineers
@@ -38,12 +38,12 @@ The Kanban tool, Tasktrone, is designed as a web-based application with mobile c
    - Machine Operators
    - Production Supervisors
 
-3. Quality Control Team
+3. **Quality Control Team**
 
    - Quality Control Inspectors
    - Metrology Engineers
 
-4. Support Teams
+4. **Support Teams**
    - Inventory Managers
    - Production Planners
    - Maintenance Technicians
@@ -71,7 +71,7 @@ The Kanban tool, Tasktrone, is designed as a web-based application with mobile c
 - Inventory management
 - Logistics operations
 
-##### Tasks specifications:
+**Tasks specifications:**
 
 | **Team**                       | **Task**             | **Deliverables**                                 | **Sent/Required Files**                                                  |
 | ------------------------------ | -------------------- | ------------------------------------------------ | ------------------------------------------------------------------------ |
@@ -105,99 +105,93 @@ The Kanban tool, Tasktrone, is designed as a web-based application with mobile c
 | **Logistics Coordinators**     | Shipment Schedules   | Shipment Schedules, Delivery Documentation       | Shipment Schedules (`.xlsx`, `.pdf`), Delivery Documents (`.pdf`)        |
 |                                | Logistics Reports    | Logistics Reports, Inventory Movement Logs       | Logistic Reports (`.docx`, `.pdf`), Movement Logs (`.xlsx`)              |
 
-###### Other multi-team tasks:
+**Other multi-team tasks:**
 
 1. **Product Design Review**: Combines Design Engineers, CAD Technicians, Manufacturing Engineers, and Metrology Engineers to ensure the design is manufacturable and meets quality standards.
-
 2. **Prototyping**: Combines Manufacturing Engineers, Machinists, CNC Programmers, and Quality Control Inspectors to produce and evaluate a prototype.
-
 3. **Production Planning**: Involves Production Planners, Inventory Managers, and Production Supervisors for material planning, scheduling, and resource allocation.
-
 4. **Equipment Maintenance**: Involves Maintenance Technicians, Machine Operators, and Production Supervisors for regular upkeep and troubleshooting.
-
 5. **Continuous Improvement**: Utilizes inputs from Manufacturing Engineers, Quality Control Inspectors, Machinists, and Production Supervisors to implement process improvements and reduce waste.
-
 6. **Training and Development**: HR Personnel, Production Supervisors, and Maintenance Technicians collaborate to develop and deliver training programs for employees.
-
 7. **Inventory Management**: Involves Inventory Managers, Production Planners, and Logistics Coordinators to streamline stock levels and ensure timely deliveries.
 
 #### Phases in Manufacturing Machine Timeline
 
-| Phase                          | Teams Involved                                                            | Deliverables                                                              | Input Files                                              | Output Files                                                                                       | Possible Events                                                                |
-| ------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --- |
-| **1. Concept and Design**      | Design Engineers<br>CAD Technicians                                       | Concept Designs<br>Design Specifications<br>CAD Models                    | Requirements docs (.PDF)<br>Reference images (.JPG/.PNG) | Design docs (.PDF)<br>Specifications (.DOCX, .PDF)<br>CAD files (.STEP, .IGES, .SLDPRT)            | Initial brainstorming<br>Design sketches<br>CAD modeling                       |
-| **2. Prototyping**             | Manufacturing Engineers<br>CNC Programmers<br>Machinists<br>QC Inspectors | Prototypes<br>CNC Programs<br>Inspection Reports                          | CAD files (.STEP, .IGES)<br>Material specs (.PDF)        | 3D print files (.STL, .OBJ)<br>CNC programs (.NC, .GCODE)<br>Inspection reports (.PDF, .XLSX)      | Prototype production<br>Testing and evaluation<br>Iterations based on feedback |
-| **3. Pre-Production Planning** | Production Planners<br>Inventory Managers<br>Production Supervisors       | Production Schedules<br>Material Requirement Plans<br>Resource Allocation | Inventory data (.CSV)<br>Capacity plans (.XLSX)          | Production schedules (.XLSX, .PDF)<br>Material plans (.XLSX, .CSV)<br>Resource plans (.XLSX, .PDF) | Planning for production runs<br>Scheduling<br>Resource allocation              |
-| **4. Production**              | Machine Operators<br>Production Supervisors<br>QC Inspectors              | Finished Machine Parts<br>Inspection Reports<br>Production Records        | CAD files (.STEP, .IGES)<br>Work instructions (.PDF)     | Production logs (.XLSX, .CSV)<br>QC reports (.PDF, .XLSX)<br>As-built records (.STEP, .IGES)       | Machine setup<br>Continuous production<br>Quality checks                       |
-| **5. Quality Control**         | QC Inspectors<br>Metrology Engineers                                      | Quality Metrics<br>Compliance Documentation                               | Manufacturing specs (.PDF)<br>QC procedures (.DOCX)      | Quality reports (.XLSX, .CSV)<br>Compliance docs (.PDF, .DOCX)                                     | Detailed inspections<br>Compliance checks<br>Final adjustments                 |
-| **6. Assembly and Testing**    | Assembly Technicians<br>Test Engineers                                    | Assembled Machines<br>Test Reports                                        | Assembly guides (.PDF)<br>Test procedures (.DOCX)        | Test reports (.PDF, .DOCX)<br>Assembly records (.PDF)                                              | Assembly of parts<br>Functional testing<br>Troubleshooting                     |
-| **7. Packaging and Shipping**  | Logistics Coordinators<br>Inventory Managers                              | Packaged Machines<br>Shipping Documentation                               | Packaging specs (.PDF)<br>Inventory data (.CSV)          | Shipping docs (.PDF)<br>Tracking records (.XLSX, .CSV)                                             | Packaging<br>Coordination with shipping<br>Inventory management                |
-| **8. Maintenance and Support** | Maintenance Technicians<br>Support Teams                                  | Maintenance Logs<br>Support Documentation                                 | Service manuals (.PDF)<br>Maintenance procedures (.DOCX) | Maintenance logs (.PDF, .DOCX)<br>Support tickets (.TXT)                                           | Scheduled maintenance<br>Technical support<br>Troubleshooting                  |     |
+| Phase                          | Teams Involved                                                            | Deliverables                                                              | Input Files                                                     | Output Files                                                                                                   | Possible Events                                                                |
+| ------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **1. Concept and Design**      | Design Engineers<br>CAD Technicians                                       | Concept Designs<br>Design Specifications<br>CAD Models                    | Requirements docs (`.pdf`)<br>Reference images (`.jpg`, `.png`) | Design docs (`.pdf`)<br>Specifications (`.docx`, `.pdf`)<br>CAD files (`.step`, `.iges`, `.sldprt`)            | Initial brainstorming<br>Design sketches<br>CAD modeling                       |
+| **2. Prototyping**             | Manufacturing Engineers<br>CNC Programmers<br>Machinists<br>QC Inspectors | Prototypes<br>CNC Programs<br>Inspection Reports                          | CAD files (`.step`, `.iges`)<br>Material specs (`.pdf`)         | 3D print files (`.stl`, `.obj`)<br>CNC programs (`.nc`, `.gcode`)<br>Inspection reports (`.pdf`, `.xlsx`)      | Prototype production<br>Testing and evaluation<br>Iterations based on feedback |
+| **3. Pre-Production Planning** | Production Planners<br>Inventory Managers<br>Production Supervisors       | Production Schedules<br>Material Requirement Plans<br>Resource Allocation | Inventory data (`.csv`)<br>Capacity plans (`.xlsx`)             | Production schedules (`.xlsx`, `.pdf`)<br>Material plans (`.xlsx`, `.csv`)<br>Resource plans (`.xlsx`, `.pdf`) | Planning for production runs<br>Scheduling<br>Resource allocation              |
+| **4. Production**              | Machine Operators<br>Production Supervisors<br>QC Inspectors              | Finished Machine Parts<br>Inspection Reports<br>Production Records        | CAD files (`.step`, `.iges`)<br>Work instructions (`.pdf`)      | Production logs (`.xlsx`, `.csv`)<br>QC reports (`.pdf`, `.xlsx`)<br>As-built records (`.step`, `.iges`)       | Machine setup<br>Continuous production<br>Quality checks                       |
+| **5. Quality Control**         | QC Inspectors<br>Metrology Engineers                                      | Quality Metrics<br>Compliance Documentation                               | Manufacturing specs (`.pdf`)<br>QC procedures (`.docx`)         | Quality reports (`.xlsx`, `.csv`)<br>Compliance docs (`.pdf`, `.docx`)                                         | Detailed inspections<br>Compliance checks<br>Final adjustments                 |
+| **6. Assembly and Testing**    | Assembly Technicians<br>Test Engineers                                    | Assembled Machines<br>Test Reports                                        | Assembly guides (`.pdf`)<br>Test procedures (`.docx`)           | Test reports (`.pdf`, `.docx`)<br>Assembly records (`.pdf`)                                                    | Assembly of parts<br>Functional testing<br>Troubleshooting                     |
+| **7. Packaging and Shipping**  | Logistics Coordinators<br>Inventory Managers                              | Packaged Machines<br>Shipping Documentation                               | Packaging specs (`.pdf`)<br>Inventory data (`.csv`)             | Shipping docs (`.pdf`)<br>Tracking records (`.xlsx`, `.csv`)                                                   | Packaging<br>Coordination with shipping<br>Inventory management                |
+| **8. Maintenance and Support** | Maintenance Technicians<br>Support Teams                                  | Maintenance Logs<br>Support Documentation                                 | Service manuals (`.pdf`)<br>Maintenance procedures (`.docx`)    | Maintenance logs (`.pdf`, `.docx`)<br>Support tickets (`.txt`)                                                 | Scheduled maintenance<br>Technical support<br>Troubleshooting                  |
 
 ### 3.2 Kanban Board Organization
 
-#### 3.2.1 Board paramaters:
+#### 3.2.1 Board Parameters
 
-A Kanban board is a visual tool used to manage workflows and tasks in a project. Here are the main parameters and components commonly used on a Kanban board:
+A Kanban board is a visual tool used to manage workflows and tasks in a project. Key parameters include:
 
 ##### 1. **Cards**
 
-- Represent individual tasks or work items .
-- Contain details such as task name, description, assignees, due dates,team and attachments .
+- Represent individual tasks or work items.
+- Contain details such as task name, description, assignees, due dates, team, and attachments.
 
 ##### 2. **WIP Limits (Work In Progress Limits)**
 
-- Restrictions on the number of tasks that can be in the "In Progress" column at any one time.
-- Helps to prevent overloading and ensure focus on task completion.
+- Restrictions on the number of tasks in the "In Progress" column at any time.
+- Prevent overloading and ensure focus on task completion.
 
 ##### 3. **Swimlanes**
 
-- Horizontal lanes that separate tasks by different categories, teams, or priorities.
-- Useful for distinguishing tasks by type, project, or team.
+- Horizontal lanes to separate tasks by categories, teams, or priorities.
+- Useful for distinguishing task types or projects.
 
 ##### 4. **Labels/Tags**
 
-- Color-coded labels or tags to categorize tasks.
-- Helps in quickly identifying the type, priority, or status of tasks.
+- Color-coded labels to categorize tasks.
+- Quickly identify task type, priority, or status.
 
-##### 4. **Due Dates**
+##### 5. **Due Dates**
 
-- Dates by which tasks need to be completed.
-- Helps in tracking deadlines and ensuring timely delivery.
+- Dates by which tasks must be completed.
+- Track deadlines and ensure timely delivery.
 
-##### 5. **Assignees**
+##### 6. **Assignees**
 
 - Team members responsible for each task.
-- Clearly identifies who is working on what.
+- Clearly identify ownership.
 
-##### 6. **Task Details**
+##### 7. **Task Details**
 
-- Descriptions, checklists, and subtasks within each card.
-- Helps in breaking down work and ensuring all aspects of a task are addressed.
+- Descriptions, checklists, and subtasks within cards.
+- Break down work and ensure thorough task handling.
 
-##### 7. **Comments and Attachments**
+##### 8. **Comments and Attachments**
 
-- Space for team members to leave comments or attach files related to the task.
-- Enhances collaboration and communication.
+- Space for comments or file attachments.
+- Enhance collaboration and communication.
 
-##### 8. **Metrics and Analytics**
+##### 9. **Metrics and Analytics**
 
 - Data such as cycle time, lead time, and cumulative flow diagrams.
-- Helps in monitoring performance and identifying areas for improvement.
+- Monitor performance and identify improvement areas.
 
-##### 9. **Priority Indicators**
+##### 10. **Priority Indicators**
 
-- Flags or icons to denote high-priority tasks.
-- Ensures critical tasks receive attention first.
+- Flags or icons for high-priority tasks.
+- Ensure critical tasks receive immediate attention.
 
 #### 3.2.2 Standard Columns
 
-- To Do
-- In Progress
-- Review
-- Done
+- **To Do**
+- **In Progress**
+- **Review**
+- **Done**
 
-#### 3.2.2 Column Customization
+#### 3.2.3 Column Customization
 
 - Add/remove columns
 - Set WIP limits
@@ -209,9 +203,9 @@ A Kanban board is a visual tool used to manage workflows and tasks in a project.
 
 #### 4.1.1 Design Data
 
-- File formats: STEP, IGES, STL, DXF, DWG
-- Handling: Version control and revision history
-- Access: Role-based permissions
+- **File formats**: STEP, IGES, STL, DXF, DWG
+- **Handling**: Version control and revision history
+- **Access**: Role-based permissions
 
 #### 4.1.2 Manufacturing Data
 
@@ -307,11 +301,11 @@ A Kanban board is a visual tool used to manage workflows and tasks in a project.
 
 ### 8.2 Best Practices
 
-- WIP limit enforcement
-- Regular board reviews
-- Data backup procedures
-- Security protocols
-- User training requirements
+- Enforce WIP limits
+- Conduct regular board reviews
+- Follow data backup procedures
+- Implement security protocols
+- Provide user training
 
 ## 9. Support and Maintenance
 
@@ -328,44 +322,45 @@ A Kanban board is a visual tool used to manage workflows and tasks in a project.
 - Issue reporting procedure
 - Resolution timeframes
 
-# Features could be added for further development:
+---
 
-manufacturing-specific features could be added to make project management tool fit manufaturing process:
+### Features Proposed for Future Development
 
-Production-Specific Task Categories:
+#### Manufacturing-Specific Features:
 
-Design review workflows
-Quality control checkpoints
-Machine maintenance scheduling
-Inventory tracking cards
-Production bottleneck alerts
+- **Production-Specific Task Categories**:
+  - Design review workflows
+  - Quality control checkpoints
+  - Machine maintenance scheduling
+  - Inventory tracking cards
+  - Production bottleneck alerts
 
-Data Integration Features:
+#### Data Integration Features:
 
-Import/export CAD files (STEP, IGES, STL)
-CNC program attachment support
-Quality inspection report generation
-Integration with common manufacturing software APIs
+- Import/export CAD files (STEP, IGES, STL)
+- CNC program attachment support
+- Quality inspection report generation
+- Integration with manufacturing software APIs
 
-Enhanced Analytics:
+#### Enhanced Analytics:
 
-Machine utilization tracking
-Production cycle time visualization
-Quality metrics dashboard
-Resource allocation charts
-Bottleneck identification tools
+- Machine utilization tracking
+- Production cycle time visualization
+- Quality metrics dashboard
+- Resource allocation charts
+- Bottleneck identification tools
 
-Specialized User Roles:
+#### Specialized User Roles:
 
-Design engineer views
-Machine operator dashboards
-Quality inspector workflows
-Maintenance technician schedules
+- Design engineer views
+- Machine operator dashboards
+- Quality inspector workflows
+- Maintenance technician schedules
 
-Manufacturing KPIs:
+#### Manufacturing KPIs:
 
-Real-time production status
-Defect rate tracking
-Machine downtime monitoring
-Inventory level alerts
-Lead time calculations
+- Real-time production status
+- Defect rate tracking
+- Machine downtime monitoring
+- Inventory level alerts
+- Lead time calculations
