@@ -27,6 +27,11 @@ import clock from '../../assets/clock.svg'
 import boxes from '../../assets/boxes.svg'
 import charts from '../../assets/charts.svg'
 import alert from '../../assets/alert.svg'
+import tools from '../../assets/tools.svg'
+import gauge from '../../assets/gauge.svg'
+import wrench from '../../assets/wrench.svg'
+import trendUp from '../../assets/trend.svg'
+import packageCheck from '../../assets/package.svg'
 import clipboardCheck from '../../assets/clipboardCheck.svg'
 import addNew from '../../assets/addNew.svg'
 import { ProfileImage } from '../../Components/User/ProfileImage'
@@ -43,19 +48,22 @@ import { MessengerRegister } from './MessangerRegister'
 // }
 
 const METRIC_CARD_STYLES = {
-  width: '10rem',
-  height: '10rem',
+  width: '8rem',
+  height: '8rem',
   borderWidth: '2px',
   borderColor: '#000',
   borderStyle: 'solid',
   borderRadius: '10px',
+  fontFamily: 'var(--font-family-mono)',
   fontWeight: 'var(--font-weight-bold)',
-  fontSize: '1.2em',
+  textAlign: 'center',
+  fontSize: '0.8em',
   color: '#000',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  justifyContent: 'center',
+  justifyContent: 'space-evenly',
+  padding: '0.5rem',
 }
 // const HOVER_CARD_STYLES = {
 //   backgroundColor: colors.hoverCardBackgroundColor,
@@ -85,7 +93,7 @@ const BUTTON_STYLES = {
 }
 
 const ICON_STYLES = {
-  width: '3rem',
+  width: '2rem',
 }
 
 const SMALL_TEXT_STYLES = {
@@ -102,25 +110,60 @@ const METRICS_DATA = [
     icon: clock,
     title: 'In Progress',
     key: 'tasksInProgress',
-    color: '#37EB4C',
+    color: '#87CEEB', // Light Steel Blue
   },
   {
     icon: alert,
     title: 'Critical Tasks',
     key: 'criticalTasks',
-    color: '#E53300',
+    color: '#FD5C5C', // Indian Red
   },
   {
     icon: clipboardCheck,
     title: 'Quality Issues',
     key: 'qualityIssues',
-    color: '#E7C900',
+    color: '#F0E68C', // Khaki
   },
   {
     icon: boxes,
     title: 'Inventory Alerts',
     key: 'inventoryAlerts',
-    color: '#00C37C',
+    color: '#D2B48C', // Tan
+  },
+  {
+    icon: tools,
+    title: 'Machine Downtime',
+    key: 'machineDowntime',
+    color: '#FA8072', // Salmon
+    unit: 'hours',
+  },
+  {
+    icon: gauge,
+    title: 'Cycle Time',
+    key: 'cycleTime',
+    color: '#90EE90', // Light Green
+    unit: 'avg hrs',
+  },
+  {
+    icon: packageCheck,
+    title: 'On-Time Delivery',
+    key: 'onTimeDelivery',
+    color: '#B0C4DE', // Light Steel Blue
+    unit: '%',
+  },
+  {
+    icon: wrench,
+    title: 'Pending Maintenance',
+    key: 'pendingMaintenance',
+    color: '#B0E0E6', // Powder Blue
+    unit: 'tasks',
+  },
+  {
+    icon: trendUp,
+    title: 'OEE',
+    key: 'oee',
+    color: '#66CDAA', // Medium Aquamarine
+    unit: '%',
   },
 ]
 
@@ -146,8 +189,8 @@ const MetricCard = ({ metric, value }) => (
       src={metric.icon}
       alt={metric.title}
     />
-    <h5 className='mb-1'>{metric.title}</h5>
-    <h3 className='mb-0'>{value}</h3>
+    <strong className='mb-1'>{metric.title}</strong>
+    <span className='mb-0'>{value}</span>
   </div>
 )
 
@@ -157,7 +200,17 @@ const CardHeader = ({ icon, title, children }) => (
     style={CARD_HEADER_STYLES}
   >
     <div className='d-flex align-items-center'>
-      {icon && <img src={icon} alt={title} style={ICON_STYLES} />}
+      {icon && (
+        <img
+          src={icon}
+          alt={title}
+          style={{
+            ...ICON_STYLES,
+            width: '1.5rem',
+            marginBottom: '0.25rem',
+          }}
+        />
+      )}
       <h4 className='mb-0'>{title}</h4>
     </div>
     {children}
@@ -274,9 +327,9 @@ export function Dashboard() {
       <Container fluid className='py-4'>
         <h1 className='mb-4'>Welcome back</h1>
 
-        <Row className='mx-4 mb-3'>
+        <Row className='mx-1 mb-3 g-0'>
           {METRICS_DATA.map((metric) => (
-            <Col md={3} sm={6} key={metric.title}>
+            <Col key={metric.title} className='g-1 p-1 mx-1'>
               <MetricCard metric={metric} value={metrics[metric.key]} />
             </Col>
           ))}
