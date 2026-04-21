@@ -1,204 +1,97 @@
+/**
+ * Signup.jsx  (updated)
+ * ──────────────────────────────────────────────────────────────
+ * Rendered inside <AuthLayout>.
+ *
+ * REMOVED:
+ *   ✕  `min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4`
+ *   ✕  `max-w-md` wrapper  → AuthLayout provides it
+ * ──────────────────────────────────────────────────────────────
+ */
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate, Link } from 'react-router-dom'
 import { signup } from '../API/users'
-import { Form, Alert, Row, Col, Container, Button } from 'react-bootstrap'
-import ImageUpload from '../Components/User/ImageUpload'
-
-const teams = [
-  'Design Team',
-  'Manufacturing Team',
-  'Quality Control Team',
-  'Support Teams',
-]
-
-const roles = {
-  'Design Team': ['Design Engineers', 'CAD Technicians'],
-  'Manufacturing Team': [
-    'CNC Programmers',
-    'Manufacturing Engineers',
-    'Machinists',
-    'Machine Operators',
-    'Production Supervisors',
-  ],
-  'Quality Control Team': ['Quality Control Inspectors', 'Metrology Engineers'],
-  'Support Teams': [
-    'Inventory Managers',
-    'Production Planners',
-    'Maintenance Technicians',
-    'HR Personnel',
-    'Logistics Coordinators',
-  ],
-}
 
 export function Signup() {
-  const [username, setUsername] = useState('')
+  const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
-  const [email, setEmail] = useState('')
-  const [team, setTeam] = useState('')
-  const [role, setRole] = useState('')
-  const [profileImage, setProfileImage] = useState(null)
+  const [error,    setError]    = useState(null)
   const navigate = useNavigate()
 
   const signupMutation = useMutation({
-    mutationFn: () => {
-      const formData = new FormData()
-      formData.append('username', username)
-      formData.append('password', password)
-      formData.append('email', email)
-      formData.append('team', team)
-      formData.append('role', role)
-      if (profileImage) {
-        formData.append('profileImage', profileImage)
-      } else {
-        formData.append('profileImage', {})
-      }
-      return signup(formData)
-    },
-    onSuccess: () => navigate('/login'),
-    onError: () => alert('Failed to sign up! Please check your information.'),
+    mutationFn: () => signup({ email, password }),
+    onSuccess:  () => navigate('/complete-profile', { replace: true }),
+    onError:    (err) => setError(err.message || 'Failed to sign up. Please try again.'),
   })
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    setError(null)
     signupMutation.mutate()
   }
 
+  // AuthLayout provides the max-w-md centering wrapper
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Container className='p-2' style={{ width: '60vw', textAlign: 'center' }}>
-        <Row className='justify-content-center'>
-          <Col xs={12}>
-            <h2 className='mb-4 text-center'>Sign Up</h2>
-            <Form onSubmit={handleSubmit}>
-              <ImageUpload onImageSelect={setProfileImage} previewUrl={null} />
+    <div className="w-full space-y-8">
+      <div>
+        <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          Create your account
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Manufacturing Kanban Tool
+        </p>
+      </div>
 
-              <Form.Group
-                controlId='create-username'
-                className='mb-3'
-                style={{ maxWidth: '300px', margin: 'auto' }}
-              >
-                <Form.Control
-                  type='text'
-                  placeholder='Enter your username'
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </Form.Group>
+      <div className="bg-white p-8 rounded-lg shadow-md space-y-4">
+        {error && (
+          <div className="p-3 rounded bg-red-50 border border-red-200 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
-              <Form.Group
-                controlId='create-email'
-                className='mb-3'
-                style={{ maxWidth: '300px', margin: 'auto' }}
-              >
-                <Form.Control
-                  type='email'
-                  placeholder='Enter your email'
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </Form.Group>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+              placeholder="you@example.com"
+            />
+          </div>
 
-              <Form.Group
-                controlId='create-password'
-                className='mb-3'
-                style={{ maxWidth: '300px', margin: 'auto' }}
-              >
-                <Form.Control
-                  type='password'
-                  placeholder='Enter your password'
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </Form.Group>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+              placeholder="Min. 8 characters"
+            />
+          </div>
 
-              <Form.Group
-                controlId='create-team'
-                className='mb-3'
-                style={{ maxWidth: '300px', margin: 'auto' }}
-              >
-                <Form.Select
-                  value={team}
-                  onChange={(e) => {
-                    setTeam(e.target.value)
-                    setRole('')
-                  }}
-                  required
-                >
-                  <option value=''>Select your team</option>
-                  {teams.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+          <button
+            type="submit"
+            disabled={!email || !password || signupMutation.isPending}
+            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {signupMutation.isPending ? 'Creating account…' : 'Sign Up'}
+          </button>
+        </form>
 
-              <Form.Group
-                controlId='create-role'
-                className='mb-3'
-                style={{ maxWidth: '300px', margin: 'auto' }}
-              >
-                <Form.Select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  disabled={!team}
-                  required
-                >
-                  <option value=''>Select your role</option>
-                  {team &&
-                    roles[team].map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-                </Form.Select>
-              </Form.Group>
-
-              <Button
-                variant='light'
-                type='submit'
-                disabled={
-                  !username ||
-                  !password ||
-                  !email ||
-                  !team ||
-                  !role ||
-                  signupMutation.isLoading
-                }
-                className='w-40'
-                style={{ backgroundColor: '#1aaa8F', color: 'black' }}
-              >
-                {signupMutation.isLoading ? 'Signing up...' : 'Sign Up'}
-              </Button>
-
-              {signupMutation.isError && (
-                <Alert variant='danger' className='mt-3'>
-                  Failed to sign up! Please check your information.
-                </Alert>
-              )}
-            </Form>
-          </Col>
-        </Row>
-        <Row xs={12}>
-          <Link to='/' className='btn btn-link mb-3'>
-            Back to main page
+        <p className="text-center text-sm text-gray-500">
+          Already have an account?{' '}
+          <Link to="/login" className="font-medium text-gray-800 hover:underline">
+            Sign in
           </Link>
-        </Row>
-      </Container>
+        </p>
+      </div>
     </div>
   )
 }

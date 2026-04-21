@@ -1,237 +1,408 @@
-/* Import Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
-/* Global font family for the entire project */
+/* ------------------------------------------------------------------
+   1. Google Fonts import – MUST come first
+   Cold industrial typography: Chakra Petch for headings, 
+   DM Sans for body, JetBrains Mono for monospace.
+------------------------------------------------------------------ */
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+/* ------------------------------------------------------------------
+   2. Tailwind v4 – single import replaces the 3 @tailwind directives
+------------------------------------------------------------------ */
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   3. Design tokens — COLD INDUSTRIAL PALETTE
+   ──────────────────────────────────────────────────────────────────
+   Palette direction: Cold Factory / Mechanical Assembly
+   ‣ Deep navy & steel — structural, machine-like
+   ‣ Frost & ice surfaces — crisp, sterile, high contrast
+   ‣ Desaturated accent blues — functional, not decorative
+   ‣ Black borders preserved — the structural skeleton stays sharp
+   ──────────────────────────────────────────────────────────────────
+   Tailwind v4 generates utility classes from every --color-* token:
+     --color-primary  → bg-primary, text-primary, border-primary
+------------------------------------------------------------------ */
+@theme {
+  /* ── Fonts ───────────────────────────────────────────────── */
+  --font-family-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+  --font-family-display: 'Chakra Petch', sans-serif;
+
+  /* ── Brand / Primary ─────────────────────────────────────── */
+  --color-primary: #1A7F8C;      /* accent-blue — cold teal */
+  --color-sage:    #6C8B9B;      /* glacier — muted icy blue */
+
+  /* ── Neutral / Structural ────────────────────────────────── */
+  --color-navy:      #0B1E33;    /* deep cold base */
+  --color-steel:     #2C3E50;    /* muted blue-grey */
+  --color-slate:     #4A5C6C;    /* cool mid grey */
+  --color-ice:       #9DBFCF;    /* frosty blue */
+  --color-glacier:   #6C8B9B;    /* subdued blue */
+  --color-fog:       #C5D5E0;    /* light icy grey */
+  --color-frost:     #EAF0F5;    /* near white cold */
+  --color-accent-blue:   #6fddda;  /* teal-blue, industrial */
+  --color-accent-cyan:   #00A5B5;  /* cold cyan */
+  --color-accent-slate:  #3F5E6B;
+  --color-warning-amber: #B68B40;  /* muted, cold gold */
+
+  --color-neutral-black: var(--color-navy);
+  --color-neutral-white: var(--color-frost);
+
+  /* ── Card surface ────────────────────────────────────────── */
+  --color-card-bg:     var(--color-frost);
+  --color-card-hover:  var(--color-fog);
+  --color-card-border: var(--color-navy);
+
+  /* ── Page surface ────────────────────────────────────────── */
+  --color-surface:       #F4F8FC;   /* bg-grid — light grid base */
+  --color-surface-muted: var(--color-fog);
+
+  /* ── Modal ───────────────────────────────────────────────── */
+  --color-modal-text:    var(--color-navy);
+  --color-modal-border:  var(--color-navy);
+  --color-modal-divider: var(--color-navy);
+
+  /* ── System roles ────────────────────────────────────────── */
+  --color-role-admin:    #962828;
+  --color-role-reviewer: var(--color-accent-blue);
+  --color-role-worker:   var(--color-navy);
+
+  /* ── Metric widget accents ───────────────────────────────── */
+  --color-metrics-wip:         var(--color-warning-amber);
+  --color-metrics-lead-time:   var(--color-accent-blue);
+  --color-metrics-in-progress: var(--color-accent-cyan);
+  --color-metrics-cycle-time:  var(--color-accent-slate);
+  --color-metrics-throughput:  var(--color-accent-blue);
+  --color-metrics-flow-eff:    var(--color-warning-amber);
+
+  /* ── Task-category tints (card backgrounds) ──────────────── */
+  --color-task-category-design:      #D9C6C6;
+  --color-task-category-production:  #D1C0A8;
+  --color-task-category-quality:     #C8D4C8;
+  --color-task-category-maintenance: #B8C8D0;
+  --color-task-category-default:     var(--color-fog);
+
+  /* ── Team / job role colors ──────────────────────────────── */
+  --color-team-role-design-engineer:        var(--color-steel);
+  --color-team-role-cad-technician:         var(--color-slate);
+  --color-team-role-cnc-programmer:         var(--color-glacier);
+  --color-team-role-manufacturing-engineer: var(--color-accent-blue);
+  --color-team-role-machinist:              var(--color-warning-amber);
+  --color-team-role-machine-operator:       var(--color-accent-slate);
+  --color-team-role-production-supervisor:  var(--color-accent-cyan);
+  --color-team-role-qc-inspector:           #5A9018;
+  --color-team-role-metrology-engineer:     #7C3AED;
+  --color-team-role-inventory-manager:      #C05818;
+  --color-team-role-production-planner:     #189080;
+  --color-team-role-maintenance-technician: #525860;
+  --color-team-role-hr-personnel:           #B03878;
+  --color-team-role-logistics-coordinator:  #6030B8;
+
+  /* ── Spacing ─────────────────────────────────────────────── */
+  --spacing-xs:        0.4rem;
+  --spacing-sm:        0.5rem;
+  --spacing-md:        1rem;
+  --spacing-lg:        1.7rem;
+  --spacing-icon-base: 7rem;
+  --spacing-icon-min:  4rem;
+  --spacing-icon-img:  1.7rem;
+  --spacing-btn-max:   7rem;
+
+  /* ── Border radius ───────────────────────────────────────── */
+  --radius-sm:   0.25rem;
+  --radius-md:   0.5rem;
+  --radius-pill: 1rem;
+  --radius-card: 4px;
+
+  /* ── Border width ────────────────────────────────────────── */
+  --border-width-thin:  1px;
+  --border-width-base:  2.5px;   /* industrial weight */
+  --border-width-thick: 3px;
+
+  /* ── Transitions ─────────────────────────────────────────── */
+  --transition-duration-fast:  150ms;
+  --transition-duration-slide: 300ms;
+}
+
+/* ------------------------------------------------------------------
+   4. :root — non-Tailwind CSS variables (scrollbar, slider, etc.)
+------------------------------------------------------------------ */
 :root {
-  --font-family-primary: 'Roboto', sans-serif;
-  --font-family-mono: 'Roboto Mono', monospace;
-  --font-weight-thin: 100;
-  --font-weight-light: 300;
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-bold: 700;
-  --font-weight-black: 900;
-  --primary-color: #186545;
-  --text-color: rgba(16, 16, 16, 0.87);
-  --background-color: #eeeeee;
+  --color-scrollbar-track:   var(--color-fog);
+  --color-scrollbar-thumb:   var(--color-steel);
+  --color-scrollbar-thumb-h: var(--color-slate);
+  --color-scrollbar-border:  var(--color-fog);
+  --color-slider-track:      #E0E8F0;
+  --color-slider-thumb:      var(--color-accent-blue);
+  --color-text:              var(--color-navy);
+  --color-bg:                var(--color-frost);
+  --header-h:                3.6rem;
+  --shadow-offset:           4px;
 }
 
+/* ------------------------------------------------------------------
+   5. Base / reset — cold industrial foundation
+------------------------------------------------------------------ */
 body {
-  font-family: var(--font-family-primary), Inter, system-ui, Avenir, Helvetica,
-    Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: var(--font-weight-regular);
-  color-scheme: light dark;
-  color: var(--text-color);
-  background-color: #fff;
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family:      var(--font-family-sans);
+  font-weight:      400;
+  color:            var(--color-text);
+  background-color: var(--color-bg);
+  scrollbar-width:  thin;
+  scrollbar-color:  var(--color-scrollbar-thumb) transparent;
 
-  /* Style the scrollbar */
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #000 transparent; /* Firefox */
+  /* Blueprint grid — signature of cold factory theme */
+  background-image:
+    linear-gradient(rgba(44, 62, 80, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(44, 62, 80, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
+/* ------------------------------------------------------------------
+   6. Scrollbar (WebKit) — industrial grey
+------------------------------------------------------------------ */
 body::-webkit-scrollbar {
-  width: 12px; /* Width of the scrollbar */
+  width: 10px;
 }
-
 body::-webkit-scrollbar-track {
-  background: #f4f4f4; /* Color of the scrollbar track */
+  background: var(--color-scrollbar-track);
 }
-
 body::-webkit-scrollbar-thumb {
-  background-color: #888; /* Color of the scrollbar thumb */
-  border-radius: 6px; /* Roundness of the scrollbar thumb */
-  border: 3px solid #f4f4f4; /* Padding around scrollbar thumb */
+  background-color: var(--color-scrollbar-thumb);
+  border-radius:    4px;
+  border:           2px solid var(--color-scrollbar-border);
 }
-
 body::-webkit-scrollbar-thumb:horizontal {
-  background-color: #ccc; /* Color of the horizontal scrollbar thumb */
+  background-color: var(--color-scrollbar-thumb-h);
 }
 
-/* Typography classes */
-/* Roboto Font Classes */
-.roboto-thin {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-thin);
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: 'wdth' 100;
+/* ------------------------------------------------------------------
+   7. Strict shadowing — comic‑style offset shadows (core of the look)
+   ──────────────────────────────────────────────────────────────────
+   All interactive / container elements receive hard offset shadows
+   with no blur. This is the defining characteristic of the cold theme.
+------------------------------------------------------------------ */
+.shadow-comic {
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-navy);
+}
+.shadow-comic-steel {
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-steel);
+}
+.shadow-comic-slate {
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-slate);
+}
+.shadow-comic-ice {
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-ice);
+}
+.shadow-comic-accent {
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-accent-blue);
+}
+.shadow-comic-cyan {
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-accent-cyan);
 }
 
-.roboto-light {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-light);
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: 'wdth' 100;
+/* ------------------------------------------------------------------
+   8. Core component classes — matching index.html exactly
+------------------------------------------------------------------ */
+
+/* Windows / cards with heavy border + offset shadow */
+.win,
+.card,
+.panel {
+  border: var(--border-width-thick) solid var(--color-navy);
+  background: var(--color-frost);
+  box-shadow: 6px 6px 0 var(--color-navy);
+  margin-bottom: 22px;
 }
 
-.roboto-regular {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-regular);
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: 'wdth' 100;
+/* Window bar (header of a panel) */
+.win-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: var(--border-width-thick) solid var(--color-navy);
+  background: var(--color-slate);
+  color: var(--color-frost);
 }
 
-.roboto-medium {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-medium);
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: 'wdth' 100;
+/* Dots (like macOS traffic lights but industrial) */
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-navy);
+  display: inline-block;
+  flex-shrink: 0;
 }
 
-.roboto-bold {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-bold);
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: 'wdth' 100;
-}
-
-.roboto-black {
-  font-family: var(--font-family-primary);
-  font-weight: var(--font-weight-black);
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: 'wdth' 100;
-}
-
-/* Roboto Mono Font Classes */
-.roboto-mono-thin {
+/* Badge / label */
+.badge {
   font-family: var(--font-family-mono);
-  font-weight: 100;
-  font-optical-sizing: auto;
-  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 2px solid var(--color-navy);
+  background: var(--color-frost);
+  color: var(--color-navy);
 }
 
-.roboto-mono-light {
-  font-family: var(--font-family-mono);
-  font-weight: 300;
-  font-optical-sizing: auto;
-  font-style: normal;
+/* Metric box — used for KPI tiles */
+.metric-box {
+  border: var(--border-width-base) solid var(--color-navy);
+  background: var(--color-frost);
+  padding: 10px 14px;
+  height: 130px;
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-navy);
 }
 
-.roboto-mono-regular {
-  font-family: var(--font-family-mono);
-  font-weight: 400;
-  font-optical-sizing: auto;
-  font-style: normal;
+/* Kanban column */
+.kanban-column {
+  background: var(--color-surface);
+  border: var(--border-width-thick) solid var(--color-navy);
+  padding: 12px;
+  min-width: 180px;
+  /*box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-navy);*/
 }
 
-.roboto-mono-medium {
-  font-family: var(--font-family-mono);
-  font-weight: 500;
-  font-optical-sizing: auto;
-  font-style: normal;
+/* Task card inside kanban */
+.task-card {
+  border: var(--border-width-base) solid var(--color-navy);
+  background: var(--color-frost);
+  padding: 10px;
+  margin-bottom: 12px;
+  box-shadow: 3px 3px 0 var(--color-steel);
 }
 
-.roboto-mono-bold {
+/* Buttons — primary (cold) */
+.btn-cold {
+  background: var(--color-steel);
+  border: var(--border-width-base) solid var(--color-navy);
+  color: var(--color-frost);
   font-family: var(--font-family-mono);
   font-weight: 700;
-  font-optical-sizing: auto;
-  font-style: normal;
-}
-
-a {
-  font-weight: 500;
-  color: #44886f;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #ffffff;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #000;
-  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 8px 14px;
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-navy);
   cursor: pointer;
-  transition: border-color 0.25s;
+  display: inline-block;
+  font-size: 11px;
+  transition: none;
+}
+.btn-cold:hover {
+  background: var(--color-slate);
 }
 
-button:hover {
-  border-color: #000;
+.btn-ice {
+  background: var(--color-ice);
+  color: var(--color-navy);
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-navy);
+}
+.btn-ice:hover {
+  background: var(--color-glacier);
 }
 
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* Logo / display type */
+.logo-type {
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
 }
 
-/* custom.css */
-.btn-custom {
-  background-color: #000000;
-  border-color: #393939;
-  color: white;
+/* ------------------------------------------------------------------
+   9. Icon‑button — slide animation (unchanged but with cold colors)
+------------------------------------------------------------------ */
+.icon-button {
+  position:   relative;
+  overflow:   hidden;
+  border:     none;
+  background: none;
+  padding:    0;
 }
-.btn-icon {
-  background-color: #000000;
-  padding: 0.25rem;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.icon-button:focus {
+  outline:    none;
+  box-shadow: none;
 }
-.btn-custom:hover {
-  background-color: '#ffffff';
-  color: black;
+.icon-wrapper {
+  position:         relative;
+  display:          flex;
+  align-items:      center;
+  justify-content:  start;
+  width:            var(--spacing-icon-base);
+  height:           100%;
+  border:           none;
+  background-color: transparent;
 }
-.phase-button {
-  color: #000000;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition:
-    color ease,
-    max-width 0.3s ease,
-    opacity 0.3s ease;
-  min-width: 40px;
-  overflow: hidden;
-  border-width: 2px;
+.icon-image {
+  height:     2rem;
+  min-width:  1rem;
+  min-height: 1rem;
+  max-width:  3rem;
+  max-height: 3rem;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
-
-.phase-button-text {
-  max-width: 0;
-  opacity: 0;
+.icon-text {
+  font-size:   0.78em;
+  font-family: var(--font-family-mono);
+  letter-spacing: 0.02em;
+  position:    absolute;
+  opacity:     0;
+  transform:   translateX(-100px);
+  transition:  opacity 0.25s ease, transform 0.25s ease;
   white-space: nowrap;
-  transition:
-    max-width 0.3s ease,
-    opacity 0.3s ease;
-  font-size: 0.6em;
+  border:      none;
+  background:  none;
+  color:       var(--color-navy);
+}
+.icon-button:hover .icon-image {
+  opacity:   0;
+  transform: translateX(-80px);
+}
+.icon-button:hover .icon-text {
+  opacity:   1;
+  transform: translateY(0);
 }
 
+/* ------------------------------------------------------------------
+   10. Phase‑button — expand on hover
+------------------------------------------------------------------ */
+.phase-button {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  border:      var(--border-width-base) solid var(--color-navy);
+  min-width:   40px;
+  overflow:    hidden;
+  color:       var(--color-navy);
+  background:  var(--color-frost);
+  transition:  color ease, max-width var(--transition-duration-slide) ease, opacity var(--transition-duration-slide) ease;
+  box-shadow:  3px 3px 0 var(--color-navy);
+}
+.phase-button-text {
+  max-width:   0;
+  opacity:     0;
+  white-space: nowrap;
+  transition:  max-width var(--transition-duration-slide) ease, opacity var(--transition-duration-slide) ease;
+  font-size:   0.6em;
+  font-family: var(--font-family-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+}
 .phase-button:hover .phase-button-text {
-  max-width: 200px;
-  opacity: 1;
+  max-width: 300px;
+  opacity:   1;
 }
-
-.phase-button:hover {
-}
-
 .phase-button-icon {
   flex-shrink: 0;
 }
+
+/* ------------------------------------------------------------------
+   11. Split‑pane layout
+------------------------------------------------------------------ */
 .split-pane {
   display: flex;
 }
@@ -240,173 +411,53 @@ button:focus-visible {
   overflow: auto;
 }
 
-/* icon button*/
-.icon-button {
-  position: relative;
-  overflow: hidden;
-  border: none;
-  background: none;
-  padding: 0;
-}
-.icon-button:focus {
-  outline: none;
-  box-shadow: none;
-}
-.icon-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 7rem;
-  height: 100%;
-  border: none;
-  background-color: none;
-}
-
-.icon-image {
-  height: 2rem;
-  min-width: 1rem;
-  min-height: 1rem;
-  max-width: 3rem;
-  max-height: 3rem;
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
-}
-
-.icon-text {
-  font-size: 0.8em;
-  position: absolute;
-  opacity: 0;
-  transform: translatex(30px);
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
-  white-space: nowrap;
-  border: none;
-  background: none;
-}
-
-.icon-button:hover .icon-image {
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
-.icon-button:hover .icon-text {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* ------------------------------------------------------------------
+   12. Bootstrap dropdown — hide default caret
+------------------------------------------------------------------ */
 .dropdown-toggle::after {
   display: none !important;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #575757;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-/* customStyles.css */
-.btn-primary {
-  background-color: #000 !important;
-  color: #fff !important;
-  border-color: #000 !important;
-}
-
-.btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active {
-  background-color: #fff !important;
-  color: #000 !important;
-  border-color: #000 !important;
-  border-width: 2px !important;
-}
-.primary {
-  background-color: #000 !important;
-  color: #fff !important;
-  border-color: #000 !important;
-}
-.custom-modal {
-  color: #000 !important;
-  border-color: #557263 !important;
-  border-width: 2px !important;
-}
-/*tabs*/
-.nav-tabs {
-  border: none;
-}
-
-.nav-tabs .nav-link {
-  font-family: var(--font-family-mono);
-  font-weight: var(--font-weight-bold);
-  font-size: 0.8rem;
-  border: 2px solid #557263;
-  border-radius: 8px;
-  margin-right: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: transparent;
-  color: #000;
-  transition: all 0.2s;
-}
-
-.nav-tabs .nav-link.active {
-  background-color: #557263;
-  color: #fff;
-  border: 2px solid #557263;
-}
-
-.nav-tabs .nav-link:hover:not(.active) {
-  border: 2px solid #557263;
-  background-color: rgba(85, 114, 99, 0.1);
-}
-
+/* ------------------------------------------------------------------
+   13. Custom range slider — cold industrial
+------------------------------------------------------------------ */
 #scale {
   -webkit-appearance: none;
-  width: 100%;
-  height: 12px;
-  background: transparent;
-  margin: 10px 0;
-  accent-color: black;
-  align-items: center;
+  width:        100%;
+  height:       12px;
+  background:   transparent;
+  margin:       10px 0;
+  accent-color: var(--color-navy);
+  align-items:  center;
 }
-
 #scale::-webkit-slider-runnable-track {
-  background: #f4f4f4;
-  border-radius: 6px;
-  height: 12px;
-  border: 2px solid #000;
+  background:    var(--color-slider-track);
+  border-radius: 4px;
+  height:        10px;
+  border:        var(--border-width-base) solid var(--color-navy);
 }
-
 #scale::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  background: #557263;
-  border-radius: 5px;
-  border: 2px solid #000;
+  width:         18px;
+  height:        18px;
+  background:    var(--color-slider-thumb);
+  border-radius: 3px;
+  border:        var(--border-width-base) solid var(--color-navy);
   margin-bottom: 5px;
-  cursor: grab;
+  cursor:        grab;
+  box-shadow:    2px 2px 0 var(--color-navy);
 }
-
-/* Firefox */
 #scale::-moz-range-track {
-  background: #f4f4f4;
-  border-radius: 6px;
-  border: 2px solid #000;
-  height: 12px;
+  background:    var(--color-slider-track);
+  border-radius: 4px;
+  border:        var(--border-width-base) solid var(--color-navy);
+  height:        10px;
 }
-
 #scale::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  background: #000;
-  border-radius: 50%;
-  border: 3px solid #000;
-  cursor: grab;
+  width:         14px;
+  height:        14px;
+  background:    var(--color-navy);
+  border-radius: 3px;
+  border:        2px solid var(--color-navy);
+  cursor:        grab;
 }

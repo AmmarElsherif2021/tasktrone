@@ -1,5 +1,5 @@
+// PostSorting.jsx
 import PropTypes from 'prop-types'
-import { Form, Row, Col } from 'react-bootstrap'
 
 export function PostSorting({
   fields = [],
@@ -9,42 +9,40 @@ export function PostSorting({
   onOrderChange,
 }) {
   return (
-    <Row className='g-2 align-items-center'>
-      <Col xs={12} sm={6}>
-        <Form.Group>
-          <Form.Label htmlFor='sortBy' className='me-2'>
-            Sort By:
-          </Form.Label>
-          <Form.Select
-            id='sortBy'
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          >
-            {fields.map((field) => (
-              <option key={field} value={field}>
-                {field}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
-      </Col>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+      <div>
+        <label htmlFor="sortBy" className="mr-2 block sm:inline">
+          Sort By:
+        </label>
+        <select
+          id="sortBy"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full border-2 border-black rounded-md px-2 py-1 bg-white"
+        >
+          {fields.map((field) => (
+            <option key={field} value={field}>
+              {field}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <Col xs={12} sm={6}>
-        <Form.Group>
-          <Form.Label htmlFor='sortOrder' className='me-2'>
-            Sort Order:
-          </Form.Label>
-          <Form.Select
-            id='sortOrder'
-            value={orderValue}
-            onChange={(e) => onOrderChange(e.target.value)}
-          >
-            <option value='ascending'>Ascending</option>
-            <option value='descending'>Descending</option>
-          </Form.Select>
-        </Form.Group>
-      </Col>
-    </Row>
+      <div>
+        <label htmlFor="sortOrder" className="mr-2 block sm:inline">
+          Sort Order:
+        </label>
+        <select
+          id="sortOrder"
+          value={orderValue}
+          onChange={(e) => onOrderChange(e.target.value)}
+          className="w-full border-2 border-black rounded-md px-2 py-1 bg-white"
+        >
+          <option value="ascending">Ascending</option>
+          <option value="descending">Descending</option>
+        </select>
+      </div>
+    </div>
   )
 }
 

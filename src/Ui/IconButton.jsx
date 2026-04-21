@@ -1,51 +1,50 @@
 import PropTypes from 'prop-types'
-//import { Button } from 'react-bootstrap'
+import { iconBtnStyle } from './componentStyles'
 
-const IconButton = ({
+/**
+ * IconButton
+ * ──────────────────────────────────────────────────────────────
+ * A button that shows an icon at rest and slides in a text label
+ * on hover.  Animation is driven by CSS classes in index.css
+ * (.icon-button, .icon-wrapper, .icon-image, .icon-text).
+ *
+ * @prop {number} iconWidthREM  – total button width in rem (default 7)
+ * @prop {string} color         – label text color (default neutral-black)
+ */
+export const IconButton = ({
   src,
   alt = 'icon',
-  onClick = () => {},
+  onClick   = () => {},
   className = '',
   iconWidthREM = 7,
-  color = '#000000',
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`icon-button p-0 ${className}`}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        width: `${iconWidthREM}rem`,
-        minWidth: `${iconWidthREM - 3}rem`,
-        height: `${iconWidthREM / 3}rem`,
-        // borderRightWidth: '2px',
-        // borderRight: '#000',
-        //backgroundColor: '#a4a35f',
-      }}
-    >
-      <div className='icon-wrapper'>
-        <img
-          src={src}
-          alt={alt}
-          className='icon-image'
-          style={{ minWidth: `${iconWidthREM - 3}rem` }}
-        />
-        <span className='icon-text' style={{ color: color }}>
-          {alt}
-        </span>
-      </div>
-    </button>
-  )
-}
+  color = 'var(--color-fog)',
+}) => (
+  <button
+    onClick={onClick}
+    className={`icon-button ${className}`}
+    style={iconBtnStyle.base(iconWidthREM)}
+  >
+    <div className="icon-wrapper">
+      <img
+        src={src}
+        alt={alt}
+        className="icon-image"
+        style={iconBtnStyle.icon(iconWidthREM)}
+      />
+      <span className="border rounded-[3px] icon-text px-2 py-1" style={{ backgroundColor: color, noOfLines: 2 }}>
+        {alt}
+      </span>
+    </div>
+  </button>
+)
 
 IconButton.propTypes = {
-  src: PropTypes.string.isRequired,
-  alt: PropTypes.string,
-  onClick: PropTypes.func,
-  className: PropTypes.string,
-  iconWidthREM: PropTypes.string,
-  color: PropTypes.string,
+  src:         PropTypes.string.isRequired,
+  alt:         PropTypes.string,
+  onClick:     PropTypes.func,
+  className:   PropTypes.string,
+  iconWidthREM: PropTypes.number,
+  color:       PropTypes.string,
 }
 
 export default IconButton

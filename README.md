@@ -1,366 +1,213 @@
-﻿# Tasktrone: Mechanical Assembly Factory Kanban Tool Documentation
+﻿# Tasktrone
 
-## 1. Introduction
+> **AI-powered workflow & analytics platform for industrial operations.**
 
-### 1.1 Purpose
-
-This document provides comprehensive documentation for a Kanban tool specifically designed for mechanical assembly factory operations. The tool aims to improve productivity, workflow visualization, and overall operational efficiency in manufacturing environments.
-
-### 1.2 Scope
-
-This documentation covers the system architecture, features, user roles, data handling, and implementation guidelines for the Kanban tool.
-
-## 2. System Overview
-
-### 2.1 System Architecture
-
-The Kanban tool, Tasktrone, is designed as a web-based application with mobile compatibility, featuring:
-
-- Frontend interface with drag-and-drop functionality
-- Backend server for data processing and storage
-- Real-time updates system
-- Integration capabilities with existing factory systems
-
-### 2.2 User Groups and Roles
-
-#### Primary User Groups:
-
-1. **Design Team**
-
-   - Design Engineers
-   - CAD Technicians
-
-2. **Manufacturing Team**
-
-   - CNC Programmers
-   - Manufacturing Engineers
-   - Machinists
-   - Machine Operators
-   - Production Supervisors
-
-3. **Quality Control Team**
-
-   - Quality Control Inspectors
-   - Metrology Engineers
-
-4. **Support Teams**
-   - Inventory Managers
-   - Production Planners
-   - Maintenance Technicians
-   - HR Personnel
-   - Logistics Coordinators
-
-## 3. Core Features
-
-### 3.1 Task Management
-
-#### 3.1.1 Task Creation
-
-- Title and description
-- Priority levels (High, Medium, Low)
-- Due dates and deadlines
-- Assignment capabilities
-- File attachment support
-
-#### 3.1.2 Task Categories
-
-- Design tasks
-- Manufacturing operations
-- Quality control checks
-- Maintenance activities
-- Inventory management
-- Logistics operations
-
-**Tasks specifications:**
-
-| **Team**                       | **Task**             | **Deliverables**                                 | **Sent/Required Files**                                                  |
-| ------------------------------ | -------------------- | ------------------------------------------------ | ------------------------------------------------------------------------ |
-| **Design Engineers**           | CAD Models           | 3D Models, Design Validation Reports             | CAD Files (`.dwg`, `.stp`), Validation Reports (`.pdf`)                  |
-|                                | Design Specs         | Detailed Design Specifications                   | Design Specification Documents (`.docx`, `.pdf`)                         |
-|                                | BOM                  | Bill of Materials                                | BOM Documents (`.xls`, `.xlsx`)                                          |
-|                                | Change Requests      | Design Change Requests                           | Change Request Forms (`.docx`, `.xlsx`)                                  |
-| **CAD Technicians**            | CAD Drawings         | 2D Drawings, 3D Models, Assembly Instructions    | CAD Files (`.dwg`, `.stl`), Instruction Sheets (`.docx`)                 |
-| **CNC Programmers**            | CNC Programming      | CNC Programming Files, Setup Sheets              | CNC Programs (`.nc`, `.cnc`), Setup Sheets (`.docx`)                     |
-|                                | Tool Instructions    | Tooling Instructions                             | Tool Instruction Manuals (`.pdf`, `.docx`)                               |
-| **Manufacturing Engineers**    | Process Plans        | Process Plans, Work Instructions                 | Process Plans (`.docx`, `.pdf`), Work Instructions (`.docx`)             |
-|                                | Production Layouts   | Production Layouts, Engineering Change Requests  | Layout Diagrams (`.pdf`), Change Request Forms (`.docx`)                 |
-|                                | Improvement Reports  | Process Improvement Reports                      | Improvement Reports (`.docx`, `.pdf`)                                    |
-| **Machinists**                 | Machined Parts       | Machined Parts, Inspection Reports               | Inspection Reports (`.docx`, `.pdf`)                                     |
-|                                | Tool Logs            | Tool Maintenance Logs                            | Maintenance Logs (`.docx`, `.pdf`)                                       |
-| **Machine Operators**          | Production Output    | Production Records, Maintenance Logs             | Production Output Records (`.docx`, `.xlsx`), Maintenance Logs (`.docx`) |
-|                                | Setup Documentation  | Machine Setup Documentation                      | Setup Sheets (`.docx`, `.pdf`)                                           |
-| **Production Supervisors**     | Production Schedules | Production Schedules, Shift Reports              | Schedule Documents (`.xlsx`, `.docx`), Shift Reports (`.docx`)           |
-|                                | Performance Records  | Employee Performance Records                     | Performance Records (`.docx`, `.xlsx`)                                   |
-| **Quality Control Inspectors** | Inspections          | Inspection Reports, Non-Conformance Reports      | Inspection Reports (`.docx`, `.pdf`), Non-Conformance Reports (`.docx`)  |
-| **Metrology Engineers**        | Calibration Records  | Calibration Records, Measurement Reports         | Calibration Logs (`.docx`, `.xlsx`), Measurement Reports (`.pdf`)        |
-|                                | SPC Charts           | SPC Charts, MSA Reports                          | Statistical Charts (`.xlsx`, `.pdf`), MSA Reports (`.docx`, `.pdf`)      |
-| **Inventory Managers**         | Inventory Reports    | Inventory Reports, Stock Level Documentation     | Inventory Reports (`.xlsx`, `.pdf`), Stock Level Sheets (`.xlsx`)        |
-|                                | Order Processing     | Order Processing Documentation                   | Order Forms (`.docx`, `.xlsx`)                                           |
-|                                | Vendor Reports       | Vendor Performance Reports                       | Vendor Reports (`.pdf`)                                                  |
-| **Production Planners**        | Production Schedules | Production Schedules, Material Requirement Plans | Schedules (`.xlsx`), MRP Documents (`.xlsx`)                             |
-|                                | Capacity Planning    | Capacity Planning Documentation                  | Capacity Plans (`.docx`, `.xlsx`)                                        |
-| **Maintenance Technicians**    | Maintenance Logs     | Maintenance Logs, Work Orders                    | Maintenance Records (`.docx`, `.xlsx`), Work Orders (`.docx`)            |
-|                                | Equipment Schedules  | Equipment Maintenance Schedules                  | Schedules (`.xlsx`, `.pdf`)                                              |
-| **HR Personnel**               | Employee Records     | Employee Records, Training Schedules             | Employee Files (`.docx`, `.xlsx`), Training Schedule Sheets (`.xlsx`)    |
-| **Logistics Coordinators**     | Shipment Schedules   | Shipment Schedules, Delivery Documentation       | Shipment Schedules (`.xlsx`, `.pdf`), Delivery Documents (`.pdf`)        |
-|                                | Logistics Reports    | Logistics Reports, Inventory Movement Logs       | Logistic Reports (`.docx`, `.pdf`), Movement Logs (`.xlsx`)              |
-
-**Other multi-team tasks:**
-
-1. **Product Design Review**: Combines Design Engineers, CAD Technicians, Manufacturing Engineers, and Metrology Engineers to ensure the design is manufacturable and meets quality standards.
-2. **Prototyping**: Combines Manufacturing Engineers, Machinists, CNC Programmers, and Quality Control Inspectors to produce and evaluate a prototype.
-3. **Production Planning**: Involves Production Planners, Inventory Managers, and Production Supervisors for material planning, scheduling, and resource allocation.
-4. **Equipment Maintenance**: Involves Maintenance Technicians, Machine Operators, and Production Supervisors for regular upkeep and troubleshooting.
-5. **Continuous Improvement**: Utilizes inputs from Manufacturing Engineers, Quality Control Inspectors, Machinists, and Production Supervisors to implement process improvements and reduce waste.
-6. **Training and Development**: HR Personnel, Production Supervisors, and Maintenance Technicians collaborate to develop and deliver training programs for employees.
-7. **Inventory Management**: Involves Inventory Managers, Production Planners, and Logistics Coordinators to streamline stock levels and ensure timely deliveries.
-
-#### Phases in Manufacturing Machine Timeline
-
-| Phase                          | Teams Involved                                                            | Deliverables                                                              | Input Files                                                     | Output Files                                                                                                   | Possible Events                                                                |
-| ------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| **1. Concept and Design**      | Design Engineers<br>CAD Technicians                                       | Concept Designs<br>Design Specifications<br>CAD Models                    | Requirements docs (`.pdf`)<br>Reference images (`.jpg`, `.png`) | Design docs (`.pdf`)<br>Specifications (`.docx`, `.pdf`)<br>CAD files (`.step`, `.iges`, `.sldprt`)            | Initial brainstorming<br>Design sketches<br>CAD modeling                       |
-| **2. Prototyping**             | Manufacturing Engineers<br>CNC Programmers<br>Machinists<br>QC Inspectors | Prototypes<br>CNC Programs<br>Inspection Reports                          | CAD files (`.step`, `.iges`)<br>Material specs (`.pdf`)         | 3D print files (`.stl`, `.obj`)<br>CNC programs (`.nc`, `.gcode`)<br>Inspection reports (`.pdf`, `.xlsx`)      | Prototype production<br>Testing and evaluation<br>Iterations based on feedback |
-| **3. Pre-Production Planning** | Production Planners<br>Inventory Managers<br>Production Supervisors       | Production Schedules<br>Material Requirement Plans<br>Resource Allocation | Inventory data (`.csv`)<br>Capacity plans (`.xlsx`)             | Production schedules (`.xlsx`, `.pdf`)<br>Material plans (`.xlsx`, `.csv`)<br>Resource plans (`.xlsx`, `.pdf`) | Planning for production runs<br>Scheduling<br>Resource allocation              |
-| **4. Production**              | Machine Operators<br>Production Supervisors<br>QC Inspectors              | Finished Machine Parts<br>Inspection Reports<br>Production Records        | CAD files (`.step`, `.iges`)<br>Work instructions (`.pdf`)      | Production logs (`.xlsx`, `.csv`)<br>QC reports (`.pdf`, `.xlsx`)<br>As-built records (`.step`, `.iges`)       | Machine setup<br>Continuous production<br>Quality checks                       |
-| **5. Quality Control**         | QC Inspectors<br>Metrology Engineers                                      | Quality Metrics<br>Compliance Documentation                               | Manufacturing specs (`.pdf`)<br>QC procedures (`.docx`)         | Quality reports (`.xlsx`, `.csv`)<br>Compliance docs (`.pdf`, `.docx`)                                         | Detailed inspections<br>Compliance checks<br>Final adjustments                 |
-| **6. Assembly and Testing**    | Assembly Technicians<br>Test Engineers                                    | Assembled Machines<br>Test Reports                                        | Assembly guides (`.pdf`)<br>Test procedures (`.docx`)           | Test reports (`.pdf`, `.docx`)<br>Assembly records (`.pdf`)                                                    | Assembly of parts<br>Functional testing<br>Troubleshooting                     |
-| **7. Packaging and Shipping**  | Logistics Coordinators<br>Inventory Managers                              | Packaged Machines<br>Shipping Documentation                               | Packaging specs (`.pdf`)<br>Inventory data (`.csv`)             | Shipping docs (`.pdf`)<br>Tracking records (`.xlsx`, `.csv`)                                                   | Packaging<br>Coordination with shipping<br>Inventory management                |
-| **8. Maintenance and Support** | Maintenance Technicians<br>Support Teams                                  | Maintenance Logs<br>Support Documentation                                 | Service manuals (`.pdf`)<br>Maintenance procedures (`.docx`)    | Maintenance logs (`.pdf`, `.docx`)<br>Support tickets (`.txt`)                                                 | Scheduled maintenance<br>Technical support<br>Troubleshooting                  |
-
-### 3.2 Kanban Board Organization
-
-#### 3.2.1 Board Parameters
-
-A Kanban board is a visual tool used to manage workflows and tasks in a project. Key parameters include:
-
-##### 1. **Cards**
-
-- Represent individual tasks or work items.
-- Contain details such as task name, description, assignees, due dates, team, and attachments.
-
-##### 2. **WIP Limits (Work In Progress Limits)**
-
-- Restrictions on the number of tasks in the "In Progress" column at any time.
-- Prevent overloading and ensure focus on task completion.
-
-##### 3. **Swimlanes**
-
-- Horizontal lanes to separate tasks by categories, teams, or priorities.
-- Useful for distinguishing task types or projects.
-
-##### 4. **Labels/Tags**
-
-- Color-coded labels to categorize tasks.
-- Quickly identify task type, priority, or status.
-
-##### 5. **Due Dates**
-
-- Dates by which tasks must be completed.
-- Track deadlines and ensure timely delivery.
-
-##### 6. **Assignees**
-
-- Team members responsible for each task.
-- Clearly identify ownership.
-
-##### 7. **Task Details**
-
-- Descriptions, checklists, and subtasks within cards.
-- Break down work and ensure thorough task handling.
-
-##### 8. **Comments and Attachments**
-
-- Space for comments or file attachments.
-- Enhance collaboration and communication.
-
-##### 9. **Metrics and Analytics**
-
-- Data such as cycle time, lead time, and cumulative flow diagrams.
-- Monitor performance and identify improvement areas.
-
-##### 10. **Priority Indicators**
-
-- Flags or icons for high-priority tasks.
-- Ensure critical tasks receive immediate attention.
-
-#### 3.2.2 Standard Columns
-
-- **To Do**
-- **In Progress**
-- **Review**
-- **Done**
-
-#### 3.2.3 Column Customization
-
-- Add/remove columns
-- Set WIP limits
-- Define column policies
-
-## 4. Data Management
-
-### 4.1 Supported Data Types
-
-#### 4.1.1 Design Data
-
-- **File formats**: STEP, IGES, STL, DXF, DWG
-- **Handling**: Version control and revision history
-- **Access**: Role-based permissions
-
-#### 4.1.2 Manufacturing Data
-
-- CNC programs (G-code, M-code)
-- Machine instructions
-- Production schedules
-- Work orders
-
-#### 4.1.3 Quality Control Data
-
-- Inspection reports
-- Measurement data
-- Quality metrics
-- Compliance documentation
-
-### 4.2 Data Flow
-
-#### 4.2.1 Input Sources
-
-- Manual entry
-- File uploads
-- API integrations
-- Automated data collection
-
-#### 4.2.2 Output Formats
-
-- CSV exports
-- PDF reports
-- API endpoints
-- Real-time dashboards
-
-## 5. Integration Capabilities
-
-### 5.1 System Integrations
-
-- ERP systems
-- CAD/CAM software
-- Quality management systems
-- Inventory management systems
-- Machine monitoring systems
-
-### 5.2 API Documentation
-
-#### 5.2.1 Available Endpoints
-
-- Task management
-- Board configuration
-- User management
-- Data exchange
-- Reporting
-
-## 6. Security and Access Control
-
-### 6.1 Authentication
-
-- User authentication
-- Single Sign-On (SSO)
-- Multi-factor authentication
-
-### 6.2 Authorization
-
-- Role-based access control
-- Permission levels
-- Data access restrictions
-
-## 7. Reporting and Analytics
-
-### 7.1 Standard Reports
-
-- Cycle time analysis
-- Lead time tracking
-- WIP monitoring
-- Bottleneck identification
-- Resource utilization
-
-### 7.2 Custom Analytics
-
-- Performance metrics
-- Productivity analysis
-- Quality metrics
-- Trend analysis
-- Predictive analytics
-
-## 8. Implementation Guidelines
-
-### 8.1 Setup Process
-
-1. Initial configuration
-2. User onboarding
-3. Data migration
-4. Integration setup
-5. Training and documentation
-
-### 8.2 Best Practices
-
-- Enforce WIP limits
-- Conduct regular board reviews
-- Follow data backup procedures
-- Implement security protocols
-- Provide user training
-
-## 9. Support and Maintenance
-
-### 9.1 System Updates
-
-- Version control
-- Update procedures
-- Rollback protocols
-
-### 9.2 Technical Support
-
-- Support levels
-- Contact information
-- Issue reporting procedure
-- Resolution timeframes
+Tasktrone is a production-grade task management and process intelligence system purpose-built for high-complexity operational environments — starting with **mechanical assembly manufacturing** and extending to **construction & MEP** workflows. It goes beyond kanban by combining structured task orchestration, domain-aware role management, equipment tracking, quality control, and a data layer designed for AI and analytics.
 
 ---
 
-### Features Proposed for Future Development
+## Why Tasktrone
 
-#### Manufacturing-Specific Features:
+Most workflow tools are built for software teams. Tasktrone is built for the factory floor — where tasks span multiple engineering disciplines, documents carry regulatory weight, machines are first-class entities, and a missed dependency can halt an entire production line.
 
-- **Production-Specific Task Categories**:
-  - Design review workflows
-  - Quality control checkpoints
-  - Machine maintenance scheduling
-  - Inventory tracking cards
-  - Production bottleneck alerts
+**Key differentiators:**
 
-#### Data Integration Features:
+- Domain-specific task model (manufacturing phases, QC checks, equipment usage, BOM-linked workflows)
+- Multi-level access control (system roles + project roles + task roles)
+- Full audit trail via immutable `task_history` — every field change is recorded
+- Rich dependency graph (finish-to-start, lag time) and subtask hierarchies
+- Metrics schema designed for ETL pipelines and analytics dashboards
+- Architecture prepared for AI integration (LLM task generation, document parsing, workflow assistant)
 
-- Import/export CAD files (STEP, IGES, STL)
-- CNC program attachment support
-- Quality inspection report generation
-- Integration with manufacturing software APIs
+---
 
-#### Enhanced Analytics:
+## Use Cases
 
-- Machine utilization tracking
-- Production cycle time visualization
-- Quality metrics dashboard
-- Resource allocation charts
-- Bottleneck identification tools
+### Manufacturing — Mechanical Assembly
 
-#### Specialized User Roles:
+Manage the full machine lifecycle from concept design through shipping and maintenance. Teams across design, CNC programming, machining, QC, inventory, and logistics collaborate on a shared task graph, with each role receiving scoped views, file requirements, and phase-appropriate workflows.
 
-- Design engineer views
-- Machine operator dashboards
-- Quality inspector workflows
-- Maintenance technician schedules
+### Construction & MEP (Mechanical, Electrical, Plumbing)
 
-#### Manufacturing KPIs:
+Apply the same phase-driven task model to MEP project delivery — from design coordination and permit documentation through installation, commissioning, and handover. The domain model maps cleanly: phases become project stages, manufacturing roles map to trade disciplines, and QC checks become inspection milestones.
 
-- Real-time production status
-- Defect rate tracking
-- Machine downtime monitoring
-- Inventory level alerts
-- Lead time calculations
+---
+
+## Core Features
+
+### Task Management
+
+Every task in Tasktrone is a rich domain object — not just a card with a title.
+
+| Capability | Detail |
+|---|---|
+| Unique task numbering | Human-readable `task_number` per task |
+| Phase tagging | Tasks are scoped to a `manufacturing_phase` enum |
+| Priority & status | `high / medium / low` priority; configurable status lifecycle |
+| Time tracking | `estimated_hours`, `actual_hours`, `start_date`, `due_date`, `completion_date` |
+| Cycle & lead time | `cycle_time` and `lead_time` stored per task for analytics |
+| Multi-member assignment | Primary assignee + additional members via `task_members`, each with a scoped `task_assignment_role` |
+| Subtask hierarchies | Self-referencing `parent_task_id` for unlimited depth |
+| Task requirements | Per-task checklist of mandatory/optional deliverables with file-type enforcement |
+| Dependency graph | `task_dependencies` table: predecessor/successor pairs with `dependency_type` and `lag_time` |
+| Audit trail | `task_history` logs every field change (old value, new value, who, when) |
+| File attachments | Versioned attachments linkable to a task, project, or specific requirement |
+
+**Task categories:** Design · Manufacturing operations · Quality control · Maintenance · Inventory · Logistics
+
+### Manufacturing Phases
+
+Each project tracks its active `current_phase`. Boards and tasks are scoped to a phase, enabling phase-based filtering, reporting, and handoff workflows.
+
+| # | Phase | Primary Teams |
+|---|---|---|
+| 1 | Concept & Design | Design Engineers, CAD Technicians |
+| 2 | Prototyping | Manufacturing Engineers, CNC Programmers, Machinists, QC Inspectors |
+| 3 | Pre-Production Planning | Production Planners, Inventory Managers, Supervisors |
+| 4 | Production | Machine Operators, Supervisors, QC Inspectors |
+| 5 | Quality Control | QC Inspectors, Metrology Engineers |
+| 6 | Assembly & Testing | Assembly Technicians, Test Engineers |
+| 7 | Packaging & Shipping | Logistics Coordinators, Inventory Managers |
+| 8 | Maintenance & Support | Maintenance Technicians, Support Teams |
+
+### Kanban Boards
+
+Boards are phase-scoped visual workspaces with production-grade controls:
+
+- **WIP limits** enforced at both board level and individual column level
+- **Swimlanes** for team/category separation (custom JSONB criteria, color, position)
+- **Standard column types**: `todo → in_progress → review → done` + custom columns
+- **Column ordering** via explicit `position` field
+- **Drag-and-drop card placement** with `position` tracking within columns
+- **Comments** with `@mention` support (stored as `mentioned_users uuid[]`)
+
+### User Roles & Teams
+
+Role assignment happens at three independent levels:
+
+| Level | Table | Enum |
+|---|---|---|
+| System-wide role | `users.role` | `user_role` |
+| Team membership | `users.team` | `team_type` |
+| Project-level role | `project_members.role` | `project_member_role` |
+| Task-level role | `task_members.role` | `task_assignment_role` |
+
+**Teams:** Design · Manufacturing · Quality Control · Inventory · Planning · Maintenance · HR · Logistics
+
+### Equipment & Quality Tracking
+
+Equipment is a first-class entity in Tasktrone — not an afterthought.
+
+**Equipment registry (`equipment` table):** Tracks serial number, operational status, last/next maintenance timestamps.
+
+**Task-equipment usage (`task_equipment`):** Per-task equipment logs with `start_time`, `end_time`, `setup_time`, `run_time` — the raw data for utilization analytics.
+
+**Quality checks (`quality_checks`):** Linked to tasks with `check_type`, `status`, structured `measurements` (JSONB), and `defects_found` count.
+
+### Data & Metrics Layer
+
+The `manufacturing_metrics` table stores timestamped numeric measurements (with unit) linked to projects and/or tasks. `metric_type` is enumerated, making this table the foundation for an ETL pipeline or analytics dashboard.
+
+**Analytics already tracked:**
+- Cycle time and lead time per task
+- WIP per board and column
+- Defect counts and QC check outcomes
+- Equipment run time and setup time
+- Estimated vs. actual hours
+
+### Projects
+
+Projects are the top-level container scoping boards, tasks, members, and metrics. Each project tracks customer, budget, current phase, priority, status, project manager, and full timestamps.
+
+### Security & Access Control
+
+- Row Level Security (RLS) on `users` table — users can read all profiles but only modify their own record
+- Project and task access governed by membership (not just role)
+- Versioned file attachments with `is_latest` flag for controlled document management
+
+### Automation
+
+`updated_at` auto-update triggers are active on: `users`, `projects`, `tasks`, `boards`, `comments`, `equipment`. Append-only tables (history, metrics, junction tables) are intentionally trigger-free.
+
+---
+
+## System Architecture
+
+```
+Frontend (React)
+    └── Drag-and-drop board UI
+    └── Phase-aware task views
+    └── Role-scoped dashboards
+
+Backend (Node.js)
+    └── REST API (tasks, boards, projects, users)
+    └── Auth middleware (role enforcement)
+    └── File upload handling
+
+Database (PostgreSQL / Supabase)
+    └── Normalized schema with enums for domain integrity
+    └── RLS policies for data isolation
+    └── Trigger-managed audit fields
+
+[Planned] AI Layer
+    └── Task generator (subtasks, roles, effort from description)
+    └── Document parser (PDF → structured JSON)
+    └── Workflow assistant ("What's blocking production?")
+
+[Planned] Data Pipeline
+    └── Event log table (task lifecycle events)
+    └── ETL (Python/pandas) → analytics tables
+    └── Metrics dashboard (cycle time, WIP trends, bottlenecks)
+```
+
+---
+
+## Schema Status
+
+> ⚠️ **The database schema is currently under active refactoring.** The tables, enums, and relationships described in this document reflect the intended production design. Some fields or tables may be in transition.
+
+**Planned schema extensions:**
+
+- `organizations` table — multi-tenant support; users and boards scoped per org
+- `events` table — granular event log for task lifecycle (created, moved, completed) feeding the analytics pipeline
+- `task_metrics` table — derived metrics (cycle time, lead time) computed from events
+- Background job support (BullMQ + Redis) for AI inference and ETL jobs
+- Expanded `project_members` roles to support construction/MEP org structures
+
+---
+
+## Roadmap
+
+| Phase | Focus | Status |
+|---|---|---|
+| 0 — Positioning | README, use case definition | ✅ Done |
+| 1 — Backend Architecture | Service/repository layers, multi-tenancy, RBAC enforcement, background jobs | 🔄 In Progress |
+| 2 — AI Layer | Task generator, document parser (PDF → JSON), workflow assistant (RAG) | 🔜 Planned |
+| 3 — Data Engineering | Event tracking, ETL pipeline, analytics dashboard | 🔜 Planned |
+| 4 — Cloud & Production | Docker, Vercel + Render deploy, CI/CD, logging | 🔜 Planned |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React |
+| Backend | Node.js |
+| Database | PostgreSQL (Supabase) |
+| Auth | Supabase Auth (RLS) |
+| File Storage | Supabase Storage |
+| Background Jobs *(planned)* | BullMQ + Redis |
+| AI Layer *(planned)* | OpenAI API (function calling + embeddings) |
+| Data Pipeline *(planned)* | Python, pandas, PostgreSQL |
+| Deployment *(planned)* | Docker, Vercel, Render |
+
+---
+
+## Contributing
+
+Tasktrone is under active development. Architecture decisions, domain modeling, and AI feature design are the current priority. Contributions, feedback, and use-case discussions are welcome via issues.
+
+---
+
+*Built for engineers who understand that manufacturing workflows are not software sprints.*

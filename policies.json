@@ -1,0 +1,38 @@
+[
+  {
+    "schema_name": "public",
+    "table_name": "users",
+    "policy_name": "users_insert_own",
+    "command": "a",
+    "permissive": true,
+    "roles_oid_array": [
+      16481
+    ],
+    "using_expression": null,
+    "with_check_expression": "(auth.uid() = id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "users",
+    "policy_name": "users_select_authenticated",
+    "command": "r",
+    "permissive": true,
+    "roles_oid_array": [
+      16481
+    ],
+    "using_expression": "true",
+    "with_check_expression": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "users",
+    "policy_name": "users_update_own",
+    "command": "w",
+    "permissive": true,
+    "roles_oid_array": [
+      16481
+    ],
+    "using_expression": "(auth.uid() = id)",
+    "with_check_expression": "(auth.uid() = id)"
+  }
+]

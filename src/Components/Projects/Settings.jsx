@@ -1,57 +1,67 @@
-import { Dropdown } from 'react-bootstrap'
-import notificationIcon from '../../assets/notification-icon.svg'
-import IconButton from '../../Ui/IconButton'
+/**
+ * Settings.jsx — Notifications + CustomDropdown
+ * ──────────────────────────────────────────────────────────────
+ * CustomDropdown is a shared primitive used here.
+ * If more components need it, extract to Ui/CustomDropdown.jsx.
+ */
+import { useState, useRef, useEffect }  from 'react'
+import IconButton                        from '../../Ui/IconButton'
+import notificationIcon         from '../../assets/notification-icon.svg'
 import notificationSettingsIcon from '../../assets/notificationsSettings.svg'
-import markAllIcon from '../../assets/markAll.svg'
+import markAllIcon              from '../../assets/markAll.svg'
 
-const Notifications = () => {
-  const dropStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '8rem',
-    padding: '1rem',
-    fontSize: '0.7em',
-  }
+// ── Shared dropdown primitive ─────────────────────────────────
+const CustomDropdown = ({ trigger, children }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const ref = useRef(null)
 
-  const handleClose = () => {
-    console.log('Notifications dropdown closed')
-  }
+  useEffect(() => {
+    const onOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setIsOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [])
 
   return (
-    <Dropdown
-      className='custom-modal h-100'
-      onToggle={(isOpen) => !isOpen && handleClose()}
-    >
-      <Dropdown.Toggle
-        as={(props) => (
-          <IconButton src={notificationIcon} alt={'Notifications'} {...props} />
-        )}
-      />
-      <Dropdown.Menu
-        className='custom-modal flex-column align-center pl-3'
-        style={dropStyle}
-      >
-        <IconButton
-          src={notificationIcon}
-          alt='Unread Notifications'
-          iconWidthREM={9}
-          className='ml-1 my-1 h-100'
-        />
-        <IconButton
-          src={markAllIcon}
-          alt='Mark All Read'
-          iconWidthREM={9}
-          className='ml-1 my-1 h-100'
-        />
-        <IconButton
-          src={notificationSettingsIcon}
-          alt='Notification Settings'
-          iconWidthREM={9}
-          className='ml-1 my-1 h-100'
-        />
-      </Dropdown.Menu>
-    </Dropdown>
+    <div className="relative inline-block" ref={ref}>
+      <div onClick={() => setIsOpen((v) => !v)} className="cursor-pointer">
+        {trigger}
+      </div>
+      {isOpen && (
+        <div
+          className="
+            absolute right-0 mt-2 z-50
+            flex flex-col items-center gap-2 p-3
+            bg-card-bg
+            border-[length:var(--border-width-base)] border-card-border border-solid
+            shadow-sm
+            w-32
+          "
+        >
+          {children}
+        </div>
+      )}
+    </div>
   )
 }
+
+// ── Notifications ─────────────────────────────────────────────
+export const Notifications = () => (
+  <CustomDropdown
+    trigger={
+      <IconButton
+        src={notificationIcon}
+        alt="Notifications"
+        iconWidthREM={1.75}
+        color="var(--color-neutral-black)"
+      />
+    }
+  >
+    <IconButton src={notificationIcon}         alt="Unread Notifications"   iconWidthREM={9} className="w-full" />
+    <IconButton src={markAllIcon}              alt="Mark All Read"          iconWidthREM={9} className="w-full" />
+    <IconButton src={notificationSettingsIcon} alt="Notification Settings"  iconWidthREM={9} className="w-full" />
+  </CustomDropdown>
+)
+
 export default Notifications

@@ -1,33 +1,24 @@
-import { Dropdown } from 'react-bootstrap'
+// RefreshProject.jsx
+import { useState, useRef, useEffect } from 'react'
 import refreshProjectIcon from '../../assets/refresh-icon.svg'
-import IconButton from '../../Ui/IconButton'
-import refreshDashboard from '../../assets/refreshDash.svg'
-import refreshProject from '../../assets/refreshProject.svg'
-import syncIcon from '../../assets/sync.svg'
-import { useProject } from '../../contexts/ProjectContext.jsx'
-import { useState } from 'react'
+import refreshDashboard   from '../../assets/refreshDash.svg'
+import refreshProject     from '../../assets/refreshProject.svg'
+import syncIcon           from '../../assets/sync.svg'
+import IconButton         from '../../Ui/IconButton'
+import { useProject }     from '../../contexts/ProjectContext.jsx'
 
 const RefreshProject = () => {
   const { refreshTasks } = useProject()
   const [isOpen, setIsOpen] = useState(false)
-  const handleToggle = () => {
-    setIsOpen(!isOpen)
-  }
-  const dropStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '8rem',
-    minWidth: '6rem',
-    maxWidth: '14rem',
+  const ref = useRef(null)
 
-    fontSize: '0.9em',
-    marginTop: '1rem',
-
-    borderColor: '#729B87',
-    backgroundColor: '#E1F9ED',
-    borderWidth: '3px',
-  }
+  useEffect(() => {
+    const onOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setIsOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [])
 
   const handleRefreshTasks = () => {
     refreshTasks()
@@ -35,50 +26,44 @@ const RefreshProject = () => {
   }
 
   return (
-    <Dropdown
-      id='dropdown-basic-button'
-      className=' h-100'
-      show={isOpen}
-      onToggle={handleToggle}
-    >
-      <Dropdown.Toggle
-        as={IconButton}
+    <div className="relative inline-block" ref={ref}>
+      <IconButton
         src={refreshProjectIcon}
-        alt='Refresh Project'
-        onClick={(e) => {
-          e.stopPropagation()
-          handleToggle()
-        }}
+        alt="Refresh Project"
+        onClick={() => setIsOpen((v) => !v)}
       />
       {isOpen && (
-        <Dropdown.Menu
-          className=' flex-column align-center pl-3'
-          style={dropStyle}
+        <div
+          className="
+            absolute right-0 mt-2 z-50 p-2
+            flex flex-col items-center gap-1
+            bg-card-bg
+            border-[length:var(--border-width-base)] border-card-border border-solid
+            shadow-sm
+            w-28
+          "
         >
           <IconButton
             src={refreshProject}
-            alt='Refresh Tasks'
-            iconWidthREM={8}
-            className='ml-1 my-1 h-100'
+            alt="Refresh Tasks"
+            iconWidthREM={2}
             onClick={handleRefreshTasks}
           />
           <IconButton
             src={refreshDashboard}
-            alt='Refresh Dashboard'
-            iconWidthREM={8}
-            className='ml-1 my-1 h-100'
+            alt="Refresh Dashboard"
+            iconWidthREM={2}
             onClick={() => setIsOpen(false)}
           />
           <IconButton
             src={syncIcon}
-            alt='Full Sync'
-            iconWidthREM={8}
-            className='ml-1 my-1 h-100'
+            alt="Full Sync"
+            iconWidthREM={2}
             onClick={() => setIsOpen(false)}
           />
-        </Dropdown.Menu>
+        </div>
       )}
-    </Dropdown>
+    </div>
   )
 }
 

@@ -1,112 +1,97 @@
+// ProjectUsers.jsx
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import {
-  Collapse,
-  Button,
-  Card,
-  ListGroup,
-  FormControl,
-  InputGroup,
-} from 'react-bootstrap'
-import usersIcon from '../../assets/users-icon.svg'
-import IconButton from '../../Ui/IconButton'
 import { useProject } from '../../contexts/ProjectContext'
+import { getAllUsers } from '../../API/users'
 
-const ProjectUsers = () => {
-  const [open, setOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
+const INPUT_CLS = `
+  w-full px-3 py-2
+  font-mono text-sm
+  bg-neutral-white
+  border border-card-border
+  focus:outline-none focus:ring-1 focus:ring-primary
+`
+
+export const ProjectUsers = () => {
   const [inviteOpen, setInviteOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const { currentProjectId, currentProjectMembers } = useProject()
 
-  const { currentProjectMembers } = useProject()
+  const { data: allUsers = [], isLoading } = useQuery({
+    queryKey: ['users'],
+    queryFn: getAllUsers,
+    enabled: inviteOpen,
+  })
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value)
+  const handleInvite = (userId) => {
+    console.log(`Inviting ${userId} to ${currentProjectId}`)
+    setInviteOpen(false)
   }
 
-  const filteredMembers = currentProjectMembers.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
-  const possibleUsers = [
-    { id: '1', username: 'John Doe', email: 'john.doe@example.com' },
-    { id: '2', username: 'Jane Smith', email: 'jane.smith@example.com' },
-    // Add more possible users here
-  ]
-
-  const filteredPossibleUsers = possibleUsers.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
   return (
-    <div className='w-100'>
-      <div className='d-flex align-items-center'>
-        <IconButton
-          src={usersIcon}
-          alt='Project Users'
-          onClick={() => setOpen(!open)}
-          className={`me-2 ${open ? 'active' : ''}`}
-        />
-      </div>
-      <Collapse in={open}>
-        <div>
-          <Card className='card-body mt-2'>
-            <ListGroup variant='flush'>
-              {filteredMembers?.map((user) => (
-                <ListGroup.Item key={user.id} style={{ fontSize: '0.8em' }}>
-                  <div className='d-flex justify-content-between align-items-center'>
-                    <div>
-                      <h5 className='mb-1'>{user.username}</h5>
-                      <small className='mb-0'>
-                        <strong>Email:</strong> {user.email}
-                      </small>
-                      <br />
-                      <small className='mb-0'>
-                        <strong>Team:</strong> {user.team}
-                      </small>
-                      <br />
-                      <small className='mb-0'>
-                        <strong>Role:</strong> {user.role}
-                      </small>
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))}
-              <ListGroup.Item>
-                <Button
-                  variant='outline-primary'
-                  className='mt-2 w-100'
-                  onClick={() => setInviteOpen(!inviteOpen)}
-                  aria-expanded={inviteOpen}
-                >
-                  Invite Team Member
-                </Button>
-                <Collapse in={inviteOpen}>
-                  <div className='mt-2'>
-                    <InputGroup className='mb-3'>
-                      <FormControl
-                        placeholder='Search for users...'
-                        aria-label='Search for users'
-                        onChange={handleSearchChange}
-                      />
-                    </InputGroup>
-                    <ListGroup>
-                      {filteredPossibleUsers.map((user) => (
-                        <ListGroup.Item key={user.id}>
-                          <div className='d-flex justify-content-between align-items-center'>
-                            <span>{user.username}</span>
-                            <Button variant='outline-secondary'>Invite</Button>
-                          </div>
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
-                  </div>
-                </Collapse>
-              </ListGroup.Item>
-            </ListGroup>
-          </Card>
-        </div>
-      </Collapse>
+    <div className="w-full">
+      <ul className="divide-y divide-card-border border border-card-border">
+        {currentProjectMembers?.map((member) => (
+          <li key={member.user.id} className="p-3 flex justify-between items-center">
+            <div>
+              <span className="font-mono font-bold text-sm">{member.user.username}</span>
+              <br />
+              <small className="font-mono text-xs text-neutral-black/60">
+                Role: {member.role}
+              </small>
+            </div>
+          </li>
+        ))}
+
+        <li className="p-3">
+          <button
+            className="
+              px-3 py-1
+              font-mono text-xs font-bold
+              border border-primary text-primary
+              hover:bg-card-bg transition-colors duration-fast
+            "
+            onClick={() => setInviteOpen((v) => !v)}
+          >
+            Invite Team Member
+          </button>
+
+          {inviteOpen && (
+            <div className="mt-3 space-y-2">
+              <input
+                type="text"
+                placeholder="Search users…"
+                className={INPUT_CLS}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <ul className="divide-y divide-card-border border border-card-border max-h-48 overflow-y-auto">
+                {allUsers
+                  .filter(
+                    (u) =>
+                      !currentProjectMembers.some((m) => m.user.id === u.id) &&
+                      u.username.toLowerCase().includes(searchTerm.toLowerCase())
+                  )
+                  .map((u) => (
+                    <li key={u.id} className="p-3 flex justify-between items-center">
+                      <span className="font-mono text-sm">{u.username}</span>
+                      <button
+                        className="
+                          px-3 py-1
+                          font-mono text-xs
+                          border border-card-border
+                          hover:bg-card-hover transition-colors duration-fast
+                        "
+                        onClick={() => handleInvite(u.id)}
+                      >
+                        Invite
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+        </li>
+      </ul>
     </div>
   )
 }
-
-export default ProjectUsers

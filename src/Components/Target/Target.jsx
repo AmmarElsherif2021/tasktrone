@@ -1,183 +1,137 @@
 // Target.jsx
 import { useState } from 'react'
-import { Card, Nav, Tab, Container, Badge, ListGroup } from 'react-bootstrap'
 import Three from '../../Ui/CAD/Three'
 import { StyledCard } from '../../Ui/StyledCard'
-//import { colors } from '../../Ui/colors'
 
-const COMMON_STYLES = {
-  cardHeader: {
-    backgroundColor: 'transparent',
-    borderBottom: '2.5px solid #557263',
-    fontFamily: 'var(--font-family-mono)',
-    fontWeight: 'var(--font-weight-bold)',
-    fontSize: '1rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  navTabs: {
-    borderBottom: '2px solid #557263',
-    marginBottom: '1rem',
-  },
-  navLink: {
-    position: 'relative',
-    fontFamily: 'var(--font-family-mono)',
-    fontWeight: 'var(--font-weight-bold)',
-    fontSize: '0.9rem',
-    color: '#000',
-    padding: '0.5rem 1rem',
-    margin: '0 0.25rem',
-    borderRadius: '5px 5px 0 0',
-    transition: 'all 0.2s',
-    borderBottomColor: 'transparent',
-    bottom: '-2px',
-    zIndex: 1000,
-    backgroundColor: '#D8F9E6',
-  },
-  navLinkActive: {
-    backgroundColor: '#557263',
-    color: '#fff',
-  },
-  listItem: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    borderBottom: '1px solid #557263',
-    padding: '0.75rem',
-    fontFamily: 'var(--font-family-mono)',
-    fontSize: '0.9rem',
-    transition: 'background-color 0.2s',
-  },
-  listItemHover: {
-    backgroundColor: 'rgba(85, 114, 99, 0.1)',
-  },
-  footer: {
-    borderTop: '2.5px solid #557263',
-    padding: '0.25rem',
-    fontFamily: 'var(--font-family-mono)',
-    color: '#000',
-    fontSize: '0.8rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-  },
-}
+const TABS = [
+  { key: '3dModel',    label: '3D Model' },
+  { key: 'documents',  label: 'Documents' },
+  { key: 'otherData',  label: 'Other Data' },
+]
+
+const DOCUMENTS = [
+  'Design Specifications.pdf',
+  'BOM.xlsx',
+  'Prototype Testing Report.docx',
+  'Production Plan.pdf',
+]
+
+const OTHER_DATA = [
+  'Target Timeline: Q4 2023',
+  'Current Progress: 75%',
+  'Key Milestones: Prototype Testing, Production Planning',
+  'Team Members: Design Engineers, Manufacturing Engineers, Quality Control',
+]
 
 export default function Target() {
-  const [activeKey, setActiveKey] = useState('3dModel')
-  const [hoveredItem, setHoveredItem] = useState(null)
+  const [activeKey,   setActiveKey]   = useState('3dModel')
   const [hoverStates, setHoverStates] = useState({})
 
-  const handleHover = (key, isHovered) => {
-    setHoverStates((prev) => ({ ...prev, [key]: isHovered }))
-  }
+  const handleHover = (key, val) =>
+    setHoverStates((prev) => ({ ...prev, [key]: val }))
 
   return (
     <StyledCard
-      hoverKey='targetCard'
+      hoverKey="targetCard"
       hoverStates={hoverStates}
       handleHover={handleHover}
-      style={{
-        height: '90vh',
-      }}
+      className="h-[90vh] flex flex-col"
     >
-      <Card.Header style={COMMON_STYLES.cardHeader}>
-        <Card.Title className='mb-0'>Gear 1011AM3</Card.Title>
-        <div>
-          <Badge bg='black' className='me-2'>
-            In Progress
-          </Badge>
-          <Badge bg='secondary'>75%</Badge>
-        </div>
-      </Card.Header>
-      <Card.Body className='p-0'>
-        <Tab.Container activeKey={activeKey} onSelect={(k) => setActiveKey(k)}>
-          <Nav
-            variant='tabs'
-            style={COMMON_STYLES.navTabs}
-            className='px-3 pt-2'
+      {/* Header */}
+      <div
+        className="flex justify-between items-center p-3 font-mono font-bold text-base"
+        style={{ borderBottom: 'var(--border-width-thick) solid var(--color-sage)' }}
+      >
+        <h3 className="text-base font-bold">Gear 1011AM3</h3>
+        <div className="flex gap-2">
+          <span
+            className="px-2 py-0.5 text-xs font-mono"
+            style={{
+              backgroundColor: 'var(--color-neutral-black)',
+              color:           'var(--color-neutral-white)',
+              borderRadius:    'var(--radius-pill)',
+            }}
           >
-            {['3D Model', 'Related Documents', 'Other Data'].map(
-              (title, index) => {
-                const eventKey = ['3dModel', 'documents', 'otherData'][index]
-                return (
-                  <Nav.Item key={eventKey}>
-                    <Nav.Link
-                      eventKey={eventKey}
-                      style={{
-                        ...COMMON_STYLES.navLink,
-                        ...(activeKey === eventKey
-                          ? COMMON_STYLES.navLinkActive
-                          : {}),
-                      }}
-                    >
-                      {title}
-                    </Nav.Link>
-                  </Nav.Item>
-                )
-              },
-            )}
-          </Nav>
-          <Tab.Content>
-            <Tab.Pane eventKey='3dModel'>
-              <Container fluid>
-                <Three />
-              </Container>
-            </Tab.Pane>
-            <Tab.Pane eventKey='documents'>
-              <ListGroup>
-                {[
-                  'Design Specifications.pdf',
-                  'BOM.xlsx',
-                  'Prototype Testing Report.docx',
-                  'Production Plan.pdf',
-                ].map((doc, index) => (
-                  <ListGroup.Item
-                    key={index}
-                    style={{
-                      ...COMMON_STYLES.listItem,
-                      ...(hoveredItem === doc
-                        ? COMMON_STYLES.listItemHover
-                        : {}),
-                    }}
-                    onMouseEnter={() => setHoveredItem(doc)}
-                    onMouseLeave={() => setHoveredItem(null)}
-                  >
-                    {doc}
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            </Tab.Pane>
-            <Tab.Pane eventKey='otherData'>
-              <ListGroup>
-                {[
-                  'Target Timeline: Q4 2023',
-                  'Current Progress: 75%',
-                  'Key Milestones: Prototype Testing, Production Planning',
-                  'Team Members: Design Engineers, Manufacturing Engineers, Quality Control',
-                ].map((item, index) => (
-                  <ListGroup.Item
-                    key={index}
-                    style={{
-                      ...COMMON_STYLES.listItem,
-                      ...(hoveredItem === item
-                        ? COMMON_STYLES.listItemHover
-                        : {}),
-                    }}
-                    onMouseEnter={() => setHoveredItem(item)}
-                    onMouseLeave={() => setHoveredItem(null)}
-                  >
-                    {item}
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            </Tab.Pane>
-          </Tab.Content>
-        </Tab.Container>
-      </Card.Body>
-      <Card.Footer style={COMMON_STYLES.footer}>
+            In Progress
+          </span>
+          <span
+            className="px-2 py-0.5 text-xs font-mono"
+            style={{
+              backgroundColor: 'var(--color-sage)',
+              color:           'var(--color-neutral-white)',
+              borderRadius:    'var(--radius-pill)',
+            }}
+          >
+            75%
+          </span>
+        </div>
+      </div>
+
+      {/* Tab bar */}
+      <div
+        className="px-3 pt-2"
+        style={{ borderBottom: 'var(--border-width-base) solid var(--color-sage)' }}
+      >
+        <div className="flex gap-1">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveKey(tab.key)}
+              className={`
+                font-mono font-bold text-xs px-3 py-1.5 rounded-t
+                transition-colors duration-fast
+                ${activeKey === tab.key
+                  ? 'bg-sage text-neutral-white'
+                  : 'bg-card-bg text-neutral-black hover:bg-sage/10'
+                }
+              `}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab panels */}
+      <div className="p-3 flex-1 overflow-y-auto">
+        {activeKey === '3dModel' && (
+          <div className="w-full h-96">
+            <Three />
+          </div>
+        )}
+
+        {activeKey === 'documents' && (
+          <ul className="divide-y divide-sage/30">
+            {DOCUMENTS.map((doc, i) => (
+              <li
+                key={i}
+                className="py-3 px-2 font-mono text-sm transition-colors hover:bg-sage/10 cursor-pointer"
+              >
+                {doc}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {activeKey === 'otherData' && (
+          <ul className="divide-y divide-sage/30">
+            {OTHER_DATA.map((item, i) => (
+              <li key={i} className="py-3 px-2 font-mono text-sm transition-colors hover:bg-sage/10">
+                {item}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div
+        className="p-2 font-mono text-xs text-neutral-black/60 flex justify-between"
+        style={{ borderTop: 'var(--border-width-thick) solid var(--color-sage)' }}
+      >
         <small>Last Updated: Today</small>
         <small>Controller Module</small>
-      </Card.Footer>
+      </div>
     </StyledCard>
   )
 }

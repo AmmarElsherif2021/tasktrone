@@ -1,42 +1,24 @@
-/* eslint-disable react/prop-types */
-//import PropTypes from 'prop-types'
+// ProjectInfo.jsx – unchanged
+import { useProject } from '../../contexts/ProjectContext'
 
-import { User } from '../User/User.jsx'
-
-export function ProjectInfo({ projectId, title, subtitle, admin, members }) {
-  // const [token] = useAuth()
-  // const queryClient = useQueryClient()
-
-  // const mutation = useMutation({
-  //   mutationFn: ({ token, projectId }) => changeProjectPhase(token, projectId),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries(['projects', projectId])
-  //   },
-  // })
+export function ProjectInfo() {
+  const { currentProject } = useProject()
 
   return (
-    <div
-      style={{
-        margin: '1vw',
-        height: 'auto',
-        fontSize: '0.8em',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-      }}
-    >
-      <h3>{title ? title : 'xxx'}</h3>
-      <p>{projectId ? projectId : 'x x x x'}</p>
-      {subtitle ? (
-        <em>
-          <br />
-          created by <User id={admin} />
+    <div className="m-4 flex flex-row items-center gap-4">
+      <h3 className="text-base font-mono font-bold">
+        {currentProject?.title || 'Loading…'}
+      </h3>
+      {currentProject?.created_by && (
+        <em className="text-xs font-mono text-neutral-black/60">
+          Created by {currentProject.created_by.username}
         </em>
-      ) : (
-        'here will be a project description, info and status'
       )}
-
-      <div>{members && members}</div>
+      {currentProject?.members?.length > 0 && (
+        <small className="text-xs font-mono text-neutral-black/60">
+          {currentProject.members.length} members
+        </small>
+      )}
     </div>
   )
 }

@@ -1,26 +1,24 @@
+// CreatePost.jsx
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Form, Button, Alert, Modal } from 'react-bootstrap'
 import { createPost } from '../../API/posts'
 import { useAuth } from '../../contexts/AuthContext'
 import { useProject } from '../../contexts/ProjectContext'
+import { Modal } from '../../Ui/Modal'
 import createPostIcon from '../../assets/create-post.svg'
 
 export function CreatePost() {
-  const [title, setTitle] = useState('')
-  const [contents, setContents] = useState('')
-  const [token] = useAuth()
-  const queryClient = useQueryClient()
+  const [content, setContent] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
   const { currentProjectId, refetchPosts } = useProject()
 
   const createPostMutation = useMutation({
-    mutationFn: () =>
-      createPost(token, currentProjectId.toString(), { title, contents }),
+    mutationFn: () => createPost(currentProjectId.toString(), user.id, { content }),
     onSuccess: () => {
       queryClient.invalidateQueries(['posts'])
-      setTitle('')
-      setContents('')
+      setContent('')
       setShowModal(false)
       refetchPosts()
     },
@@ -31,88 +29,59 @@ export function CreatePost() {
     createPostMutation.mutate()
   }
 
-  if (!token) {
-    return <Alert variant='warning'>Please log in to create new posts.</Alert>
+  if (!user?.id) {
+    return (
+      <div className="bg-warning-amber/20 border-l-4 border-warning-amber text-neutral-black p-3">
+        Please log in to create new posts.
+      </div>
+    )
   }
 
   return (
-    <div className='mx-1'>
-      <Button
-        variant='none'
-        size='lg'
-        className='phase-button'
-        style={{
-          borderWidth: '2px',
-          borderColor: '#000',
-          borderRadius: '2rem',
-          backgroundColor: '#5EE5AD',
-        }}
+    <div className="mx-1">
+      <button
+        type="button"
+        className="phase-button flex items-center gap-2"
         onClick={() => setShowModal(true)}
       >
-        <img
-          src={createPostIcon}
-          width={25}
-          alt={`Create Post`}
-          className='phase-button-icon'
-        />
-        <span className='phase-button-text' style={{ color: '#000' }}>
-          <strong>Create Post</strong>
-        </span>
-      </Button>
+        <img src={createPostIcon} width={25} alt="Create Post" className="phase-button-icon" />
+        <span>Create Post</span>
+      </button>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header
-          style={{ borderWidth: '2px', borderColor: '#000' }}
-          closeButton
-        >
-          <Modal.Title>Create Post</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ borderWidth: '2px', borderColor: '#000' }}>
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className='mb-3'>
-              <Form.Label htmlFor='create-title'>Title</Form.Label>
-              <Form.Control
-                type='text'
-                id='create-title'
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder='Enter post title'
-                style={{ borderWidth: '2px', borderColor: '#000' }}
-              />
-            </Form.Group>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Create Post">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block mb-1 font-medium">Content</label>
+            <textarea
+              rows={3}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Write your post content here..."
+              className="
+                w-full px-3 py-2
+                border border-card-border
+                bg-neutral-white
+                font-mono text-sm
+                focus:outline-none focus:ring-1 focus:ring-primary
+              "
+            />
+          </div>
 
-            <Form.Group className='mb-3'>
-              <Form.Label>Contents</Form.Label>
-              <Form.Control
-                as='textarea'
-                rows={3}
-                style={{ borderWidth: '2px', borderColor: '#000' }}
-                value={contents}
-                onChange={(e) => setContents(e.target.value)}
-                placeholder='Write your post content here...'
-              />
-            </Form.Group>
-
-            <Button
-              type='submit'
-              variant='primary'
-              disabled={!title || createPostMutation.isPending}
-              className='btn-custom'
-            >
-              {createPostMutation.isPending ? 'Creating...' : 'Create Post'}
-            </Button>
-          </Form>
+          <button
+            type="submit"
+            disabled={!content || createPostMutation.isPending}
+            className="btn-cold"
+          >
+            {createPostMutation.isPending ? 'Creating...' : 'Create Post'}
+          </button>
 
           {createPostMutation.isSuccess && (
-            <Alert variant='success' className='mt-3'>
+            <div className="bg-primary/10 border-l-4 border-primary text-neutral-black p-3">
               Post created successfully!
-            </Alert>
+            </div>
           )}
-        </Modal.Body>
+        </form>
       </Modal>
     </div>
   )
 }
-/*
-
-*/

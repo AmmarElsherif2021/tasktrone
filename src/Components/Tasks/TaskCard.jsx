@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
-import { Card, Button, Badge, Image } from 'react-bootstrap'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { deleteTask, updateTask } from '../../API/tasks.js'
 import { useAuth } from '../../contexts/AuthContext.jsx'
@@ -15,49 +14,6 @@ import { DeleteWarningModal } from './DeleteTaskModal.jsx'
 import { useProject } from '../../contexts/ProjectContext.jsx'
 import IconButton from '../../Ui/IconButton.jsx'
 
-const badgeStyle = {
-  borderWidth: '2px',
-  borderRadius: '2rem',
-  borderStyle: 'solid',
-  padding: '0.5rem',
-}
-
-const leadTimeBadgeStyle = {
-  ...badgeStyle,
-  borderColor: '#186545',
-  color: '#186545',
-}
-
-const cycleTimeBadgeStyle = {
-  ...badgeStyle,
-  borderColor: '#ad0000',
-  color: '#ad0000',
-}
-
-const phaseButtonStyle = {
-  borderWidth: '2px',
-  borderRadius: '2rem',
-}
-
-const backwardButtonStyle = {
-  ...phaseButtonStyle,
-  borderColor: '#ad0000',
-}
-
-const forwardButtonStyle = {
-  ...phaseButtonStyle,
-  borderColor: '#000',
-}
-
-const cardStyle = (hover, taskType, phase) => ({
-  backgroundColor: hover
-    ? getHexBackground(taskType, phase, 20)
-    : getHexBackground(taskType, phase, 0),
-  cursor: 'pointer',
-  borderWidth: '2.5px',
-  borderColor: '#000',
-})
-
 export function TaskCard({
   taskId,
   projectId,
@@ -68,7 +24,7 @@ export function TaskCard({
   taskType,
   phase,
 }) {
-  const [token] = useAuth()
+  const { accessToken } = useAuth()
   const { currentUser } = useUserHome()
   const { refreshTasks } = useProject()
   const queryClient = useQueryClient()
@@ -77,24 +33,25 @@ export function TaskCard({
   const [hover, setHover] = useState(false)
 
   const phaseMutation = useMutation({
-    mutationFn: ({ token, projectId, taskId, phase }) =>
-      updateTask(token, projectId, taskId, { phase }),
+    mutationFn: ({ accessToken, projectId, taskId, phase }) =>
+      updateTask(accessToken, projectId, taskId, { phase }),
     onSuccess: () => {
       queryClient.invalidateQueries(['tasks', taskId])
+      refreshTasks()
     },
   })
 
   const deleteMutation = useMutation({
-    mutationFn: ({ token, projectId, taskId }) =>
-      deleteTask(token, projectId, taskId),
+    mutationFn: ({ accessToken, projectId, taskId }) =>
+      deleteTask(accessToken, projectId, taskId),
     onSuccess: () => {
       queryClient.invalidateQueries(['tasks', taskId])
+      refreshTasks()
     },
   })
 
   const handlePhaseChange = (newPhase) => {
-    phaseMutation.mutate({ token, projectId, taskId, phase: newPhase })
-    refreshTasks()
+    phaseMutation.mutate({ accessToken, projectId, taskId, phase: newPhase })
   }
 
   const handleDeleteClick = (e) => {
@@ -103,7 +60,7 @@ export function TaskCard({
   }
 
   const handleDeleteConfirm = () => {
-    deleteMutation.mutate({ token, projectId, taskId })
+    deleteMutation.mutate({ accessToken, projectId, taskId })
     setShowDeleteModal(false)
   }
 
@@ -129,121 +86,81 @@ export function TaskCard({
       done: 'Done',
     })[phase] || phase
 
+  const cardBg = getHexBackground(taskType, phase, hover ? 20 : 0)
+
   return (
     <>
-      <Card
-        className='task-card shadow-sm'
-        style={cardStyle(hover, taskType, phase)}
+      <div
+        className="task-card shadow-sm border-2.5 border-black cursor-pointer p-3 rounded"
+        style={{ backgroundColor: cardBg }}
         onClick={() => setShowTaskModal(true)}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
       >
-        <Card.Body className='p-3'>
-          <div className='d-flex justify-content-between align-items-start mb-2'>
-            <Card.Title
-              className='h6 mb-0'
-              style={{
-                fontFamily: 'var(--font-family-mono)',
-                fontWeight: 'var(--font-weight-bold)',
-                maxWidth: '75%',
+        <div className="flex justify-between items-start mb-2">
+          <h6 className="font-mono font-bold max-w-[75%] mb-0">{title}</h6>
+          {currentUser.id === author && (
+            <IconButton
+              src={deleteIcon}
+              alt="delete"
+              onClick={handleDeleteClick}
+              className="danger"
+              iconWidthREM="1rem"
+              color="#ad0000"
+            />
+          )}
+        </div>
+        {(cycleTime > leadTime || (cycleTime / leadTime > 0.8 && leadTime < 3)) && (
+          <div className="text-red-700 text-sm">
+            {cycleTime > leadTime ? 'Exceeded deadline!' : 'Expires soon!'}
+          </div>
+        )}
+        <div className="flex gap-2 mb-2">
+          <span className="border-2 border-[#186545] text-[#186545] rounded-full px-2 py-1 text-xs">
+            Lead: {leadTime}d
+          </span>
+          <span className="border-2 border-[#ad0000] text-[#ad0000] rounded-full px-2 py-1 text-xs">
+            Cycle: {cycleTime}d
+          </span>
+        </div>
+        {author && (
+          <div className="text-sm text-gray-500 mb-2">
+            By <User id={author} />
+          </div>
+        )}
+        <div className="flex justify-between gap-2">
+          {phase !== 'story' && (
+            <button
+              type="button"
+              className="flex items-center gap-1 border-2 border-[#ad0000] rounded-full px-2 py-1 text-sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                const prevPhase = getPreviousPhase(phase)
+                if (prevPhase) handlePhaseChange(prevPhase)
               }}
             >
-              {title}
-            </Card.Title>
-            <br />
-
-            {currentUser.id === author && (
-              <IconButton
-                src={deleteIcon}
-                alt={'delete'}
-                onClick={handleDeleteClick}
-                className={'danger'}
-                iconWidthREM='1rem'
-                color='#ad0000'
-              />
-            )}
-          </div>
-          <Card.Subtitle style={{ color: '#ad0000' }}>
-            {cycleTime > leadTime
-              ? 'Exceeded deadline!'
-              : cycleTime / leadTime > 0.8 || leadTime < 3
-                ? 'Expires soon!'
-                : ''}
-          </Card.Subtitle>
-          <div className='d-flex gap-2 mb-2'>
-            <Badge bg='none' style={leadTimeBadgeStyle}>
-              Lead: {leadTime}d
-            </Badge>
-            <Badge bg='none' style={cycleTimeBadgeStyle}>
-              Cycle: {cycleTime}d
-            </Badge>
-          </div>
-          {author && (
-            <div className='small text-muted mb-2'>
-              <span>
-                By <User id={author} />
+              <img src={backwardArrow} width={15} alt={`Move to ${getPhaseLabel(getPreviousPhase(phase))}`} />
+              <span className="text-[#ad0000] font-bold">
+                Move to {getPhaseLabel(getPreviousPhase(phase))}
               </span>
-            </div>
+            </button>
           )}
-          <div className='d-flex justify-content-between gap-2'>
-            {phase !== 'story' && (
-              <Button
-                variant='none'
-                size='sm'
-                className='phase-button'
-                style={backwardButtonStyle}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const prevPhase = getPreviousPhase(phase)
-                  if (prevPhase) {
-                    handlePhaseChange(prevPhase)
-                  }
-                }}
-              >
-                <Image
-                  src={backwardArrow}
-                  width={15}
-                  alt={`Move to ${getPhaseLabel(getPreviousPhase(phase))}`}
-                  className='phase-button-icon'
-                />
-                <span
-                  className='phase-button-text'
-                  style={{ color: '#ad0000' }}
-                >
-                  <strong>
-                    Move to {getPhaseLabel(getPreviousPhase(phase))}
-                  </strong>
-                </span>
-              </Button>
-            )}
-            {phase !== 'done' && (
-              <Button
-                variant='none'
-                size='sm'
-                className='phase-button'
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const nextPhase = getNextPhase(phase)
-                  if (nextPhase) {
-                    handlePhaseChange(nextPhase)
-                  }
-                }}
-                style={forwardButtonStyle}
-              >
-                <span className='phase-button-text' style={{ color: '#000' }}>
-                  <strong>Move to {getPhaseLabel(getNextPhase(phase))}</strong>
-                </span>
-                <Image
-                  src={forwardArrow}
-                  width={15}
-                  alt={`Move to ${getPhaseLabel(getNextPhase(phase))}`}
-                  className='phase-button-icon'
-                />
-              </Button>
-            )}
-          </div>
-        </Card.Body>
-      </Card>
+          {phase !== 'done' && (
+            <button
+              type="button"
+              className="flex items-center gap-1 border-2 border-black rounded-full px-2 py-1 text-sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                const nextPhase = getNextPhase(phase)
+                if (nextPhase) handlePhaseChange(nextPhase)
+              }}
+            >
+              <span className="text-black font-bold">Move to {getPhaseLabel(getNextPhase(phase))}</span>
+              <img src={forwardArrow} width={15} alt={`Move to ${getPhaseLabel(getNextPhase(phase))}`} />
+            </button>
+          )}
+        </div>
+      </div>
 
       <DeleteWarningModal
         show={showDeleteModal}
@@ -258,7 +175,7 @@ export function TaskCard({
           onHide={() => setShowTaskModal(false)}
           taskId={taskId}
           projectId={projectId}
-          cardColor={getHexBackground(taskId, phase)}
+          cardColor={getHexBackground(taskType, phase)}
         />
       )}
     </>
@@ -278,14 +195,14 @@ TaskCard.propTypes = {
     PropTypes.shape({
       user: PropTypes.string,
       role: PropTypes.oneOf(['admin', 'reviewer', 'worker']),
-    }),
+    })
   ),
   attachments: PropTypes.arrayOf(
     PropTypes.shape({
       filename: PropTypes.string.isRequired,
       url: PropTypes.string.isRequired,
       contentType: PropTypes.string.isRequired,
-    }),
+    })
   ),
   taskType: PropTypes.string,
   startDate: PropTypes.string,

@@ -1,24 +1,17 @@
-//import { useUserHome } from '../../contexts/UserHomeContext'
 import avatarIcon from '../../assets/profile.svg'
 import PropTypes from 'prop-types'
 import { useState, useEffect } from 'react'
 
-export const ProfileImage = ({
-  user,
-  size = 5,
-  showStatus = true,
-  style = {},
-}) => {
+export const ProfileImage = ({ user, size = 5, showStatus = true, style = {} }) => {
   const [avatarUrl, setAvatarUrl] = useState(avatarIcon)
+
   useEffect(() => {
-    if (user && user.profileImage) {
+    if (user?.profileImage) {
       try {
         const byteArray = new Uint8Array(user.profileImage.data.data)
         const blob = new Blob([byteArray], { type: 'image/jpeg' })
         const url = URL.createObjectURL(blob)
         setAvatarUrl(url)
-        console.log(`AVATAR URL ${url}`)
-        // Cleanup function to revoke the object URL ????
         return () => URL.revokeObjectURL(url)
       } catch (error) {
         console.error('Failed to create object URL:', error)
@@ -31,7 +24,7 @@ export const ProfileImage = ({
 
   return (
     <div
-      className='user-profile-avatar position-relative'
+      className="user-profile-avatar relative"
       style={{
         width: `${size}rem`,
         height: `${size}rem`,
@@ -40,29 +33,27 @@ export const ProfileImage = ({
     >
       <img
         src={avatarUrl}
-        alt='User avatar'
+        alt="User avatar"
         style={{
           width: '100%',
           height: '100%',
           objectFit: 'cover',
-          borderColor: '#729B87',
-          borderWidth: '2px',
+          borderColor: 'var(--color-primary)',
+          borderWidth: 'var(--border-width-base)',
           borderRadius: '50%',
           margin: 0,
         }}
-        className='avatar-img'
+        className="avatar-img"
       />
       {showStatus && (
         <span
-          className='position-absolute'
+          className="absolute bottom-0 right-0"
           style={{
             width: '10px',
             height: '10px',
-            backgroundColor: '#28a745',
+            backgroundColor: 'var(--color-accent-cyan)',
             borderRadius: '50%',
-            bottom: '0',
-            right: '0',
-            border: '2px solid white',
+            border: '2px solid var(--color-neutral-white)',
           }}
         />
       )}

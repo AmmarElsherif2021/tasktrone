@@ -1,72 +1,58 @@
-import { Dropdown } from 'react-bootstrap'
+import { useState, useRef, useEffect } from 'react'
 import notificationIcon from '../../assets/notification-icon.svg'
 import IconButton from '../../Ui/IconButton'
 import notificationSettingsIcon from '../../assets/notificationsSettings.svg'
 import markAllIcon from '../../assets/markAll.svg'
-import { useState } from 'react'
 
 const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const handleToggle = () => {
-    setIsOpen(!isOpen)
-  }
-  const dropStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '7rem',
-    minWidth: '6rem',
-    maxWidth: '8rem',
-    paddingLeft: '2rem',
-    fontSize: '0.7em',
+  const dropdownRef = useRef(null)
 
-    marginTop: '1rem',
-    marginLeft: '0.5rem',
-    borderColor: '#729B87',
-    backgroundColor: '#E1F9ED',
-    borderWidth: '3px',
-  }
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleToggle = () => setIsOpen(!isOpen)
 
   return (
-    <Dropdown className=' h-100' show={isOpen} onToggle={handleToggle}>
-      <Dropdown.Toggle
-        as={IconButton}
+    <div className="relative inline-block h-full" ref={dropdownRef}>
+      <IconButton
         src={notificationIcon}
-        alt={'Notifications'}
-        onClick={(e) => {
-          e.stopPropagation()
-          handleToggle()
-        }}
+        alt="Notifications"
+        onClick={handleToggle}
       />
       {isOpen && (
-        <Dropdown.Menu
-          className=' flex-column align-center pl-0'
-          style={dropStyle}
-        >
+        <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg border-2 border-green-200 bg-green-50 z-10 p-2 flex flex-col items-center">
           <IconButton
             src={notificationIcon}
-            alt='Unread Notifications'
-            iconWidthREM={9}
-            className='ml-1 my-1 h-100'
+            alt="Unread Notifications"
+            iconWidthREM={2.25}
+            className="my-1"
             onClick={() => setIsOpen(false)}
           />
           <IconButton
             src={markAllIcon}
-            alt='Mark All Read'
-            iconWidthREM={9}
-            className='ml-1 my-1 h-100'
+            alt="Mark All Read"
+            iconWidthREM={2.25}
+            className="my-1"
             onClick={() => setIsOpen(false)}
           />
           <IconButton
             src={notificationSettingsIcon}
-            alt='Notification Settings'
-            iconWidthREM={9}
-            className='ml-1 my-1 h-100'
+            alt="Notification Settings"
+            iconWidthREM={2.25}
+            className="my-1"
             onClick={() => setIsOpen(false)}
           />
-        </Dropdown.Menu>
+        </div>
       )}
-    </Dropdown>
+    </div>
   )
 }
 

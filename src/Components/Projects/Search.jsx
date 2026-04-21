@@ -1,40 +1,36 @@
-import { Button, Nav, FormControl, InputGroup } from 'react-bootstrap'
-import searchIcon from '../../assets/search.svg'
+// Search.jsx
 import { useState } from 'react'
+import searchIcon from '../../assets/search.svg'
 
 const Search = () => {
-  const [isOpenSearch, setIsOpenSearch] = useState(false)
-
-  const toggleSearch = () => setIsOpenSearch(!isOpenSearch)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Nav className='align-items-center'>
-      <Nav.Item className='nav-item'>
-        <Button
-          variant='none'
-          className='px-3'
-          type='button'
-          onClick={toggleSearch}
-        >
-          <img src={searchIcon} style={{ width: '2rem' }} alt='search' />
-        </Button>
-      </Nav.Item>{' '}
-      {isOpenSearch && (
-        <Nav.Item className='nav-item'>
-          <InputGroup className='ms-0.5'>
-            <FormControl
-              type='text'
-              placeholder='Search...'
-              aria-label='Search'
-              style={{
-                borderColor: '#729B87',
-                borderWidth: '2.5px',
-              }}
-            />
-          </InputGroup>
-        </Nav.Item>
+    <div className="flex items-center">
+      <button
+        type="button"
+        className="p-1 hover:opacity-70 transition-opacity"
+        onClick={() => setIsOpen((v) => !v)}
+        aria-label="Toggle search"
+      >
+        <img src={searchIcon} className="w-7 h-7" alt="search" />
+      </button>
+
+      {isOpen && (
+        <input
+          type="text"
+          placeholder="Search…"
+          autoFocus
+          className="
+            ml-2 px-3 py-1
+            font-mono text-sm
+            bg-neutral-white
+            border-[length:var(--border-width-base)] border-sage border-solid
+            focus:outline-none focus:ring-1 focus:ring-sage
+          "
+        />
       )}
-    </Nav>
+    </div>
   )
 }
 

@@ -1,26 +1,18 @@
+
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react'
-import {
-  Container,
-  Card,
-  Alert,
-  Button,
-  OverlayTrigger,
-  Tooltip,
-  Row,
-  Col,
-  Modal,
-} from 'react-bootstrap'
 import '../../index.css'
 import { PreviewProjects } from './PreviewProjects'
-import { User } from '../../Components/User/User'
 import { CreateProject } from '../../Components/Projects/CreateProject'
 import { useAuth } from '../../contexts/AuthContext'
 import { useUserHome } from '../../contexts/UserHomeContext'
-import { jwtDecode } from 'jwt-decode'
-import { Header } from '../../Components/Header/Header'
 import IconButton from '../../Ui/IconButton'
 import StaticRoundBtn from '../../Ui/StaticRoundBtn'
+import { ProfileImage } from '../../Components/User/ProfileImage'
+import DashboardSkeleton from '../../Ui/LoadingSkeletons/DashboardSkeleton'
+import { StyledCard } from '../../Ui/StyledCard'
+import { MessengerRegister } from './MessangerRegister'
+import { Modal } from '../../Ui/Modal'          // Custom Tailwind modal
 import folderPlus from '../../assets/folderPlus.svg'
 import userInfo from '../../assets/userInfo.svg'
 import clock from '../../assets/clock.svg'
@@ -34,405 +26,211 @@ import trendUp from '../../assets/trend.svg'
 import packageCheck from '../../assets/package.svg'
 import clipboardCheck from '../../assets/clipboardCheck.svg'
 import addNew from '../../assets/addNew.svg'
-import { ProfileImage } from '../../Components/User/ProfileImage'
-import DashboardSkeleton from '../../Ui/LoadingSkeletons/DashboardSkeleton'
-//import { colors } from '../../Ui/colors'
-import { StyledCard } from '../../Ui/StyledCard'
-import { MessengerRegister } from './MessangerRegister'
-// ==================== STYLES ====================
-// const CARD_STYLES = {
-//   borderWidth: '2.5px',
-//   borderColor: '#557263',
-//   transition: 'background-color 0.2s',
-//   backgroundColor: colors.cardBackgroundColor,
-// }
 
-const METRIC_CARD_STYLES = {
-  width: '8rem',
-  height: '8rem',
-  borderWidth: '2px',
-  borderColor: '#000',
-  borderStyle: 'solid',
-  borderRadius: '10px',
-  fontFamily: 'var(--font-family-mono)',
-  fontWeight: 'var(--font-weight-bold)',
-  textAlign: 'center',
-  fontSize: '0.8em',
-  color: '#000',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'space-evenly',
-  padding: '0.5rem',
-}
-// const HOVER_CARD_STYLES = {
-//   backgroundColor: colors.hoverCardBackgroundColor,
-// }
+// ==================== TAILWIND STYLE CONSTANTS ====================
+const METRIC_CARD_BASE_CLASS =
+  'w-32 h-32 border-2 border-neutral-black rounded-card font-mono font-bold text-center flex flex-col items-center justify-evenly p-2 text-black text-sm'
 
-const CARD_HEADER_STYLES = {
-  backgroundColor: 'transparent',
-  borderBottom: '2.5px solid #557263',
-  fontFamily: 'var(--font-family-mono)',
-  fontWeight: 'var(--font-weight-bold)',
-  fontSize: '0.9rem',
-  color: '#000',
-}
+const CARD_HEADER_CLASS =
+  'flex items-center justify-between py-3 border-b-2 border-sage font-mono font-bold text-black text-sm'
 
-const ALERT_STYLES = {
-  borderWidth: '2px',
-  borderColor: '#ad0000',
-  backgroundColor: 'transparent',
-  color: '#ad0000',
-}
+const ALERT_CLASS =
+  'border-2 border-red-800 bg-transparent text-red-800 p-3 rounded'
 
-const BUTTON_STYLES = {
-  borderWidth: '2px',
-  borderColor: '#186545',
-  borderRadius: '2rem',
-  color: '#186545',
-}
+const BUTTON_CLASS =
+  'border-2 border-primary rounded-pill text-primary px-4 py-2 hover:bg-primary/10 transition-colors'
 
-const ICON_STYLES = {
-  width: '2rem',
-}
+const ICON_SIZE_CLASS = 'w-8 h-8'
 
-const SMALL_TEXT_STYLES = {
-  fontSize: '0.7em',
-}
-
-const MEDIUM_TEXT_STYLES = {
-  fontSize: '0.8em',
-}
-
-// ==================== CONSTANTS ====================
-const METRICS_DATA = [
-  {
-    icon: clock,
-    title: 'In Progress',
-    key: 'tasksInProgress',
-    color: '#87CEEB', // Light Steel Blue
-  },
-  {
-    icon: alert,
-    title: 'Critical Tasks',
-    key: 'criticalTasks',
-    color: '#FD5C5C', // Indian Red
-  },
-  {
-    icon: clipboardCheck,
-    title: 'Quality Issues',
-    key: 'qualityIssues',
-    color: '#F0E68C', // Khaki
-  },
-  {
-    icon: boxes,
-    title: 'Inventory Alerts',
-    key: 'inventoryAlerts',
-    color: '#D2B48C', // Tan
-  },
-  {
-    icon: tools,
-    title: 'Machine Downtime',
-    key: 'machineDowntime',
-    color: '#FA8072', // Salmon
-    unit: 'hours',
-  },
-  {
-    icon: gauge,
-    title: 'Cycle Time',
-    key: 'cycleTime',
-    color: '#90EE90', // Light Green
-    unit: 'avg hrs',
-  },
-  {
-    icon: packageCheck,
-    title: 'On-Time Delivery',
-    key: 'onTimeDelivery',
-    color: '#B0C4DE', // Light Steel Blue
-    unit: '%',
-  },
-  {
-    icon: wrench,
-    title: 'Pending Maintenance',
-    key: 'pendingMaintenance',
-    color: '#B0E0E6', // Powder Blue
-    unit: 'tasks',
-  },
-  {
-    icon: trendUp,
-    title: 'OEE',
-    key: 'oee',
-    color: '#66CDAA', // Medium Aquamarine
-    unit: '%',
-  },
-]
-
-const QUICK_ACCESS_BUTTONS = [
-  { title: 'Design Tasks', color: '#E4080A' },
-  { title: 'Manufacturing', color: '#0F5A38' },
-  { title: 'Quality Control', color: '#FF6201' },
-  { title: 'Inventory', color: '#1f3f4f' },
-]
-
-// ==================== REUSABLE COMPONENTS ====================
-const MetricCard = ({ metric, value }) => (
-  <div
-    className='mb-3 '
-    style={{
-      ...METRIC_CARD_STYLES,
-      backgroundColor: metric.color,
-    }}
-  >
-    <img
-      className='d-flex column align-items-center mb-3'
-      style={ICON_STYLES}
-      src={metric.icon}
-      alt={metric.title}
-    />
-    <strong className='mb-1'>{metric.title}</strong>
-    <span className='mb-0'>{value}</span>
+// ==================== TOOLTIP COMPONENT (replaces OverlayTrigger) ====================
+const Tooltip = ({ children, text }) => (
+  <div className="relative inline-block group">
+    {children}
+    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-neutral-black rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-10">
+      {text}
+    </span>
   </div>
 )
 
+// ==================== METRIC CARD ====================
+const MetricCard = ({ metric, value }) => (
+  <div className={`${METRIC_CARD_BASE_CLASS}`} style={{ backgroundColor: metric.color }}>
+    <img className="mb-2" style={{ width: '2rem' }} src={metric.icon} alt={metric.title} />
+    <strong className="mb-1">{metric.title}</strong>
+    <span>{value}{metric.unit && ` ${metric.unit}`}</span>
+  </div>
+)
+
+// ==================== CARD HEADER ====================
 const CardHeader = ({ icon, title, children }) => (
-  <div
-    className='d-flex align-items-center justify-content-between py-3'
-    style={CARD_HEADER_STYLES}
-  >
-    <div className='d-flex align-items-center'>
-      {icon && (
-        <img
-          src={icon}
-          alt={title}
-          style={{
-            ...ICON_STYLES,
-            width: '1.5rem',
-            marginBottom: '0.25rem',
-          }}
-        />
-      )}
-      <h4 className='mb-0'>{title}</h4>
+  <div className={CARD_HEADER_CLASS}>
+    <div className="flex items-center gap-2">
+      {icon && <img src={icon} alt={title} className="w-6 h-6" />}
+      <h4 className="mb-0">{title}</h4>
     </div>
     {children}
   </div>
 )
 
+// ==================== CONSTANTS ====================
+const METRICS_DATA = [
+  { icon: clock,         title: 'In Progress',         key: 'tasksInProgress', color: '#87CEEB' },
+  { icon: alert,         title: 'Critical Tasks',       key: 'criticalTasks',   color: '#FD5C5C' },
+  { icon: clipboardCheck,title: 'Quality Issues',       key: 'qualityIssues',   color: '#F0E68C' },
+  { icon: boxes,         title: 'Inventory Alerts',     key: 'inventoryAlerts', color: '#D2B48C' },
+  { icon: tools,         title: 'Machine Downtime',     key: 'machineDowntime', color: '#FA8072', unit: 'hours' },
+  { icon: gauge,         title: 'Cycle Time',           key: 'cycleTime',       color: '#90EE90', unit: 'avg hrs' },
+  { icon: packageCheck,  title: 'On-Time Delivery',     key: 'onTimeDelivery',  color: '#B0C4DE', unit: '%' },
+  { icon: wrench,        title: 'Pending Maintenance',  key: 'pendingMaintenance', color: '#B0E0E6', unit: 'tasks' },
+  { icon: trendUp,       title: 'OEE',                  key: 'oee',             color: '#66CDAA', unit: '%' },
+]
+
+const QUICK_ACCESS_BUTTONS = [
+  { title: 'Design Tasks',    color: '#E4080A' },
+  { title: 'Manufacturing',   color: '#0F5A38' },
+  { title: 'Quality Control', color: '#FF6201' },
+  { title: 'Inventory',       color: '#1f3f4f' },
+]
+
 // ==================== MAIN COMPONENT ====================
 export function Dashboard() {
-  //Dashboard
-  const { userProjects, currentUser, isUserLoading, areProjectsLoading } =
-    useUserHome()
-  const [token] = useAuth()
-  const [userData, setUserData] = useState(null)
+  const { isAuthenticated } = useAuth()
+  const { userProjects, currentUser, isUserLoading, areProjectsLoading, refreshProjects } = useUserHome()
+
   const [showCreateProject, setShowCreateProject] = useState(false)
-  const [hoverStates, setHoverStates] = useState({
-    info: false,
-    projects: false,
-  })
+  const [hoverStates, setHoverStates] = useState({ info: false, projects: false })
   const [isLoading, setIsLoading] = useState(true)
 
+  // Mock metrics
   const metrics = {
-    tasksInProgress: 12,
-    criticalTasks: 3,
-    qualityIssues: 2,
-    inventoryAlerts: 4,
+    tasksInProgress: 12, criticalTasks: 3, qualityIssues: 2, inventoryAlerts: 4,
+    machineDowntime: 2.5, cycleTime: 4.2, onTimeDelivery: 87, pendingMaintenance: 6, oee: 92,
   }
 
   useEffect(() => {
-    try {
-      const decoded = jwtDecode(token)
-      setUserData({ userId: decoded.sub, username: decoded.username })
-    } catch (error) {
-      console.error('Invalid token:', error)
-      setUserData(null)
-    }
-  }, [token])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
-
+    const timer = setTimeout(() => setIsLoading(false), 1000)
     return () => clearTimeout(timer)
   }, [])
 
-  const handleHover = (key, value) => {
+  const handleHover = (key, value) =>
     setHoverStates((prev) => ({ ...prev, [key]: value }))
+
+  const handleProjectCreated = () => {
+    setShowCreateProject(false)
+    refreshProjects()
   }
 
-  if (!currentUser || isLoading || isUserLoading || areProjectsLoading) {
+  // Loading state
+  if (!isAuthenticated || isLoading || isUserLoading || areProjectsLoading) {
     return (
-      <>
-        <Header />
-        <div style={{ opacity: '80%' }}>
-          <DashboardSkeleton />
-        </div>
-      </>
+      <div className="opacity-80">
+        <DashboardSkeleton />
+      </div>
     )
   }
 
   const renderProjectsHeader = () => (
-    <div className='d-flex gap-2'>
-      <OverlayTrigger
-        placement='top'
-        overlay={<Tooltip>View Analytics</Tooltip>}
-      >
-        <IconButton
-          onClick={() => {}}
-          color='#557263'
-          src={charts}
-          alt='Visualize data'
-        />
-      </OverlayTrigger>
-      <OverlayTrigger
-        placement='top'
-        overlay={<Tooltip>Create New Project</Tooltip>}
-      >
-        <IconButton
-          onClick={() => setShowCreateProject(true)}
-          color='#186545'
-          src={addNew}
-          alt='Create new project'
-        />
-      </OverlayTrigger>
+    <div className="flex gap-2">
+      <Tooltip text="View Analytics">
+        <IconButton onClick={() => {}} color="#557263" src={charts} alt="Visualize data" />
+      </Tooltip>
+      <Tooltip text="Create New Project">
+        <IconButton onClick={() => setShowCreateProject(true)} color="#186545" src={addNew} alt="Create new project" />
+      </Tooltip>
     </div>
   )
 
   const renderEmptyProjects = () => (
-    <Card.Body className='text-center'>
-      <div className='d-flex flex-column align-items-center justify-content-center'>
-        <img
-          src={folderPlus}
-          alt='add project'
-          style={{ ...ICON_STYLES, color: '#186545' }}
-        />
-        <p className='mb-3' style={{ color: '#666' }}>
-          No manufacturing projects found. Create your first project to get
-          started!
+    <div className="text-center py-6">
+      <div className="flex flex-col items-center justify-center">
+        <img src={folderPlus} alt="add project" className="w-8 h-8 mb-3" style={{ color: '#186545' }} />
+        <p className="mb-3 text-gray-600">
+          No manufacturing projects found. Create your first project to get started!
         </p>
-        <Button
-          variant='none'
-          onClick={() => setShowCreateProject(true)}
-          style={BUTTON_STYLES}
-        >
+        <button onClick={() => setShowCreateProject(true)} className={BUTTON_CLASS}>
           Create Project
-        </Button>
+        </button>
       </div>
-    </Card.Body>
+    </div>
   )
 
+  const renderUserInfo = () => {
+    if (!currentUser) {
+      return <div className={ALERT_CLASS}>User data not available</div>
+    }
+    return (
+      <div className="flex flex-row">
+        <ProfileImage user={currentUser} className="mr-4" size={4} />
+        <div>
+          <h5>{currentUser.full_name || 'No name provided'}</h5>
+          <p className="text-gray-500 mb-1">{currentUser.email}</p>
+          <p className="text-gray-500 mb-0">{currentUser.role || 'No role assigned'}</p>
+          <p className="text-gray-500 mb-0">{currentUser.team || 'No team assigned'}</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%' }}>
-      <Header />
-      <Container fluid className='py-4'>
-        <h1 className='mb-4'>Welcome back</h1>
+    <div className="container-fluid px-4 py-4">
+      <h1 className="mb-4">
+        Welcome back{currentUser?.full_name ? `, ${currentUser.full_name.split(' ')[0]}` : ''}
+      </h1>
 
-        <Row className='mx-1 mb-3 g-0'>
-          {METRICS_DATA.map((metric) => (
-            <Col key={metric.title} className='g-1 p-1 mx-1'>
-              <MetricCard metric={metric} value={metrics[metric.key]} />
-            </Col>
-          ))}
-        </Row>
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9 gap-2 mb-4">
+        {METRICS_DATA.map((metric) => (
+          <MetricCard key={metric.title} metric={metric} value={metrics[metric.key] || 0} />
+        ))}
+      </div>
 
-        <Row className='mb-3'>
-          <Col lg={4} md={5} sm={12} className='mb-4'>
-            <StyledCard
-              hoverKey='info'
-              hoverStates={hoverStates}
-              handleHover={handleHover}
-              style={{ padding: '1rem' }}
-            >
-              <CardHeader icon={userInfo} title='Personal Information' />
-              <Card.Body style={MEDIUM_TEXT_STYLES}>
-                {userData ? (
-                  <div className='d-flex flex-row'>
-                    <ProfileImage
-                      user={currentUser}
-                      style={{ marginRight: '1rem' }}
-                      size={4}
-                    />
-                    <User id={userData.userId} explicit={true} />
-                  </div>
-                ) : (
-                  <Alert variant='warning' style={ALERT_STYLES}>
-                    User data not available
-                  </Alert>
-                )}
-              </Card.Body>
-            </StyledCard>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        {/* Left Column: User Info & Quick Access */}
+        <div className="md:col-span-5 lg:col-span-4 space-y-4">
+          <StyledCard hoverKey="info" hoverStates={hoverStates} handleHover={handleHover} className="p-4">
+            <CardHeader icon={userInfo} title="Personal Information" />
+            <div className="mt-3 text-sm">{renderUserInfo()}</div>
+          </StyledCard>
 
-            <StyledCard
-              hoverKey='info'
-              hoverStates={hoverStates}
-              handleHover={handleHover}
-              style={{ padding: '1rem' }}
-            >
-              <CardHeader title='Quick Access' />
-              <Card.Body>
-                <div className='mt-3'>
-                  <small
-                    className='d-flex flex-wrap gap-2'
-                    style={SMALL_TEXT_STYLES}
-                  >
-                    {QUICK_ACCESS_BUTTONS.map(({ title, color }) => (
-                      <StaticRoundBtn
-                        key={title}
-                        src={''}
-                        alt={title}
-                        handleClick={() => {}}
-                        color={color}
-                      />
-                    ))}
-                  </small>
-                </div>
-              </Card.Body>
-            </StyledCard>
-          </Col>
+          <StyledCard hoverKey="info" hoverStates={hoverStates} handleHover={handleHover} className="p-4">
+            <CardHeader title="Quick Access" />
+            <div className="mt-3">
+              <div className="flex flex-wrap gap-2 text-xs">
+                {QUICK_ACCESS_BUTTONS.map(({ title, color }) => (
+                  <StaticRoundBtn key={title} src="" alt={title} handleClick={() => {}} color={color} />
+                ))}
+              </div>
+            </div>
+          </StyledCard>
+        </div>
 
-          <Col lg={8} md={7} sm={12}>
-            <StyledCard
-              hoverKey='projects'
-              hoverStates={hoverStates}
-              handleHover={handleHover}
-            >
-              <Card.Body>
-                <CardHeader icon={folderPlus} title='Projects'>
-                  {renderProjectsHeader()}
-                </CardHeader>
+        {/* Right Column: Projects */}
+        <div className="md:col-span-7 lg:col-span-8">
+          <StyledCard hoverKey="projects" hoverStates={hoverStates} handleHover={handleHover}>
+            <div className="p-4">
+              <CardHeader icon={folderPlus} title="Projects">
+                {renderProjectsHeader()}
+              </CardHeader>
+              {userProjects?.length ? <PreviewProjects /> : renderEmptyProjects()}
+            </div>
+          </StyledCard>
 
-                {userProjects?.length ? (
-                  <PreviewProjects />
-                ) : (
-                  renderEmptyProjects()
-                )}
-              </Card.Body>
-            </StyledCard>
-            <MessengerRegister
-              users={[
-                { id: 'u1', name: 'Alice Chen', role: 'engineer' },
-                { id: 'u2', name: 'Bob Wilson', role: 'designer' },
-                { id: 'u3', name: 'Carol Martinez', role: 'manager' },
-              ]}
-              onClose={() => {}}
-            />
-          </Col>
-        </Row>
+          <MessengerRegister
+            users={[
+              { id: 'u1', name: 'Alice Chen',      role: 'design_engineer' },
+              { id: 'u2', name: 'Bob Wilson',       role: 'cad_technician' },
+              { id: 'u3', name: 'Carol Martinez',   role: 'production_supervisor' },
+            ]}
+            onClose={() => {}}
+          />
+        </div>
+      </div>
 
-        <Modal
-          show={showCreateProject}
-          onHide={() => setShowCreateProject(false)}
-          size='lg'
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Create New Project</Modal.Title>
-          </Modal.Header>
-          <Modal.Body className='custom-modal'>
-            <CreateProject onClose={() => setShowCreateProject(false)} />
-          </Modal.Body>
-        </Modal>
-      </Container>
+      {/* Create Project Modal (custom Tailwind modal) */}
+      <Modal isOpen={showCreateProject} onClose={() => setShowCreateProject(false)} title="Create New Project">
+        <CreateProject onClose={handleProjectCreated} />
+      </Modal>
     </div>
   )
 }

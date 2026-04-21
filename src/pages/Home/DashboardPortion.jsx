@@ -1,59 +1,24 @@
-import { Card } from 'react-bootstrap'
-import dashboardIcon from '../../assets/dashboard-icon.svg'
 import { useNavigate } from 'react-router-dom'
+import dashboardIcon from '../../assets/dashboard-icon.svg'
+
 export default function DashboardPortion() {
   const navigate = useNavigate()
 
-  const handleClick = () => {
-    navigate('/dashboard')
-  }
-
   return (
-    <>
-      {/* Dashboard portion */}
-      <Card
-        style={{
-          borderWidth: '2.5px',
-          borderColor: '#000',
-          backgroundColor: '#fff',
-        }}
-      >
-        <Card.Body className='text-center p-5'>
-          <div className='d-flex flex-column align-items-center'>
-            <h3>Go to Dashboard</h3>
-            {/* Clickable dashboard icon */}
-            <button
-              onClick={handleClick}
-              style={{
-                borderWidth: '2.5px',
-                backgroundColor: '#1aaa8F', // Change color to match your theme
-                borderRadius: '50%',
-                height: '5rem',
-                width: '5rem',
-                display: 'flex',
-                flex: 'wrap',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '1rem',
-              }}
-              className='mb-1'
-            >
-              <img
-                src={dashboardIcon}
-                alt='dashboard'
-                style={{
-                  width: '4rem',
-                  margin: 0,
-                  cursor: 'pointer',
-                }}
-              />
-            </button>
-            <p className='mt-0 mb-4' style={{ color: '#666' }}>
-              Access your project dashboard to manage tasks and progress.
-            </p>
-          </div>
-        </Card.Body>
-      </Card>
-    </>
+    <div className="border-thick border-neutral-black bg-neutral-white rounded-card p-5 text-center">
+      <div className="flex flex-col items-center">
+        <h3 className="text-xl font-bold mb-3">Go to Dashboard</h3>
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="border-thick bg-[#1aaa8F] rounded-full h-20 w-20 flex items-center justify-center p-4 mb-1 hover:scale-105 transition-transform"
+          aria-label="Dashboard"
+        >
+          <img src={dashboardIcon} alt="dashboard" className="w-16 cursor-pointer" />
+        </button>
+        <p className="mt-0 mb-4 text-[#666]">
+          Access your project dashboard to manage tasks and progress.
+        </p>
+      </div>
+    </div>
   )
 }

@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Col, Row, Container } from 'react-bootstrap'
 import { Blog } from './Blog'
 import { Board } from './Board'
 import { Header } from '../Components/Header/Header'
 import BlogIcon from '../assets/blogIcon.svg'
 import BlogIconFlipped from '../assets/blogIconFlipped.svg'
-import toUp from '../assets/up.svg'
+//import toUp from '../assets/up.svg'
 import IconButton from '../Ui/IconButton'
 import { CreateTask } from '../Components/Tasks/CreateTask'
 import { ProjectDashboard } from '../Components/Projects/ProjectDashboard'
@@ -13,50 +12,23 @@ import { ProjectDashboard } from '../Components/Projects/ProjectDashboard'
 export const ProjectLayout = () => {
   const [showBlog, setShowBlog] = useState(false)
 
-  const toggleBlog = () => {
-    setShowBlog(!showBlog)
-  }
+  const toggleBlog = () => setShowBlog(!showBlog)
 
   return (
-    <Container fluid className='vh-100 d-flex flex-column mx-0 px-0'>
+    <div className="h-screen flex flex-col mx-0 px-0 overflow-hidden">
       <Header />
-      <Row className='flex-grow-1 g-0'>
+      
+      <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <Col
-          xs={2}
-          lg={1}
-          className='d-flex flex-column align-items-center'
-          style={{
-            height: '100%',
-            position: 'fixed',
-            paddingTop: 0, //'4rem',
-            paddingRight: '1rem',
-            top: 0,
-            left: 0,
-            zIndex: 1000,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-evenly',
-            backgroundColor: '#EEFBF4',
-            borderRightWidth: !showBlog && '2px',
-            borderRightColor: !showBlog && '#000', // '#729B87',
-            borderRightStyle: !showBlog && 'solid',
-          }}
+        <aside
+          className={`
+            relative flex flex-col items-center justify-evenly
+            w-20 lg:w-24 flex-shrink-0
+            bg-[#EEFBF4] border-r-2 border-black border-solid
+            ${!showBlog ? 'border-r-2' : 'border-r-0'}
+          `}
         >
-          <div
-            style={{
-              position: 'absolute',
-              top: '0',
-              margin: '1rem',
-            }}
-          >
-            <IconButton
-              src={toUp}
-              alt={'scroll up'}
-              onClick={() => window.scrollTo(0, 0)}
-              iconWidthREM={6}
-            />
-          </div>
+          
 
           <IconButton
             src={showBlog ? BlogIconFlipped : BlogIcon}
@@ -66,50 +38,31 @@ export const ProjectLayout = () => {
           />
           <CreateTask />
           <ProjectDashboard />
-        </Col>
+        </aside>
 
-        {/* Blog Panel */}
-        <Col
-          xs={10}
-          lg={showBlog ? 4 : 1}
-          className={` ${showBlog ? 'd-block' : 'd-none'}`}
-          style={{
-            height: '100vh',
-            position: 'fixed',
-            top: 0,
-            paddingTop: 0,
-            left: '5rem',
-            overflowY: 'auto',
-            zIndex: 999,
-            backgroundColor: '#EEFBF4',
-            borderRightWidth: '2px',
-            borderRightColor: '#000', // '#729B87',
-            borderRightStyle: 'solid',
-          }}
-        >
-          <Blog />
-        </Col>
+        {/* Blog Panel (conditionally rendered) */}
+        {showBlog && (
+          <aside
+            className="
+              w-80 lg:w-96 flex-shrink-0
+              h-full overflow-y-auto
+              bg-[#EEFBF4] border-r-2 border-black
+            "
+          >
+            <Blog />
+          </aside>
+        )}
 
         {/* Main Content */}
-        <Col
-          xs={10}
-          lg={11}
-          className=' w-99'
-          style={{
-            mineight: '100%',
-            position: 'absolute',
-            top: 0,
-            left: '5rem',
-            paddingTop: '5rem',
-            marginTop: 0,
-            marginLeft: '2rem',
-            paddingBottom: '1rem',
-            overflowY: 'auto',
-          }}
+        <main
+          className="
+            flex-1 h-full overflow-y-auto
+            pt-20 px-4 lg:px-6 pb-4
+          "
         >
           <Board />
-        </Col>
-      </Row>
-    </Container>
+        </main>
+      </div>
+    </div>
   )
 }

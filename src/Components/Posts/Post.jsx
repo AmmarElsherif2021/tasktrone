@@ -1,7 +1,7 @@
+// Post.jsx
 import PropTypes from 'prop-types'
-import { Button, Card } from 'react-bootstrap'
-import { User } from '../User/User'
 import { useEffect, useState } from 'react'
+import { User } from '../User/User'
 import StaticRoundBtn from '../../Ui/StaticRoundBtn'
 import { useProject } from '../../contexts/ProjectContext'
 import { ProfileImage } from '../User/ProfileImage'
@@ -13,7 +13,7 @@ export function Post({ title, contents, author, taskId = '' }) {
   const [postUserData, setPostUserData] = useState(null)
 
   useEffect(() => {
-    if (currentProjectMembers && currentProjectMembers.length) {
+    if (currentProjectMembers?.length) {
       const user = currentProjectMembers.find((x) => x.id === author)
       setPostUserData(user)
     }
@@ -23,82 +23,59 @@ export function Post({ title, contents, author, taskId = '' }) {
   const shouldShowToggle = contents?.length > 50
 
   return (
-    <Card
-      className='mb-3 shadow-sm'
-      style={{ borderColor: '#000', borderWidth: '2px' }}
-    >
-      <Card.Header className='d-flex align-items-center bg-transparent border-0'>
-        <Button
-          variant='none'
+    <div className="bg-card-bg border-2 border-card-border rounded-md shadow-sm p-3 mb-3 transition-colors hover:bg-card-hover">
+      {/* Header */}
+      <div className="flex items-center border-0 pb-2">
+        <button
+          type="button"
           onClick={() => setExplicitUserInfo(!explicitUserInfo)}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            fontSize: explicitUserInfo ? '0.6em' : '1em',
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
-            borderBottomWidth: '2px',
-            borderBottomColor: '#000',
-            paddingLeft: '0.5rem',
-          }}
+          className={`flex flex-row items-center pl-2 border-b-2 border-primary rounded-t-md ${
+            explicitUserInfo ? 'text-xs' : 'text-base'
+          }`}
         >
-          <ProfileImage
-            user={postUserData}
-            size={4}
-            style={{
-              marginRight: '1rem',
-            }}
-          />
+          <ProfileImage user={postUserData} size={4} className="mr-4" />
           <User id={author} explicit={explicitUserInfo} />
-        </Button>
-      </Card.Header>
-      <Card.Body>
-        <Card.Title>
-          <h2>{title}</h2>
-        </Card.Title>
-        <hr style={{ borderWidth: '2px', color: '#729B87' }} />
-        <Card.Text
-          style={{
-            fontFamily: 'var(--font-family-mono)',
-            fontWeight: 'var(--font-weight-bold)',
-            fontSize: '0.9em',
-          }}
-        >
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="pt-2">
+        <h2 className="text-xl font-bold mb-2">{title}</h2>
+        <hr className="border-2 border-primary my-2" />
+        <div className="font-mono font-bold text-sm">
           {isExpanded ? contents : truncatedContent}
           {!isExpanded && contents?.length > 50 && '...'}
 
           {shouldShowToggle && (
-            <Button
-              variant='link'
+            <button
+              type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className='ms-2'
-              style={{
-                fontSize: '0.8em',
-                textDecoration: 'none',
-                color: '#729B87',
-                padding: 0,
-              }}
+              className="ml-2 text-sm text-primary hover:underline"
             >
               {isExpanded ? 'Read less' : 'Read more'}
-            </Button>
+            </button>
           )}
-        </Card.Text>
-      </Card.Body>
+        </div>
+      </div>
+
+      {/* Footer */}
       {taskId ? (
-        <Card.Footer className='text-muted bg-transparent border-0'>
+        <div className="text-muted text-sm mt-3 pt-2 border-t border-transparent">
           <small>Related Task ID: </small>
           <StaticRoundBtn src={''} handleClick={() => {}} alt={taskId} />
-        </Card.Footer>
+        </div>
       ) : (
-        <StaticRoundBtn
-          src={''}
-          handleClick={() => {}}
-          alt={'public'}
-          backgroundColor={'#99FACA'}
-          color='#729B87'
-        />
+        <div className="mt-3 pt-2 border-t border-transparent">
+          <StaticRoundBtn
+            src={''}
+            handleClick={() => {}}
+            alt={'public'}
+            backgroundColor="var(--color-frost)"
+            color="var(--color-primary)"
+          />
+        </div>
       )}
-    </Card>
+    </div>
   )
 }
 

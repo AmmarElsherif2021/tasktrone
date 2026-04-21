@@ -1,20 +1,58 @@
-import { Dropdown } from 'react-bootstrap'
+// ExportProject.jsx
+import { useState, useRef, useEffect } from 'react'
 import exportIcon from '../../assets/export-icon.svg'
 import IconButton from '../../Ui/IconButton'
-const ExportProject = () => {
+
+// ── Shared dropdown panel style (mirrors Settings.jsx pattern) ─
+const DROPDOWN_CLS = `
+  absolute right-0 mt-2 z-50
+  bg-neutral-white
+  border-[length:var(--border-width-base)] border-card-border border-solid
+  shadow-sm
+  min-w-[10rem]
+`
+
+const ITEM_CLS = `
+  block w-full text-left
+  px-4 py-2
+  font-mono text-xs
+  hover:bg-card-hover
+  transition-colors duration-fast
+`
+
+export const ExportProject = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const onOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setIsOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [])
+
   return (
-    <Dropdown>
-      <Dropdown.Toggle
-        as={(props) => (
-          <IconButton src={exportIcon} alt={'Export'} {...props} />
-        )}
+    <div className="relative inline-block" ref={ref}>
+      <IconButton
+        src={exportIcon}
+        alt="Export"
+        onClick={() => setIsOpen((v) => !v)}
       />
-      <Dropdown.Menu>
-        <Dropdown.Item>Export Tasks</Dropdown.Item>
-        <Dropdown.Item>Export Project</Dropdown.Item>
-        <Dropdown.Item>Export Metrics</Dropdown.Item>
-      </Dropdown.Menu>
-    </Dropdown>
+      {isOpen && (
+        <div className={DROPDOWN_CLS}>
+          <button className={ITEM_CLS} onClick={() => setIsOpen(false)}>
+            Export Tasks
+          </button>
+          <button className={ITEM_CLS} onClick={() => setIsOpen(false)}>
+            Export Project
+          </button>
+          <button className={ITEM_CLS} onClick={() => setIsOpen(false)}>
+            Export Metrics
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 

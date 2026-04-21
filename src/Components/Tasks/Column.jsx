@@ -1,29 +1,16 @@
 import PropTypes from 'prop-types'
-import { Card, Stack } from 'react-bootstrap'
-import { TaskCard } from './TaskCard'
 import { useEffect } from 'react'
-//import { useProject } from '../../contexts/ProjectContext'
+import { TaskCard } from './TaskCard'
 
 export const Column = ({ tasks }) => {
   useEffect(() => {
-    console.log(`Column  rendered with tasks:`, tasks)
+    console.log(`Column rendered with tasks:`, tasks)
   }, [tasks])
+
   return (
-    <Card
-      className='h-100'
-      style={{ backgroundColor: '#fff', border: 'none', paddingRight: '15px' }}
-    >
-      <Stack
-        gap={2}
-        className='overflow-auto px-1'
-        style={{
-          maxHeight: '70vh',
-          backgroundColor: '#fff',
-          border: 'none',
-          borderRightStyle: 'dashed',
-          borderRightColor: '#d11',
-          borderRightWidth: '1px',
-        }}
+    <div className="h-full bg-white border-none pr-[15px]">
+      <div
+        className="flex flex-col gap-2 overflow-auto px-1 max-h-[70vh] bg-white border-r border-r-red-700 border-dashed"
       >
         {tasks?.map((task) => (
           <TaskCard
@@ -42,8 +29,8 @@ export const Column = ({ tasks }) => {
             requirements={task.requirements}
           />
         ))}
-      </Stack>
-    </Card>
+      </div>
+    </div>
   )
 }
 
@@ -57,6 +44,6 @@ Column.propTypes = {
       leadTime: PropTypes.number.isRequired,
       cycleTime: PropTypes.number.isRequired,
       phase: PropTypes.string,
-    }),
+    })
   ).isRequired,
 }

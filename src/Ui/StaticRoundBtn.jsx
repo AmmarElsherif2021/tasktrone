@@ -1,41 +1,39 @@
 import PropTypes from 'prop-types'
-import { Button } from 'react-bootstrap'
+import { roundBtnStyle } from './componentStyles'
 
-const StaticRoundBtn = ({
+/**
+ * StaticRoundBtn
+ * ──────────────────────────────────────────────────────────────
+ * A pill-shaped label button with an optional leading icon image.
+ * Border + text color are driven by the `color` prop so callers
+ * can match team-role or category colors at runtime.
+ *
+ * @prop {string} color           – border + text color
+ * @prop {string} backgroundColor – defaults to transparent
+ */
+export const StaticRoundBtn = ({
   src = '',
   alt,
-  handleClick = () => {},
-  color = '#fff',
-  backgroundColor = 'transparent',
-}) => {
-  return (
-    <Button
-      variant='none'
-      size='sm'
-      style={{
-        borderWidth: '2px',
-        borderColor: color, //'#ad0000',
-        color: color,
-        borderRadius: '10px',
-        maxWidth: '7rem',
-        margin: '0.4rem',
-        backgroundColor: backgroundColor,
-      }}
-      onClick={handleClick}
-    >
-      {src && <img src={src} width={2} alt={alt} />}
-      <span style={{ color: color }}>{alt}</span>
-    </Button>
-  )
-}
+  handleClick      = () => {},
+  color            = 'var(--color-neutral-black)',
+  backgroundColor  = 'transparent',
+}) => (
+  <button
+    onClick={handleClick}
+    style={roundBtnStyle.base(color, backgroundColor)}
+  >
+    {src && (
+      <img src={src} width="14" alt="" aria-hidden="true" className="inline mr-1" />
+    )}
+    <span>{alt}</span>
+  </button>
+)
 
 StaticRoundBtn.propTypes = {
-  src: PropTypes.string,
-  alt: PropTypes.string,
-  handleClick: PropTypes.func,
-  //className: PropTypes.string,
-  //iconWidthREM: PropTypes.string,
-  color: PropTypes.string,
+  src:             PropTypes.string,
+  alt:             PropTypes.string,
+  handleClick:     PropTypes.func,
+  color:           PropTypes.string,
   backgroundColor: PropTypes.string,
 }
 

@@ -1,19 +1,22 @@
+// PostFilter.jsx
 import PropTypes from 'prop-types'
-import { Form, InputGroup } from 'react-bootstrap'
 
 export function PostFilter({ field, value, onChange }) {
   return (
-    <Form.Group className='mb-3'>
-      <InputGroup>
-        <InputGroup.Text className='text-capitalize'>{field}</InputGroup.Text>
-        <Form.Control
-          type='text'
+    <div className="mb-3">
+      <div className="flex border-2 border-black rounded-md overflow-hidden">
+        <span className="bg-gray-100 px-3 py-1 border-r-2 border-black capitalize">
+          {field}
+        </span>
+        <input
+          type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={`Filter by ${field}...`}
+          className="flex-1 px-3 py-1 focus:outline-none"
         />
-      </InputGroup>
-    </Form.Group>
+      </div>
+    </div>
   )
 }
 

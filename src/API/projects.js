@@ -1,151 +1,151 @@
-// Get projects
-export const listProjects = async (userId, queryParams = {}) => {
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/${userId}/projects/?` +
-        new URLSearchParams(queryParams),
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          //Authorization: `Bearer ${token}`,
-        },
-      },
-    )
+import supabase from '../../supabaseClient';
 
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(`Error fetching projects: ${errorText}`)
-    }
-    return await res.json()
-  } catch (error) {
-    console.error('Error listing projects:', error)
-    throw error
-  }
-}
+export const listProjects = async (userId) => {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('created_by', userId);
 
-// Create new Project
-export const createProject = async (token, projectData) => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/projects`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(projectData),
-    })
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(`Error creating Project: ${errorText}`)
-    }
-    return await res.json()
-  } catch (error) {
-    console.error('Error creating Project:', error)
-    throw error
-  }
-}
+  if (error) throw new Error(`Error fetching projects: ${error.message}`);
+  return data;
+};
 
-// Get project by ID
-export const getProjectById = async (projectId, token) => {
+// Create a new project
+export const createProject = async (projectData) => {
   try {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/projects/${projectId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(`Error fetching project: ${errorText}`)
-    }
-    console.log(`API retrieve project`)
-    return await res.json()
-  } catch (error) {
-    console.error('Error fetching project:', error)
-    throw error
-  }
-}
+    // 1. Create the project first
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
+      .insert({
+        title: projectData.title,
+        description: projectData.description,
+        start_date: projectData.start_date,
+        target_completion_date: projectData.target_completion_date,
+        created_by: projectData.created_by,
+        project_manager: projectData.project_manager || projectData.created_by,
+        status: 'active',
+        
+      })
+      .select()
+      .single();
 
-// Update project
-export const updateProject = async (projectId, token, projectData) => {
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/projects/${projectId}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(projectData),
-      },
-    )
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(`Error updating project: ${errorText}`)
-    }
-    return await res.json()
-  } catch (error) {
-    console.error('Error updating project:', error)
-    throw error
-  }
-}
+    if (projectError) throw projectError;
 
-// Delete project
-export const deleteProject = async (projectId, token) => {
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/projects/${projectId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(`Error deleting project: ${errorText}`)
-    }
-    return null
-  } catch (error) {
-    console.error('Error deleting project:', error)
-    throw error
-  }
-}
-//update cycleTimes
-export const updateTasksCycleTime = async (token, projectId) => {
-  try {
-    const res = await fetch(
-      `${
-        import.meta.env.VITE_BACKEND_URL
-      }/projects/${projectId}/update-cycle-times/tasks`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
+    // 2. Create a default board for the project
+    const { data: board, error: boardError } = await supabase
+      .from('boards')
+      .insert({
+        project_id: project.id,
+        name: 'Default Board',
+        is_default: true,
+        wip_limit: projectData.wip_limit || 5,
+        phase: projectData.current_phase || 'concept_design',
+      })
+      .select()
+      .single();
 
-    if (!res.ok) {
-      const errorData = await res.json()
-      throw new Error(
-        errorData.message ||
-          `Error updating tasks cycleTimes: ${res.statusText}`,
-      )
+    if (boardError) throw boardError;
+
+    // 3. Add the project ID to the creator's projects array
+    const { error: userUpdateError } = await supabase.rpc('append_to_array', {
+      table_name: 'users',
+      column_name: 'projects',
+      id: projectData.created_by,
+      value: project.id  // Changed from board.id to project.id
+    });
+
+    if (userUpdateError) {
+      console.warn('Warning: Could not update user projects array:', userUpdateError);
     }
 
-    return await res.json()
+    // 4. Add the creator as a project admin
+    const { error: creatorMemberError } = await supabase
+      .from('project_members')
+      .insert({
+        project_id: project.id,
+        user_id: projectData.created_by,
+        role: 'admin'
+      });
+
+    if (creatorMemberError) {
+      console.warn('Warning: Could not add creator as project member:', creatorMemberError);
+    }
+
+    // 5. Add other members if provided
+    if (projectData.members && projectData.members.length > 0) {
+      const memberInserts = projectData.members
+        .filter(member => member.user_id !== projectData.created_by) // Don't duplicate creator
+        .map(member => ({
+          project_id: project.id,
+          user_id: member.user_id,
+          role: member.role || 'worker'
+        }));
+
+      if (memberInserts.length > 0) {
+        // Add project ID to each member's projects array
+        for (const member of memberInserts) {
+          await supabase.rpc('append_to_array', {
+            table_name: 'users',
+            column_name: 'projects',
+            id: member.user_id,
+            value: project.id  // Changed from board.id to project.id
+          }).then(({ error }) => {
+            if (error) {
+              console.warn(`Warning: Could not update projects array for user ${member.user_id}:`, error);
+            }
+          });
+        }
+
+        const { error: membersError } = await supabase
+          .from('project_members')
+          .insert(memberInserts);
+
+        if (membersError) {
+          console.warn('Warning: Some members could not be added:', membersError);
+        }
+      }
+    }
+
+    return { ...project, board_id: board.id };
   } catch (error) {
-    console.error('Error updating tasks cycleTimes:', error)
-    throw error
+    console.error('Error creating project:', error);
+    throw new Error(`Failed to create project: ${error.message}`);
   }
-}
+};
+
+export const getProjectById = async (projectId) => {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('id', projectId)
+    .single();
+
+  if (error) throw new Error(`Error fetching project: ${error.message}`);
+  return data;
+};
+
+export const updateProject = async (projectId, updates) => {
+  const { data, error } = await supabase
+    .from('projects')
+    .update(updates)
+    .eq('id', projectId)
+    .select();
+
+  if (error) throw new Error(`Error updating project: ${error.message}`);
+  return data;
+};
+
+export const deleteProject = async (projectId) => {
+  const { error } = await supabase
+    .from('projects')
+    .delete()
+    .eq('id', projectId);
+
+  if (error) throw new Error(`Error deleting project: ${error.message}`);
+};
+
+export const updateTasksCycleTime = async () => {
+  // This would be handled via database triggers in Supabase
+  console.warn('Cycle time updates should be handled via database triggers');
+  return [];
+};

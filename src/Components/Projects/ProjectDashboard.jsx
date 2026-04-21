@@ -1,118 +1,60 @@
-import { useState } from 'react'
-import { Modal, Button, Container, Row, Col, Collapse } from 'react-bootstrap'
-import settingsIcon from '../../assets/settings-icon.svg'
-import ProjectUsers from './ProjectUsers'
-import exportIcon from '../../assets/export-icon.svg'
-import IconButton from '../../Ui/IconButton'
+// ProjectDashboard.jsx
+import { useState }         from 'react'
+import IconButton           from '../../Ui/IconButton'
+import Notifications        from './Settings'
+import { ProjectUsers }     from './ProjectUsers'
+import { ExportProject }    from './ExportProject'
+import { useProject }       from '../../contexts/ProjectContext'
 import projectDashboardIcon from '../../assets/dashboard-icon.svg'
 
-// Settings Component
-const Settings = () => {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <div className='w-100'>
-      <div className='d-flex align-items-center'>
-        <IconButton
-          src={settingsIcon}
-          alt={'Settings'}
-          onClick={() => setOpen(!open)}
-          className={`me-2 ${open ? 'active' : ''}`}
-        />
-      </div>
-      <Collapse in={open}>
-        <div>
-          <div className='card card-body mt-2'>
-            <div className='d-flex flex-column gap-2'>
-              <Button variant='outline-secondary'>General Settings</Button>
-              <Button variant='outline-secondary'>Project Preferences</Button>
-              <Button variant='outline-secondary'>Integrations</Button>
-            </div>
-          </div>
-        </div>
-      </Collapse>
-    </div>
-  )
-}
-
-// Export Project Component
-const ExportProject = () => {
-  const [open, setOpen] = useState(false)
-
-  const exportOptions = ['Export Tasks', 'Export Project', 'Export Metrics']
-
-  return (
-    <div className='w-100'>
-      <div className='d-flex align-items-center'>
-        <IconButton
-          src={exportIcon}
-          alt={'Export'}
-          onClick={() => setOpen(!open)}
-          className={`me-2 ${open ? 'active' : ''}`}
-        />
-      </div>
-      <Collapse in={open}>
-        <div>
-          <div className='card card-body mt-2'>
-            <div className='d-flex flex-column gap-2'>
-              {exportOptions.map((option, index) => (
-                <Button key={index} variant='outline-secondary'>
-                  {option}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Collapse>
-    </div>
-  )
-}
-
-// Project Dashboard Component
 export const ProjectDashboard = () => {
   const [show, setShow] = useState(false)
-
-  const handleShow = () => setShow(true)
-  const handleClose = () => setShow(false)
+  const { currentProjectId } = useProject()
 
   return (
     <>
       <IconButton
         src={projectDashboardIcon}
-        alt='Set Project'
-        className='mb-0 p-0 border-0'
-        onClick={handleShow}
-        iconWidthREM={6}
+        alt={`Project\n Dashboard`}
+        onClick={() => setShow(true)}
+        iconWidthREM={5}
       />
 
-      <Modal show={show} onHide={handleClose} centered size='lg'>
-        <Modal.Header closeButton>
-          <Modal.Title>Set project</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Container fluid>
-            <Row className='g-3 flex-row'>
-              <Col xs={4}>
-                <Settings />
-              </Col>
-              <Col xs={4}>
+      {show && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          onClick={() => setShow(false)}
+        >
+          <div
+            className="bg-neutral-white max-w-3xl w-full mx-4"
+            style={{ border: 'var(--border-width-base) solid var(--color-card-border)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div
+              className="flex justify-between items-center px-4 py-3"
+              style={{ borderBottom: 'var(--border-width-base) solid var(--color-card-border)' }}
+            >
+              <h2 className="text-base font-mono font-bold">Project Management</h2>
+              <button
+                onClick={() => setShow(false)}
+                className="text-xl font-bold hover:text-primary transition-colors"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-4">
+              <div className="grid grid-cols-3 gap-4">
+                <Notifications projectId={currentProjectId} />
                 <ProjectUsers />
-              </Col>
-              <Col xs={4}>
-                <ExportProject />
-              </Col>
-            </Row>
-          </Container>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant='secondary' onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+                <ExportProject projectId={currentProjectId} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
-
-//export default ProjectDashboard
-export { Settings, ExportProject }

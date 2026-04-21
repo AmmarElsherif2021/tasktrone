@@ -1,117 +1,77 @@
 import { useAuth } from '../../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
-import {
-  Navbar,
-  Nav,
-  Container,
-  //Button,
-  Row,
-  Col,
-  Image,
-} from 'react-bootstrap'
-//import { User } from '../User/User'
 import logo from '../../assets/logo-negative.svg'
 import { useProject } from '../../contexts/ProjectContext'
-//import { jwtDecode } from 'jwt-decode'
 import IconButton from '../../Ui/IconButton'
 import logoutIcon from '../../assets/logout.svg'
 import dashboardIcon from '../../assets/negative-dashboard.svg'
 import { useUserHome } from '../../contexts/UserHomeContext'
+import supabaseClient from '../../../supabaseClient'
+
 export function Header() {
-  const [token, setToken] = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const { currentUser, setCurrentUser } = useUserHome()
   const navigate = useNavigate()
   const { setCurrentProjectId } = useProject()
 
-  const handleLogout = () => {
-    setToken(null)
-    setCurrentUser({})
-    navigate('/') // Navigate to Intro after logout
+  const handleLogout = async () => {
+    try {
+      await supabaseClient.auth.signOut()
+      setCurrentUser({})
+      setCurrentProjectId('')
+      navigate('/')
+    } catch (error) {
+      console.error('Error signing out:', error)
+      navigate('/')
+    }
   }
 
-  const renderAuthenticatedLinks = () => {
-    //const { sub } = jwtDecode(token)
-    return (
-      <Nav
-        className='ml-auto'
-        style={{
-          flex: 'row',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Nav.Item as='span' className='navbar-text me-2 py-3'>
-          <span style={{ fontSize: '0.8em' }}>
-            Logged in as {currentUser.username}
-          </span>
-        </Nav.Item>
-        <Nav.Link as={Link} to='/dashboard' className='nav-link'>
-          <IconButton
-            src={dashboardIcon}
-            alt='Dashboard'
-            onClick={() => {
-              setCurrentProjectId('')
-              navigate('/dashboard')
-            }}
-            className='py-4'
-            iconWidthREM={7}
-            color='#ffffff'
-          />
-        </Nav.Link>
-        <Nav.Link>
-          {' '}
-          <IconButton
-            src={logoutIcon}
-            alt='Sign out'
-            onClick={handleLogout}
-            className='py-4'
-            iconWidthREM={3}
-            color='#ffffff'
-          />
-        </Nav.Link>
-      </Nav>
-    )
+  const getDisplayName = () => {
+    if (currentUser?.username) return currentUser.username
+    if (currentUser?.full_name) return currentUser.full_name
+    if (user?.user_metadata?.full_name) return user.user_metadata.full_name
+    if (user?.user_metadata?.name) return user.user_metadata.name
+    if (user?.email) return user.email.split('@')[0]
+    return 'User'
   }
-
-  const renderGuestLinks = () => (
-    <Nav className='ml-auto'>
-      <Nav.Link as={Link} to='/login' className='nav-link'>
-        Log In
-      </Nav.Link>
-      <Nav.Link as={Link} to='/signup' className='nav-link'>
-        Sign Up
-      </Nav.Link>
-    </Nav>
-  )
 
   return (
-    <Navbar
-      expand='lg'
-      sticky='top'
-      className='mb-3'
-      style={{
-        paddingRight: '3rem',
-        paddingLeft: 0,
-        postion: 'fixed',
-        left: 0,
-        width: '100vw',
-        backgroundColor: '#000',
-      }}
-    >
-      <Container fluid>
-        <Navbar.Brand as={Link} to='/' onClick={() => setCurrentProjectId('')}>
-          <Image src={logo} width={30} alt='Tasktrone Logo' />
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls='basic-navbar-nav' />
-        <Navbar.Collapse id='basic-navbar-nav'>
-          <Nav className='w-100 justify-content-end'>
-            <Row className='w-100'>
-              <Col className='d-flex justify-content-end'>
-                {token ? renderAuthenticatedLinks() : renderGuestLinks()}
-              </Col>
-            </Row>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+    <header className="fixed top-0 left-0 w-full bg-black z-50 px-6 py-2 h-[var(--header-h)]">
+      <div className="container mx-auto flex items-center justify-between">
+        <Link to="/" onClick={() => setCurrentProjectId('')}>
+          <img src={logo} width={30} alt="Tasktrone Logo" />
+        </Link>
+
+        <div className="flex justify-end items-center gap-2">
+          {isAuthenticated && user ? (
+            <>
+              <span className="text-white text-sm">Logged in as {getDisplayName()}</span>
+              <IconButton
+                src={dashboardIcon}
+                alt="Dashboard"
+                onClick={() => {
+                  setCurrentProjectId('')
+                  navigate('/dashboard')
+                }}
+                iconWidthREM={5}
+                color="#ffffff"
+              />
+              <IconButton
+                src={logoutIcon}
+                alt="Sign out"
+                onClick={handleLogout}
+                iconWidthREM={5}
+                color="#ffffff"
+              />
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="text-white hover:text-gray-300">Log In</Link>
+              <Link to="/signup" className="text-white hover:text-gray-300">Sign Up</Link>
+            </>
+          )}
+        </div>
+      </div>
+    </header>
   )
 }

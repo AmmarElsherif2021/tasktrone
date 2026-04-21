@@ -1,68 +1,54 @@
-/* eslint-disable react/prop-types */
 import { createContext, useContext, useState, useEffect } from 'react'
-import { useQuery, useMutation, QueryClient } from '@tanstack/react-query'
-import { getProjectById, updateTasksCycleTime } from '../API/projects'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getProjectById, updateProject } from '../API/projects'
 import { getPosts } from '../API/posts'
-import { getUserInfo } from '../API/users'
 import { useAuth } from '../contexts/AuthContext'
 import { listTasks } from '../API/tasks'
 
 const ProjectContext = createContext()
 
+export const useProject = () => useContext(ProjectContext)
+
 export const ProjectProvider = ({ children }) => {
-  const [token] = useAuth()
+  const { user, isAuthenticated } = useAuth()
+  const queryClient = useQueryClient()
 
   // Context states
   const [currentProjectId, setCurrentProjectId] = useState('')
-  const [currentProject, setCurrentProject] = useState('')
+  const [currentProject, setCurrentProject] = useState(null)
   const [currentProjectMembers, setCurrentProjectMembers] = useState([])
   const [currentAvgLeadTime, setCurrentAvgLeadTime] = useState(0)
   const [currentAvgCycleTime, setCurrentAvgCycleTime] = useState(0)
   const [currentTasks, setCurrentTasks] = useState([])
   const [isTasksLoading, setIsTasksLoading] = useState(false)
+  
   // Blog-specific states
   const [postAuthorFilter, setPostAuthorFilter] = useState('')
-  const [postSortBy, setPostSortBy] = useState('createdAt')
-  const [postSortOrder, setPostSortOrder] = useState('descending')
-
-  const queryClient = new QueryClient()
-  // Project query
+  const [postSortBy, setPostSortBy] = useState('created_at')
+  const [postSortOrder, setPostSortOrder] = useState('desc')
+  
+  // Project query - updated to match the new API structure
   const currentProjectQuery = useQuery({
     queryKey: ['project', currentProjectId],
-    queryFn: () => getProjectById(currentProjectId, token),
-    enabled: !!currentProjectId,
+    queryFn: () => getProjectById(currentProjectId),
+    enabled: !!currentProjectId && isAuthenticated,
+    select: (data) => ({
+      ...data,
+      // Transform project_members to match expected structure
+      members: data.project_members?.map(member => ({
+        user_id: member.user.id,
+        role: member.role,
+        username: member.user.username,
+        full_name: member.user.full_name,
+        team: member.user.team,
+        joined_at: member.joined_at
+      })) || []
+    }),
+    staleTime: 30000,
+    retry: 2
   })
 
-  // Separate query for users data
-  const usersDataQuery = useQuery({
-    queryKey: ['project-users', currentProjectId],
-    queryFn: async () => {
-      if (!currentProject?.members?.length) return []
-
-      try {
-        const userPromises = currentProject.members.map(async (member) => {
-          try {
-            return await getUserInfo(member.user)
-          } catch (userFetchError) {
-            console.error(
-              `Failed to fetch user ${member.user}:`,
-              userFetchError,
-            )
-            return null
-          }
-        })
-
-        const users = await Promise.all(userPromises)
-        return users.filter((user) => user !== null)
-      } catch (error) {
-        console.error('Failed to fetch project users:', error)
-        return []
-      }
-    },
-    enabled: false,
-  })
-
-  // In ProjectContext.jsx
+  // Tasks query
   const tasksQuery = useQuery({
     queryKey: ['tasks', currentProjectId],
     queryFn: () => {
@@ -71,100 +57,96 @@ export const ProjectProvider = ({ children }) => {
     },
     select: (data) =>
       data.map((task) => ({
-        _id: task._id,
-        project: task.project,
+        _id: task.id,
+        project: task.project_id,
         title: task.title,
-        author: task.author,
-        taskType: task.taskType,
-        leadTime: task.leadTime,
-        cycleTime: task.cycleTime,
-        startDate: task?.startDate,
-        createdAt: task.createdAt,
-        updatedAt: task.updatedAt,
-        dueDate: task.dueDate,
+        author: task.created_by,
+        taskType: task.task_type,
+        leadTime: task.lead_time,
+        cycleTime: task.cycle_time,
+        startDate: task.start_date,
+        createdAt: task.created_at,
+        updatedAt: task.updated_at,
+        dueDate: task.due_date,
         phase: task.phase,
-        members: task.members || [],
+        status: task.status,
+        members: task.task_members || [],
       })),
-    enabled: !!currentProjectId,
-    onSettled: () => setIsTasksLoading(false),
-    staleTime: 30000, // caching to prevent unnecessary refreshes
+    enabled: !!currentProjectId && isAuthenticated,
+    staleTime: 30000,
     retry: 2,
   })
-  // refresh posts
-  const refetchPosts = () => {
-    postsQuery.refetch()
-  }
-  // Blog posts query
+  // Update loading state based on tasks query
+  useEffect(() => {
+    if (!tasksQuery.isLoading) setIsTasksLoading(false)
+    }, [tasksQuery.isLoading])
+  // Posts query
   const postsQuery = useQuery({
-    queryKey: [
-      'posts',
-      {
-        projectId: currentProjectId,
-        author: postAuthorFilter,
-        sortBy: postSortBy,
-        sortOrder: postSortOrder,
-      },
-    ],
-    queryFn: () =>
-      getPosts(token, currentProjectId, {
-        author: postAuthorFilter,
-        sortBy: postSortBy,
-        sortOrder: postSortOrder,
-      }),
-    enabled: !!token && !!currentProjectId,
-    staleTime: 1000 * 60,
+    queryKey: ['posts', currentProjectId, {
+      author: postAuthorFilter,
+      sortBy: postSortBy,
+      sortOrder: postSortOrder
+    }],
+    queryFn: () => getPosts(currentProjectId, {
+      author: postAuthorFilter,
+      sortBy: postSortBy,
+      sortOrder: postSortOrder
+    }),
+    enabled: !!currentProjectId && isAuthenticated,
+    staleTime: 1000 * 60, // 1 minute
   })
 
-  //posts updates
+  // Update post filters
   const updatePostFilters = ({ author, sortBy, sortOrder }) => {
     if (author !== undefined) setPostAuthorFilter(author)
     if (sortBy !== undefined) setPostSortBy(sortBy)
     if (sortOrder !== undefined) setPostSortOrder(sortOrder)
   }
-  // Trigger users fetch when project is loaded ...........................................................................
-  useEffect(() => {
-    if (currentProject?.members?.length) {
-      usersDataQuery.refetch()
-    }
-  }, [currentProject])
+
+  // Refresh posts function
+  const refetchPosts = () => {
+    postsQuery.refetch()
+  }
 
   // Handle project query result
   useEffect(() => {
     if (currentProjectQuery?.data) {
       setCurrentProject(currentProjectQuery.data)
+      setCurrentProjectMembers(currentProjectQuery.data.members || [])
     }
-  }, [currentProjectQuery])
+  }, [currentProjectQuery.data])
 
-  // Update project members when users are fetched
-  useEffect(() => {
-    if (usersDataQuery.data) {
-      setCurrentProjectMembers(usersDataQuery.data)
-    }
-  }, [usersDataQuery.data])
-
-  // Update currentTasks state with improved reliability
+  // Update currentTasks state
   useEffect(() => {
     if (tasksQuery.data) {
       setCurrentTasks(tasksQuery.data)
     }
   }, [tasksQuery.data, currentProjectId])
 
-  //update cycleTimes
-  const cycleTimesMutation = useMutation({
-    mutationFn: () => updateTasksCycleTime(token, currentProjectId),
-    onSuccess: (data) => {
-      console.log(`Successfully updated ${data.updatedCount} tasks`)
-      // Invalidate and refetch tasks
-      queryClient.invalidateQueries(['tasks', currentProjectId])
-    },
-    onError: (error) => {
-      console.error('Failed to update cycle times:', error)
+  // Clear project data when project changes
+  useEffect(() => {
+    if (!currentProjectId) {
+      setCurrentProject(null)
+      setCurrentProjectMembers([])
+      setCurrentTasks([])
+    }
+  }, [currentProjectId])
+
+  // Update WIP limit mutation
+  const updateWipMutation = useMutation({
+    mutationFn: ({ projectId, wip }) => 
+      updateProject(projectId, { wip_limit: wip }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['project', currentProjectId])
     },
   })
-  // refreshTasks method
+
   const refreshTasks = () => {
-    cycleTimesMutation.mutate()
     tasksQuery.refetch()
+  }
+
+  const refreshProject = () => {
+    currentProjectQuery.refetch()
   }
 
   return (
@@ -173,19 +155,19 @@ export const ProjectProvider = ({ children }) => {
         currentProjectId,
         setCurrentProjectId,
         currentProject,
-        setCurrentProject,
         currentProjectMembers,
-        setCurrentProjectMembers,
         currentAvgLeadTime,
         setCurrentAvgLeadTime,
         currentAvgCycleTime,
         setCurrentAvgCycleTime,
         currentTasks,
-        setCurrentTasks,
         isTasksLoading,
-        setIsTasksLoading,
-        usersDataQuery,
         refreshTasks,
+        refreshProject,
+        updateWipMutation,
+        // Loading states
+        isProjectLoading: currentProjectQuery.isLoading,
+        // Blog-related values
         posts: postsQuery.data ?? [],
         postAuthorFilter,
         postSortBy,
@@ -193,11 +175,12 @@ export const ProjectProvider = ({ children }) => {
         updatePostFilters,
         isPostsLoading: postsQuery.isLoading,
         refetchPosts,
+        // Auth data
+        user,
+        isAuthenticated,
       }}
     >
       {children}
     </ProjectContext.Provider>
   )
 }
-
-export const useProject = () => useContext(ProjectContext)

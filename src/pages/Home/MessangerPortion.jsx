@@ -1,26 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import {
-  Card,
-  Button,
-  Spinner,
-  Modal,
-  Form,
-  Alert,
-  ListGroup,
-} from 'react-bootstrap'
-import { getAllUsers } from '../../API/users'
 import flowIcon from '../../assets/flow.svg'
+import { getAllUsers } from '../../API/users'
+import { Modal } from '../../Ui/Modal'
+import { Spinner } from '../../Ui/Spinner'
 
 export default function MessangerPortion() {
-  const [showNotifyModal, setShowNotifyModal] = useState(false)
+  const [showModal, setShowModal] = useState(false)
   const [selectedUsers, setSelectedUsers] = useState([])
 
   const {
     data: users = [],
-    isLoading: isLoadingUsers,
-    isError: isUsersError,
-    error: usersError,
+    isLoading,
+    isError,
+    error,
   } = useQuery({
     queryKey: ['users'],
     queryFn: getAllUsers,
@@ -36,142 +29,87 @@ export default function MessangerPortion() {
     return acc
   }, {})
 
-  const handleOpenModal = () => setShowNotifyModal(true)
-  const handleCloseModal = () => setShowNotifyModal(false)
-
   const handleUserSelection = (userId) => {
-    if (selectedUsers.includes(userId)) {
-      setSelectedUsers(selectedUsers.filter((id) => id !== userId))
-    } else {
-      setSelectedUsers([...selectedUsers, userId])
-    }
+    setSelectedUsers((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    )
   }
 
   const handleNotifyUsers = () => {
-    // Implement notification logic here
     console.log('Notifying users:', selectedUsers)
-    handleCloseModal()
+    setShowModal(false)
   }
 
   return (
     <>
-      <Card
-        className='shadow-sm'
-        style={{
-          borderWidth: '2.5px',
-          borderColor: '#000',
-          backgroundColor: '#fff',
-        }}
-      >
-        <Card.Body className='text-center p-5'>
-          <div className='d-flex flex-column align-items-center'>
-            <h3>Notify other users</h3>
-
-            {/* Clickable flowIcon icon */}
-            <button
-              onClick={handleOpenModal}
-              style={{
-                borderWidth: '2.5px',
-                backgroundColor: '#1aaa8F',
-                borderRadius: '50%',
-                height: '5rem',
-                width: '5rem',
-                display: 'flex',
-                flex: 'wrap',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '1rem',
-              }}
-              className='mb-1'
-            >
-              <img
-                src={flowIcon}
-                alt='notify users'
-                style={{
-                  width: '4rem',
-                  margin: 0,
-                  padding: 0,
-                  cursor: 'pointer',
-                }}
-              />
-            </button>
-          </div>
-          <p>
-            Inform other users that you are ready to collaborate in their
-            projects
+      <div className="border-thick border-neutral-black bg-neutral-white rounded-card p-5 text-center shadow-sm">
+        <div className="flex flex-col items-center">
+          <h3 className="text-xl font-bold mb-3">Notify other users</h3>
+          <button
+            onClick={() => setShowModal(true)}
+            className="border-thick bg-[#1aaa8F] rounded-full h-20 w-20 flex items-center justify-center p-4 mb-3 hover:scale-105 transition-transform"
+            aria-label="Notify users"
+          >
+            <img src={flowIcon} alt="notify users" className="w-16 cursor-pointer" />
+          </button>
+          <p className="text-[#666]">
+            Inform other users that you are ready to collaborate in their projects
           </p>
-        </Card.Body>
-      </Card>
+        </div>
+      </div>
 
-      {/* Notify Users Modal */}
-      <Modal
-        show={showNotifyModal}
-        onHide={handleCloseModal}
-        className='custom-modal'
-      >
-        <Modal.Header closeButton className='custom-modal'>
-          <Modal.Title>Notify Users</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className='custom-modal'>
-          {isUsersError ? (
-            <Alert variant='danger'>
-              Error loading users:{' '}
-              {usersError?.message || 'Please try again later'}
-            </Alert>
-          ) : (
-            <>
-              <Form.Group
-                className='custom-modal mb-3 '
-                style={{ borderWidth: '2.5px', borderColor: '#000' }}
-              >
-                <Form.Label>Select Users to Notify</Form.Label>
-                {isLoadingUsers ? (
-                  <div className='text-center'>
-                    <Spinner animation='border' role='status'>
-                      <span className='visually-hidden'>Loading users...</span>
-                    </Spinner>
-                  </div>
-                ) : (
-                  <ListGroup>
-                    {Object.entries(usersByTeam).map(([team, teamUsers]) => (
-                      <div key={team}>
-                        <h6>{team}</h6>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Notify Users">
+        {isError ? (
+          <div className="border-2 border-[#ad0000] bg-transparent text-[#ad0000] p-3 rounded">
+            Error loading users: {error?.message || 'Please try again later'}
+          </div>
+        ) : (
+          <>
+            <div className="mb-3">
+              <label className="block mb-2 font-medium">Select Users to Notify</label>
+              {isLoading ? (
+                <div className="flex justify-center py-4">
+                  <Spinner />
+                </div>
+              ) : (
+                <div className="max-h-64 overflow-y-auto border border-neutral-black rounded p-2">
+                  {Object.entries(usersByTeam).map(([team, teamUsers]) => (
+                    <div key={team} className="mb-3">
+                      <h6 className="font-bold mb-1">{team}</h6>
+                      <ul className="space-y-1">
                         {teamUsers
                           .sort((a, b) => a.username.localeCompare(b.username))
                           .map((user) => (
-                            <ListGroup.Item
+                            <li
                               key={user.id}
-                              className='d-flex justify-content-between align-items-center'
-                              style={{
-                                borderWidth: '0.5px',
-                                borderColor: '#fff',
-                              }}
+                              className="flex justify-between items-center p-2 border-b border-gray-200 last:border-0"
                             >
-                              <div>
+                              <span>
                                 <strong>{user.username}</strong> ({user.role})
-                              </div>
-                              <Form.Check
-                                type='checkbox'
+                              </span>
+                              <input
+                                type="checkbox"
                                 checked={selectedUsers.includes(user.id)}
                                 onChange={() => handleUserSelection(user.id)}
+                                className="w-5 h-5 accent-primary"
                               />
-                            </ListGroup.Item>
+                            </li>
                           ))}
-                      </div>
-                    ))}
-                  </ListGroup>
-                )}
-              </Form.Group>
-              <Button
-                variant='primary'
-                onClick={handleNotifyUsers}
-                disabled={selectedUsers.length === 0}
-              >
-                Notify Selected Users
-              </Button>
-            </>
-          )}
-        </Modal.Body>
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={handleNotifyUsers}
+              disabled={selectedUsers.length === 0}
+              className="bg-primary text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Notify Selected Users
+            </button>
+          </>
+        )}
       </Modal>
     </>
   )

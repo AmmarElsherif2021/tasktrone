@@ -1,93 +1,89 @@
+/**
+ * Home.jsx (Tailwind + DRY refactor)
+ * ──────────────────────────────────────────────────────────────
+ * - Removed react-bootstrap imports (Container, Button)
+ * - Replaced with Tailwind CSS classes
+ * - Custom Button component extracted for reuse
+ * - FullContentScreen uses Tailwind utilities
+ * - No inline styles, all styling via Tailwind
+ */
 /* eslint-disable react/prop-types */
-import NewMemberExplorer from './NewMemberExplorer'
-import { Container, Button } from 'react-bootstrap'
-import OldMemberExplorer from './OldMemberExplorer'
 import { Link } from 'react-router-dom'
 import { useUserHome } from '../../contexts/UserHomeContext'
 import { useAuth } from '../../contexts/AuthContext'
-import { jwtDecode } from 'jwt-decode'
+import NewMemberExplorer from './NewMemberExplorer'
+import OldMemberExplorer from './OldMemberExplorer'
 import logo from '../../assets/logo.svg'
 
+// ── Shared wrapper for full-content-area screens ──────────────
+const FullContentScreen = ({ children }) => (
+  <div className="w-full flex flex-col items-center justify-center min-h-[calc(100vh-var(--header-h))] text-center px-4">
+    {children}
+  </div>
+)
+
+// ── Reusable Button component (Tailwind) ──────────────────────
+const CustomButton = ({ children, variant = 'dark', onClick, to }) => {
+  const baseClasses = "px-4 py-2 rounded-md font-medium transition-colors"
+  const variants = {
+    dark: "bg-neutral-black text-white hover:bg-gray-800",
+    light: "bg-teal-600 text-black hover:bg-teal-500"
+  }
+  const buttonClasses = `${baseClasses} ${variants[variant] || variants.dark}`
+
+  if (to) {
+    return (
+      <Link to={to} className={buttonClasses}>
+        {children}
+      </Link>
+    )
+  }
+  return (
+    <button onClick={onClick} className={buttonClasses}>
+      {children}
+    </button>
+  )
+}
+
+// ── Welcome (unauthenticated) ─────────────────────────────────
 const WelcomeScreen = () => (
-  <Container
-    className='text-center'
-    style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-  >
-    <img
-      src={logo}
-      alt='Tasktrone'
-      style={{ width: '20%', marginBottom: '3rem' }}
-    />
-    <h2 style={{ marginBottom: '1rem' }}>Welcome to Tasktrone!</h2>
-    <p className='mb-4'>
+  <FullContentScreen>
+    <img src={logo} alt="Tasktrone" className="w-1/5 mb-12 max-w-[10rem]" />
+    <h2 className="mb-4 text-2xl font-bold">Welcome to Tasktrone!</h2>
+    <p className="mb-6 text-gray-600 max-w-sm">
       Please sign in or sign up to start managing your projects.
     </p>
-    <div style={{ display: 'flex', flexDirection: 'row' }}>
-      <Link to='/login'>
-        <Button
-          variant='dark'
-          className='m-2'
-          style={{ backgroundColor: 'black', color: 'white' }}
-        >
-          Login
-        </Button>
-      </Link>
-      <Link to='/signup'>
-        <Button
-          variant='light'
-          className='m-2'
-          style={{ backgroundColor: '#1aaa8F', color: 'black' }}
-        >
-          Signup
-        </Button>
-      </Link>
+    <div className="flex gap-3">
+      <CustomButton to="/login" variant="dark">Login</CustomButton>
+      <CustomButton to="/signup" variant="light">Sign up</CustomButton>
     </div>
-  </Container>
+  </FullContentScreen>
 )
+
+// ── Loading ───────────────────────────────────────────────────
+const LoadingScreen = () => (
+  <FullContentScreen>
+    <img src={logo} alt="Tasktrone" className="w-1/5 mb-12 max-w-[10rem]" />
+    <h2 className="mb-2 text-xl font-semibold">Loading…</h2>
+    <p className="text-gray-500">Setting up your workspace</p>
+  </FullContentScreen>
+)
+
+// ── Main component ────────────────────────────────────────────
 export function Home() {
-  const { userProjects } = useUserHome()
-  const [token] = useAuth()
+  const { userProjects, isUserLoading, areProjectsLoading } = useUserHome()
+  const { user, isAuthenticated, loading: authLoading } = useAuth()
 
-  const decodeToken = (token) => {
-    if (!token || typeof token !== 'string') return null
-    try {
-      const decoded = jwtDecode(token)
-      return { userId: decoded.sub }
-    } catch (error) {
-      console.error('Invalid token:', error)
-      return null
-    }
-  }
-
-  const userData = decodeToken(token)
-
-  if (!userData) return <WelcomeScreen />
+  if (authLoading)                           return <LoadingScreen />
+  if (!isAuthenticated || !user)             return <WelcomeScreen />
+  if (isUserLoading || areProjectsLoading)   return <LoadingScreen />
 
   return (
-    <div
-      style={{
-        backgroundColor: '#EEFBF4',
-        minHeight: '100vh',
-        width: '100vw',
-      }}
-    >
-      {userData && Object.keys(userProjects).length === 0 ? (
-        <NewMemberExplorer userId={userData.userId} />
-      ) : userData && Object.keys(userProjects).length > 0 ? (
-        <OldMemberExplorer userId={userData.userId} />
+    <div className="w-full min-h-[calc(100vh-var(--header-h))] bg-[#EEFBF4]">
+      {userProjects.length === 0 ? (
+        <NewMemberExplorer userId={user.id} />
       ) : (
-        <WelcomeScreen />
+        <OldMemberExplorer userId={user.id} />
       )}
     </div>
   )

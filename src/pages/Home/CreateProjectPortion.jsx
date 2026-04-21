@@ -1,70 +1,33 @@
 import { useState } from 'react'
-import { Card, Modal } from 'react-bootstrap'
 import folderPlus from '../../assets/folderPlus.svg'
 import { CreateProject } from '../../Components/Projects/CreateProject'
+import { Modal } from '../../Ui/Modal'
 
 export default function CreateProjectPortion() {
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false)
 
-  const handleOpenModal = () => setShowCreateProjectModal(true)
-  const handleCloseModal = () => setShowCreateProjectModal(false)
-
   return (
     <>
-      {/* Create new project portion */}
-      <Card
-        style={{
-          borderWidth: '2.5px',
-          borderColor: '#000',
-          backgroundColor: '#fff',
-        }}
-      >
-        <Card.Body className='text-center p-5'>
-          <div className='d-flex flex-column align-items-center'>
-            <h3>Create your new project!</h3>
-            {/* Clickable folderPlus icon */}
-            <button
-              onClick={handleOpenModal}
-              style={{
-                borderWidth: '2.5px',
-                backgroundColor: '#FFD941',
-                borderRadius: '50%',
-                height: '5rem',
-                width: '5rem',
-                display: 'flex',
-                flex: 'wrap',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '1rem',
-              }}
-              className=' mb-1'
-            >
-              <img
-                src={folderPlus}
-                alt='add project'
-                style={{
-                  width: '4rem',
-                  margin: 0,
-                  cursor: 'pointer',
-                }}
-              />
-            </button>
-            <p className='mt-0 mb-4' style={{ color: '#666' }}>
-              No manufacturing projects found. Create your first project to get
-              started!
-            </p>
-          </div>
-        </Card.Body>
-      </Card>
+      {/* Card */}
+      <div className="border-thick border-neutral-black bg-neutral-white rounded-card p-5 text-center">
+        <div className="flex flex-col items-center">
+          <h3 className="text-xl font-bold mb-3">Create your new project!</h3>
+          <button
+            onClick={() => setShowCreateProjectModal(true)}
+            className="border-thick bg-[#FFD941] rounded-full h-20 w-20 flex items-center justify-center p-4 mb-1 hover:scale-105 transition-transform"
+            aria-label="Create project"
+          >
+            <img src={folderPlus} alt="add project" className="w-16 cursor-pointer" />
+          </button>
+          <p className="mt-0 mb-4 text-[#666]">
+            No manufacturing projects found. Create your first project to get started!
+          </p>
+        </div>
+      </div>
 
-      {/* CreateProject Modal */}
-      <Modal show={showCreateProjectModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Create Project</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <CreateProject onClose={handleCloseModal} />
-        </Modal.Body>
+      {/* Modal */}
+      <Modal isOpen={showCreateProjectModal} onClose={() => setShowCreateProjectModal(false)} title="Create Project">
+        <CreateProject onClose={() => setShowCreateProjectModal(false)} />
       </Modal>
     </>
   )

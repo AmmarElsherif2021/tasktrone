@@ -1,151 +1,81 @@
 /* eslint-disable react/prop-types */
-//import PropTypes from 'prop-types'
-import { Card, Modal, ListGroup } from 'react-bootstrap'
-import { StyledBadge } from '../../Ui/StyledBadge.jsx'
-import { User } from '../User/User.jsx'
-import { useProject } from '../../contexts/ProjectContext.jsx'
-import { useState, useEffect } from 'react'
-import StaticRoundBtn from '../../Ui/StaticRoundBtn.jsx'
-import { useNavigate } from 'react-router-dom'
+// ProjectCard.jsx
+import { useState } from 'react'
+import { User } from '../User/User'
+import { StaticRoundBtn } from '../../Ui/StaticRoundBtn'
+import { StyledBadge } from '../../Ui/StyledBadge'
+import { StyledCard } from '../../Ui/StyledCard'
+import { Modal } from '../../Ui/Modal'
 
-// Style constants
-
-const BORDER_STYLE = {
-  width: '2.5px',
-  color: '#000',
-}
-const CARD_STYLE = {
-  cursor: 'pointer',
-  borderWidth: BORDER_STYLE.width,
-  borderColor: BORDER_STYLE.color,
-  transition: 'background-color 0.3s ease',
-  fontFamily: 'var(--font-family-mono)',
-  fontWeight: 'var(--font-weight-bold)',
-  color: '#000',
-}
-const SCROLL_CONTAINER_STYLE = {
-  height: '30vh',
-  overflowY: 'auto',
-  padding: '5px',
-  margin: '5px',
-}
-
-// Utility functions
-function createHexColor(id) {
-  const cleanedId = id.replace(/\s/g, '')
-  const chars = cleanedId.slice(-2).split('')
-  return `#f8${chars.join('')}5f`
-}
-
-export function ProjectCard({
-  projectId,
-  title,
-  description,
-  createdBy,
-  members,
-}) {
-  const navigate = useNavigate()
-  const { setCurrentProjectId, currentProjectId } = useProject()
-  const [hover, setHover] = useState(false)
+export function ProjectCard({ projectId, title, description, createdBy, members, onClick }) {
   const [showModal, setShowModal] = useState(false)
-  const cardBgColor = createHexColor(projectId)
-  const modalBg = `${cardBgColor}99`
+  const [hoverStates, setHoverStates] = useState({ card: false })
 
-  const handleProjectClick = () => setShowModal(true)
-  const handleCloseModal = () => setShowModal(false)
-  const openProjectClick = () => setCurrentProjectId(projectId)
+  const handleHover = (key, value) => setHoverStates(prev => ({ ...prev, [key]: value }))
 
-  useEffect(() => {
-    if (currentProjectId === projectId) navigate('/project')
-  }, [currentProjectId, projectId, navigate])
+  const handleCardClick = (e) => {
+  console.log('Card clicked!', e.target);
+  setShowModal(true);
+};
+
+  const handleCloseModal = () => setShowModal(false);
+  const handleOpenProject = () => {
+    handleCloseModal();
+    onClick?.(projectId);
+  };
 
   return (
-    <>
-      <Card
-        onClick={handleProjectClick}
-        className='h-100 project-card'
+    <div onClick={handleCardClick} key={projectId}>
+      <StyledCard
+        hoverKey="card"
+        hoverStates={hoverStates}
+        handleHover={handleHover}
+        className="h-full rounded-xl cursor-pointer flex flex-col p-2 "
+        onClick={handleCardClick}
         style={{
-          ...CARD_STYLE,
-          backgroundColor: hover ? `${cardBgColor}30` : cardBgColor,
+          backgroundColor: 'var(--color-accent-cyan)'
         }}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
       >
-        <Card.Body className='p-2 d-flex flex-column justify-content-between align-items-center'>
-          <div className='d-flex justify-content-between align-items-center mb-1'>
-            <Card.Title
-              className='h6 px-1 mb-2 w-100 text-center'
-              style={{ fontSize: '1.1em' }}
-            >
-              {title}
-            </Card.Title>
+        <div className="flex flex-col items-center justify-between h-full">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-1">{title}</h3>
+            <StyledBadge>{projectId.slice(-6)}</StyledBadge>
           </div>
-          <StyledBadge>{projectId.slice(-6)}</StyledBadge>
           {createdBy && (
-            <Card.Subtitle className='small text-muted my-3'>
+            <div className="text-sm text-neutral-black/70 my-3">
               Created by <User id={createdBy} />
-            </Card.Subtitle>
+            </div>
           )}
+          <p className="text-sm text-neutral-black/70 my-2 text-center">
+            {description?.slice(0, 50) || 'No description'}
+            {description?.length > 50 && <strong>…</strong>}
+          </p>
+        </div>
+      </StyledCard>
 
-          <Card.Text className='small text-muted my-2 mx-2 truncate-text'>
-            {description.slice(0, 50)} <strong>...continue</strong>
-          </Card.Text>
-        </Card.Body>
-      </Card>
-
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header
-          closeButton
-          style={{
-            backgroundColor: modalBg,
-            borderWidth: BORDER_STYLE.width,
-            borderColor: BORDER_STYLE.color,
-          }}
-        >
-          <Modal.Title>{title}</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body style={{ backgroundColor: modalBg }}>
-          <div
-            style={{
-              ...SCROLL_CONTAINER_STYLE,
-              backgroundColor: '#fff',
-              border: `${BORDER_STYLE.width} solid ${BORDER_STYLE.color}`,
-              borderRadius: '7px',
-            }}
-          >
-            <p>{description}</p>
-          </div>
-
-          <ListGroup variant='flush' style={SCROLL_CONTAINER_STYLE}>
-            {members.map((member) => (
-              <ListGroup.Item
-                key={member.user}
-                className='d-flex justify-content-between align-items-center px-0 flex-wrap gap-2'
-                style={{
-                  border: 'none',
-                  fontSize: '0.8em',
-                  backgroundColor: 'transparent',
-                }}
-              >
-                <div className='text-truncate'>
+      <Modal isOpen={showModal} onClose={handleCloseModal} title={title}>
+        <div className="space-y-4">
+          <p>{description || 'No description available'}</p>
+          <div className="max-h-60 overflow-y-auto">
+            <ul className="divide-y divide-card-border">
+              {members?.map((member) => (
+                <li key={member.user} className="py-2 flex justify-between items-center">
                   <User id={member.user} />
-                </div>
-                <StyledBadge role={member.role}>{member.role}</StyledBadge>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-
-          <StaticRoundBtn
-            alt='open'
-            handleClick={openProjectClick}
-            color='#126a41'
-            backgroundColor='transparent'
-          />
-        </Modal.Body>
+                  <StyledBadge role={member.role}>{member.role}</StyledBadge>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex justify-end">
+            <StaticRoundBtn
+              alt="open"
+              handleClick={handleOpenProject}
+              color="var(--color-primary)"
+              backgroundColor="transparent"
+            />
+          </div>
+        </div>
       </Modal>
-    </>
+    </div>
   )
 }
-
-// PropTypes remain the same

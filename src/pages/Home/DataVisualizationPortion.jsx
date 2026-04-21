@@ -1,68 +1,30 @@
 import { useState } from 'react'
-import { Card, Modal } from 'react-bootstrap'
 import dataVisualizationIcon from '../../assets/preferences.svg'
-export default function DataVisualizationPortion() {
-  const [showVisualizationModal, setShowVisualizationModal] = useState(false)
+import { Modal } from '../../Ui/Modal'
 
-  const handleOpenModal = () => setShowVisualizationModal(true)
-  const handleCloseModal = () => setShowVisualizationModal(false)
+export default function DataVisualizationPortion() {
+  const [showModal, setShowModal] = useState(false)
 
   return (
     <>
-      {/* Data Visualization portion */}
-      <Card
-        style={{
-          borderWidth: '2.5px',
-          borderColor: '#000',
-          backgroundColor: '#fff',
-        }}
-      >
-        <Card.Body className='text-center p-5'>
-          <div className='d-flex flex-column align-items-center'>
-            <h3>Visualize Data</h3>
-            {/* Clickable data visualization icon */}
-            <button
-              onClick={handleOpenModal}
-              style={{
-                borderWidth: '2.5px',
-                backgroundColor: '#FFD941', // Change color to match your theme
-                borderRadius: '50%',
-                height: '5rem',
-                width: '5rem',
-                display: 'flex',
-                flex: 'wrap',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '1rem',
-              }}
-              className='mb-1'
-            >
-              <img
-                src={dataVisualizationIcon}
-                alt='data visualization'
-                style={{
-                  width: '4rem',
-                  margin: 0,
-                  cursor: 'pointer',
-                }}
-              />
-            </button>
-            <p className='mt-0 mb-4' style={{ color: '#666' }}>
-              Visualize your project data to gain insights and make decisions.
-            </p>
-          </div>
-        </Card.Body>
-      </Card>
+      <div className="border-thick border-neutral-black bg-neutral-white rounded-card p-5 text-center">
+        <div className="flex flex-col items-center">
+          <h3 className="text-xl font-bold mb-3">Visualize Data</h3>
+          <button
+            onClick={() => setShowModal(true)}
+            className="border-thick bg-[#FFD941] rounded-full h-20 w-20 flex items-center justify-center p-4 mb-1 hover:scale-105 transition-transform"
+            aria-label="Data visualization"
+          >
+            <img src={dataVisualizationIcon} alt="data visualization" className="w-16 cursor-pointer" />
+          </button>
+          <p className="mt-0 mb-4 text-[#666]">
+            Visualize your project data to gain insights and make decisions.
+          </p>
+        </div>
+      </div>
 
-      {/* Data Visualization Modal */}
-      <Modal show={showVisualizationModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Data Visualization</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {/* Add data visualization content here */}
-          <p>Data visualization content goes here.</p>
-        </Modal.Body>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Data Visualization">
+        <p>Data visualization content goes here.</p>
       </Modal>
     </>
   )

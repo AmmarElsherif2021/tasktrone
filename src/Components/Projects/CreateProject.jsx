@@ -1,295 +1,333 @@
-/* eslint-disable react/prop-types */
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+// CreateProject.jsx
 import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createProject } from '../../API/projects'
 import { getAllUsers } from '../../API/users'
 import { useAuth } from '../../contexts/AuthContext'
-import { Form, Button, ListGroup, Alert, Spinner } from 'react-bootstrap'
+import { useProject } from '../../contexts/ProjectContext'
+
+const INPUT_CLS = `
+  w-full px-3 py-2
+  border border-card-border
+  bg-neutral-white
+  font-mono text-sm
+  focus:outline-none focus:ring-1 focus:ring-primary
+`
+
+const Label = ({ children }) => (
+  <label className="block text-xs font-mono font-bold mb-1 uppercase tracking-wider text-neutral-black/70">
+    {children}
+  </label>
+)
 
 export function CreateProject({ onClose }) {
+  const { user } = useAuth()
+  const { setCurrentProjectId } = useProject()
+  const queryClient = useQueryClient()
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     members: [],
-    startDate: null,
-    endDate: null,
+    start_date: null,
+    target_completion_date: null,
+    wip_limit: 5,
   })
   const [member, setMember] = useState({ userId: '', role: 'worker' })
-  const [token] = useAuth()
-  const queryClient = useQueryClient()
 
-  const {
-    data: users = [],
-    isLoading: isLoadingUsers,
-    isError: isUsersError,
-    error: usersError,
-  } = useQuery({
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ['users'],
     queryFn: getAllUsers,
-    retry: 2,
     staleTime: 30000,
   })
 
-  const usersByTeam = users.reduce((acc, user) => {
-    if (user?.team && user?.id) {
-      if (!acc[user.team]) acc[user.team] = []
-      acc[user.team].push(user)
+  const usersByTeam = users.reduce((acc, u) => {
+    if (u?.team && u?.id) {
+      if (!acc[u.team]) acc[u.team] = []
+      acc[u.team].push(u)
     }
     return acc
   }, {})
 
-  const createProjectMutation = useMutation({
-    mutationFn: () => {
-      const { title, description, members, startDate, endDate } = formData
-      return createProject(token, {
-        title,
-        description,
-        startDate,
-        endDate,
-        members: members.map((m) => ({
-          user: m.userId || m.user,
-          role: m.role || 'worker',
-        })),
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['projects'])
-      onClose?.()
-    },
-  })
+  const handleInputChange = (e) =>
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
 
-  if (!token) {
-    return (
-      <Alert variant='warning'>Please log in to create new projects.</Alert>
-    )
-  }
-
-  if (isUsersError) {
-    return (
-      <Alert variant='danger'>
-        Error loading users: {usersError?.message || 'Please try again later'}
-      </Alert>
-    )
-  }
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleMemberChange = (e) => {
-    const { name, value } = e.target
-    setMember((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleMemberChange = (e) =>
+    setMember((prev) => ({ ...prev, [e.target.name]: e.target.value }))
 
   const handleAddMember = () => {
     if (!member.userId) return
-    const selectedUser = users.find((u) => u.id === member.userId)
-    if (!selectedUser) return
-
-    if (formData.members.some((m) => m.userId === member.userId)) {
-      alert('This user is already added to the project.')
+    const selected = users.find((u) => u.id === member.userId)
+    if (!selected) return
+    if (formData.members.some((m) => m.user_id === member.userId)) {
+      alert('This user is already added.')
       return
     }
-
+    if (member.userId === user.id) {
+      alert('You will be automatically added as project admin.')
+      return
+    }
     setFormData((prev) => ({
       ...prev,
       members: [
         ...prev.members,
         {
-          user: member.userId,
-          id: prev.members.length,
-          team: selectedUser.team,
+          user_id: member.userId,
           role: member.role,
-          fieldRole: selectedUser.role,
-          username: selectedUser.username,
+          username: selected.username,
+          full_name: selected.full_name,
+          team: selected.team,
         },
       ],
     }))
     setMember({ userId: '', role: 'worker' })
   }
 
-  const handleRemoveMember = (index) => {
+  const handleRemoveMember = (index) =>
     setFormData((prev) => ({
       ...prev,
       members: prev.members.filter((_, i) => i !== index),
     }))
-  }
+
+  const createProjectMutation = useMutation({
+    mutationFn: () =>
+      createProject({
+        title: formData.title,
+        description: formData.description,
+        start_date: formData.start_date,
+        target_completion_date: formData.target_completion_date,
+        wip_limit: formData.wip_limit,
+        created_by: user.id,
+        project_manager: user.id,
+        members: formData.members.map((m) => ({
+          user_id: m.user_id,
+          role: m.role,
+        })),
+      }),
+    onSuccess: (newProject) => {
+      queryClient.invalidateQueries(['projects'])
+      queryClient.invalidateQueries(['project', newProject.id])
+      setCurrentProjectId(newProject.id)
+      onClose?.()
+    },
+    onError: (error) => console.error('Create project error:', error),
+  })
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    if (!formData.title.trim()) {
+      alert('Project title is required.')
+      return
+    }
     createProjectMutation.mutate()
   }
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <Form.Group className='mb-3'>
-        <Form.Label>Project Title</Form.Label>
-        <Form.Control
-          type='text'
-          name='title'
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Title */}
+      <div>
+        <Label>Project Title *</Label>
+        <input
+          type="text"
+          name="title"
           value={formData.title}
           onChange={handleInputChange}
-          placeholder='Enter project title'
-          className='custom-modal'
+          placeholder="Enter project title"
           required
+          className={INPUT_CLS}
         />
-      </Form.Group>
+      </div>
 
-      <Form.Group className='mb-3'>
-        <Form.Label>Project Description</Form.Label>
-        <Form.Control
-          as='textarea'
-          name='description'
+      {/* Description */}
+      <div>
+        <Label>Description</Label>
+        <textarea
+          name="description"
           value={formData.description}
           onChange={handleInputChange}
-          placeholder='Enter project description'
-          className='custom-modal'
+          placeholder="Enter project description"
           rows={3}
+          className={INPUT_CLS}
         />
-      </Form.Group>
+      </div>
 
-      <Form.Group className='mb-3'>
-        <Form.Label>Start Date (Optional)</Form.Label>
-        <Form.Control
-          type='date'
-          name='startDate'
-          value={
-            formData.startDate
-              ? formData.startDate.toISOString().substr(0, 10)
-              : ''
+      {/* Start date */}
+      <div>
+        <Label>Start Date (Optional)</Label>
+        <input
+          type="date"
+          name="start_date"
+          value={formData.start_date || ''}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, start_date: e.target.value || null }))
           }
+          className={INPUT_CLS}
+        />
+      </div>
+
+      {/* Target completion */}
+      <div>
+        <Label>Target Completion Date (Optional)</Label>
+        <input
+          type="date"
+          name="target_completion_date"
+          value={formData.target_completion_date || ''}
           onChange={(e) =>
             setFormData((prev) => ({
               ...prev,
-              startDate: e.target.value ? new Date(e.target.value) : null,
+              target_completion_date: e.target.value || null,
             }))
           }
-          className='custom-modal'
+          className={INPUT_CLS}
         />
-      </Form.Group>
+      </div>
 
-      <Form.Group className='mb-3'>
-        <Form.Label>End Date (Optional)</Form.Label>
-        <Form.Control
-          type='date'
-          name='endDate'
-          value={
-            formData.endDate ? formData.endDate.toISOString().substr(0, 10) : ''
-          }
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              endDate: e.target.value ? new Date(e.target.value) : null,
-            }))
-          }
-          className='custom-modal'
+      {/* WIP limit */}
+      <div>
+        <Label>WIP Limit</Label>
+        <input
+          type="number"
+          name="wip_limit"
+          value={formData.wip_limit}
+          onChange={handleInputChange}
+          min="1"
+          max="50"
+          className={INPUT_CLS}
         />
-      </Form.Group>
+        <p className="text-xs font-mono text-neutral-black/50 mt-1">
+          Max tasks in progress at once (1–50)
+        </p>
+      </div>
 
-      <div className='mb-3'>
-        <h6>Add Project Members</h6>
+      {/* Members */}
+      <div>
+        <Label>Add Project Members</Label>
+        <p className="text-xs font-mono text-neutral-black/50 mb-2">
+          You will be automatically added as project admin.
+        </p>
+
         {isLoadingUsers ? (
-          <div className='text-center'>
-            <Spinner animation='border' role='status'>
-              <span className='visually-hidden'>Loading users...</span>
-            </Spinner>
+          <div className="flex justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
           </div>
         ) : (
           <>
-            <div className='d-flex gap-2 mb-3'>
-              <Form.Group className='flex-grow-1'>
-                <Form.Select
-                  name='userId'
-                  value={member.userId}
-                  onChange={handleMemberChange}
-                  className='custom-modal'
-                  disabled={isLoadingUsers}
-                >
-                  <option value=''>Select a team member</option>
-                  {Object.entries(usersByTeam).map(([team, teamUsers]) => (
-                    <optgroup label={team} key={team}>
-                      {teamUsers
-                        .sort((a, b) => a.username.localeCompare(b.username))
-                        .map((user) => (
-                          <option key={user.id} value={user.id}>
-                            {user.username} ({user.role})
-                          </option>
-                        ))}
-                    </optgroup>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+            <div className="flex gap-2 mb-3">
+              <select
+                name="userId"
+                value={member.userId}
+                onChange={handleMemberChange}
+                className={`flex-1 ${INPUT_CLS}`}
+              >
+                <option value="">Select a team member</option>
+                {Object.entries(usersByTeam).map(([team, teamUsers]) => (
+                  <optgroup
+                    key={team}
+                    label={team.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                  >
+                    {teamUsers
+                      .filter((u) => u.id !== user.id)
+                      .map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.username} — {u.full_name} ({u.role})
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
 
-              <Form.Group style={{ width: '150px' }}>
-                <Form.Select
-                  name='role'
-                  value={member.role}
-                  onChange={handleMemberChange}
-                  className='custom-modal'
-                >
-                  <option value='admin'>Admin</option>
-                  <option value='worker'>Worker</option>
-                  <option value='reviewer'>Reviewer</option>
-                </Form.Select>
-              </Form.Group>
+              <select
+                name="role"
+                value={member.role}
+                onChange={handleMemberChange}
+                className={`w-32 ${INPUT_CLS}`}
+              >
+                <option value="admin">Admin</option>
+                <option value="worker">Worker</option>
+                <option value="reviewer">Reviewer</option>
+              </select>
 
-              <Button
+              <button
+                type="button"
                 onClick={handleAddMember}
                 disabled={!member.userId}
-                variant='outline-primary'
-                className='custom-modal'
+                className="
+                  px-4 py-2
+                  bg-primary text-neutral-white
+                  font-mono text-sm font-bold
+                  hover:opacity-90 transition-opacity
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                "
               >
                 Add
-              </Button>
+              </button>
             </div>
 
-            <ListGroup>
-              {formData.members.map((member, index) => (
-                <ListGroup.Item
-                  key={index}
-                  className='d-flex justify-content-between align-items-center custom-modal'
-                >
-                  <div>
-                    <strong>{member.username}</strong> - {member.role}
-                    <br />
-                    <small className='text-muted'>
-                      Team: {member.team} | Role: {member.fieldRole}
-                    </small>
-                  </div>
-                  <Button
-                    variant='outline-danger'
-                    size='sm'
-                    onClick={() => handleRemoveMember(index)}
-                    className='custom-modal'
-                  >
-                    Remove
-                  </Button>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
+            {/* Creator row */}
+            <div className="mb-3">
+              <span className="text-xs font-mono text-neutral-black/60 block mb-1">
+                Project Creator (Admin)
+              </span>
+              <div className="p-2 bg-card-bg border border-card-border font-mono text-sm">
+                <strong>You</strong> — Admin
+              </div>
+            </div>
+
+            {/* Added members list */}
+            {formData.members.length > 0 && (
+              <ul className="divide-y divide-card-border border border-card-border">
+                {formData.members.map((m, index) => (
+                  <li key={index} className="p-3 flex justify-between items-center">
+                    <div className="font-mono text-sm">
+                      <strong>{m.username}</strong> — {m.full_name}
+                      <br />
+                      <span className="text-xs text-neutral-black/60">
+                        {m.role} · {m.team?.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveMember(index)}
+                      className="text-role-admin hover:opacity-70 text-sm font-mono font-bold transition-opacity"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </>
         )}
       </div>
 
-      <Button
-        type='submit'
-        variant='primary'
-        disabled={
-          !formData.title ||
-          createProjectMutation.isPending ||
-          formData.members.length === 0
-        }
-        className='custom-modal'
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={!formData.title.trim() || createProjectMutation.isPending}
+        className="
+          w-full py-2 px-4
+          bg-primary text-neutral-white
+          font-mono font-bold text-sm
+          hover:opacity-90 transition-opacity
+          disabled:opacity-40 disabled:cursor-not-allowed
+        "
       >
-        {createProjectMutation.isPending ? 'Creating...' : 'Create Project'}
-      </Button>
+        {createProjectMutation.isPending ? 'Creating…' : 'Create Project'}
+      </button>
 
-      {createProjectMutation.isSuccess && (
-        <Alert variant='success' className='mt-3'>
-          Project created successfully!
-        </Alert>
+      {/* Error */}
+      {createProjectMutation.isError && (
+        <div
+          className="mt-3 p-3 font-mono text-sm"
+          style={{
+            color: 'var(--color-role-admin)',
+            backgroundColor: 'color-mix(in srgb, var(--color-role-admin) 10%, transparent)',
+            border: '1px solid var(--color-role-admin)',
+          }}
+        >
+          Error: {createProjectMutation.error.message}
+        </div>
       )}
-    </Form>
+    </form>
   )
 }

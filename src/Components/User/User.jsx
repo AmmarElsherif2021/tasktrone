@@ -1,29 +1,36 @@
 import { useQuery } from '@tanstack/react-query'
 import PropTypes from 'prop-types'
 import { getUserInfo } from '../../API/users'
-export function User({ id, explicit = false }) {
-  const userInfoQuery = useQuery({
-    queryKey: ['users', id],
+export function User({ id, user: userProp, explicit = false }) {
+  // If user object is provided directly, use it; otherwise fetch by id
+  const { data: fetchedUser, isLoading } = useQuery({
+    queryKey: ['user', id],
     queryFn: () => getUserInfo(id),
+    enabled: !!id && !userProp,
   })
-  const userInfo = userInfoQuery.data ?? {}
+
+  const user = userProp || fetchedUser
+
+  if (isLoading) {
+    return <span className="text-neutral-black/50 font-mono text-sm">Loading…</span>
+  }
+
+
+  if (!user) {
+    return <span className="text-role-admin font-mono text-sm">Unknown user</span>
+  }
+
   return (
-    <div
-      style={{
-        textAlign: 'left',
-      }}
-    >
-      <strong>{userInfo?.username ?? id}</strong>
+    <div className="text-left font-mono">
+      <strong className="text-neutral-black">{user.full_name || user.username || id}</strong>
       {explicit && (
         <>
           <br />
-          <strong>Email</strong>:{` `}
-          {userInfo.email}
+          <span className="text-neutral-black/60">Email:</span> {user.email}
           <br />
-          <strong>Team</strong>:{` `} {userInfo.team}
+          <span className="text-neutral-black/60">Team:</span> {user.team?.replace(/_/g, ' ')}
           <br />
-          <strong>role</strong>: {` `}
-          {userInfo.role}
+          <span className="text-neutral-black/60">Role:</span> {user.role?.replace(/_/g, ' ')}
         </>
       )}
     </div>
@@ -31,6 +38,14 @@ export function User({ id, explicit = false }) {
 }
 
 User.propTypes = {
-  id: PropTypes.string.isRequired,
-  explicit: PropTypes.boolean,
+  id: PropTypes.string,
+  user: PropTypes.shape({
+    id: PropTypes.string,
+    full_name: PropTypes.string,
+    username: PropTypes.string,
+    email: PropTypes.string,
+    team: PropTypes.string,
+    role: PropTypes.string,
+  }),
+  explicit: PropTypes.bool,
 }
