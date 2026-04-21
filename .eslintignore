@@ -1,2 +1,4 @@
 dist/
 vite.config.js
+.env
+.env.demo
