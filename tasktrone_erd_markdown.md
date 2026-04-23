@@ -1,4 +1,4 @@
-# Tasktrone Manufacturing Kanban Tool - Entity Relationship Diagram
+# Tasktrone Manufacturing Kanban Tool - The most basic MVP Entity Relationship Diagram
 
 ## Tables and Relationships
 

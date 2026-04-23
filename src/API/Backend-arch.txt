@@ -1,0 +1,143 @@
+# Phase 1 — Backend Architecture: Sub-Phases Breakdown
+
+Here's how I'd structure this phase into clear, sequenced sub-phases — each building on the last, with topics and resources that demonstrate genuine engineering depth:
+
+---
+
+## Sub-Phase 1.1 — Layered Architecture Refactor
+
+The goal here is separating concerns so the codebase stops looking like "routes that do everything."
+
+**The 3-layer target:**
+
+```
+HTTP Request
+    → Controller    (validates input, calls service, returns response)
+    → Service       (business logic, orchestration)
+    → Repository    (all DB access — no raw queries outside this layer)
+```
+
+**Topics to assert knowledge in:**
+
+- **Service Layer Pattern** — why business logic doesn't belong in controllers or DB queries. You should be able to explain: *"if I want to reuse this logic in a background job AND an API route, where does it live?"* → the service.
+- **Repository Pattern** — abstracting persistence. The key insight is your service shouldn't care if data comes from PostgreSQL, Redis, or a test mock.
+- **Dependency Injection (light)** — passing repos into services so they're testable.
+- **Error propagation across layers** — custom error classes (`AppError`, `NotFoundError`) thrown in repos/services, caught once in a global Express error handler.
+
+**Resources:**
+- "Node.js Project Structure — Service Layer" (Bulletproof Node.js Architecture by softwareontheroad.com — genuinely the best single article for this)
+- *Node.js Design Patterns* book — Chapter on structural patterns
+- Search: `"repository pattern typescript node.js"` — look for examples using classes, not just plain functions
+
+**What to avoid**
+Most devs:
+
+dump logic in controllers
+don’t test services
+tightly couple DB
+
+I want to show:
+
+DI + testable services
+clean layering
+error strategy
+
+→ you’re already ahead of 80% of Node devs
+---
+
+## Sub-Phase 1.2 — Multi-Tenancy
+
+This is where Tasktrone goes from a personal project to a product. Every query, every board, every task must be scoped to an `organization_id`.
+
+**The schema addition:**
+```
+organizations
+    └── id, name, slug, plan, created_at
+
+users.organization_id → FK to organizations
+projects.organization_id → FK to organizations
+boards.organization_id  → FK to organizations
+```
+
+**Topics to assert knowledge in:**
+
+- **Tenant isolation strategies** — the 3 models: shared DB/shared schema (your approach), shared DB/separate schema, separate DB. You should know *why* shared schema is right for an early-stage SaaS and what its tradeoffs are.
+- **Tenant context propagation** — extracting `org_id` from the JWT/session and attaching it to every repository call. A clean pattern: `req.tenant` middleware.
+- **Row-level filtering vs. Row Level Security (RLS)** — you're already using Supabase RLS on `users`. The question is: do you enforce tenancy in the app layer, DB layer, or both? Knowing the tradeoff is the interview answer.
+- **Slug-based routing** — `app.tasktrone.com/org-slug/boards` — how tenant context flows from URL → middleware → service.
+
+**Resources:**
+- Search: `"multi-tenancy SaaS postgres row level security"` — Supabase's own docs on RLS are excellent here
+- "The Architecture of SaaS Applications" — good conceptual overview
+- Stripe's engineering blog on data isolation (shows real-world thinking)
+
+---
+
+## Sub-Phase 1.3 — RBAC Enforcement
+
+You already have roles defined in the schema. This sub-phase is about *enforcing* them — meaning the backend rejects requests that violate role rules, not just the UI hiding buttons.
+
+**The 3-level enforcement target** (maps directly to your schema):
+
+```
+System Role      → can this user do admin actions at all?
+Project Role     → can this user modify THIS project?
+Task Role        → can this user perform THIS action on THIS task?
+```
+
+**Topics to assert knowledge in:**
+
+- **RBAC vs. ABAC** — Role-Based vs. Attribute-Based Access Control. For an interview, being able to say *"I implemented RBAC at the project level but ABAC logic for task-level permissions because task access depends on membership attributes"* signals real architectural thinking.
+- **Permission middleware vs. permission guards** — middleware handles coarse-grained checks (is user authenticated? do they have system-level access?); guards/service-layer checks handle fine-grained ones (are they a *member* of this project?).
+- **The membership check pattern** — every project-scoped route should call something like `projectService.assertMembership(userId, projectId, requiredRole)` before proceeding.
+- **Avoiding the "fat middleware" trap** — permission logic in middleware is hard to test and reuse. Moving it into services/guards is the mature pattern.
+
+**Resources:**
+- Search: `"RBAC implementation Node.js Express middleware"`
+- CASL.js library (even if you don't use it, reading its docs teaches you how to model permissions cleanly)
+- Search: `"fine-grained authorization patterns backend"`
+
+---
+
+## Sub-Phase 1.4 — Background Jobs (BullMQ + Redis)
+
+This is the infrastructure that makes Phase 2 (AI) and Phase 3 (data pipeline) possible. AI inference and ETL are both too slow for synchronous HTTP requests.
+
+**The architecture target:**
+```
+API Route
+    → validates request
+    → enqueues job (BullMQ) → returns 202 Accepted immediately
+    
+Worker Process (separate)
+    → picks up job from Redis queue
+    → runs AI/ETL/heavy task
+    → stores result in DB
+    → (optional) emits event/webhook back to client
+```
+
+**Topics to assert knowledge in:**
+
+- **Why queues exist** — the "slow operation" problem. If an AI call takes 8 seconds, you can't hold an HTTP connection open. The queue decouples request acceptance from result production.
+- **BullMQ core concepts** — Queues, Workers, Jobs, Processors. Also: job retries, backoff strategies, and dead-letter queues (what happens when a job keeps failing?).
+- **Redis as a broker** — Redis is the transport here, not a database. Understanding it as an in-memory data structure store (lists/streams) helps you reason about durability tradeoffs.
+- **Worker as a separate process** — this matters for deployment: your worker and your API server are different Node.js processes. In Docker this means separate containers.
+- **Job result patterns** — polling (`GET /jobs/:id/status`) vs. webhooks vs. WebSocket push. For Tasktrone, polling is fine to start; knowing the alternatives signals depth.
+
+**Resources:**
+- BullMQ official docs — genuinely well-written, start with the "Quick Start" then "Patterns" section
+- Search: `"BullMQ Redis worker Node.js tutorial"`
+- Search: `"background jobs vs async API design"` — good for understanding *when* to queue vs. when to just await
+
+---
+
+## Sequencing Recommendation
+
+```
+1.1 Layered Arch   → establishes the codebase structure everything else builds on
+1.2 Multi-tenancy  → extend the schema + add tenant middleware early, before logic multiplies
+1.3 RBAC           → now that tenant context exists, layer permissions on top of it
+1.4 BullMQ         → add last, since it requires knowing what "heavy operations" are (AI, ETL)
+```
+
+The key insight tying all four together: **each sub-phase is a cross-cutting concern**. Multi-tenancy touches every query. RBAC touches every route. The queue touches every slow operation. Getting them in *before* building features is what separates a production system from a demo.
