@@ -1,10 +1,5 @@
-// CreateProject.jsx
-import { useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createProject } from '../../API/projects'
-import { getAllUsers } from '../../API/users'
-import { useAuth } from '../../contexts/AuthContext'
-import { useProject } from '../../contexts/ProjectContext'
+import { useState, useMemo } from 'react'
+import { Input, Textarea, Label } from '../../Ui/FormUi'
 
 const INPUT_CLS = `
   w-full px-3 py-2
@@ -14,17 +9,14 @@ const INPUT_CLS = `
   focus:outline-none focus:ring-1 focus:ring-primary
 `
 
-const Label = ({ children }) => (
-  <label className="block text-xs font-mono font-bold mb-1 uppercase tracking-wider text-neutral-black/70">
-    {children}
-  </label>
-)
-
-export function CreateProject({ onClose }) {
-  const { user } = useAuth()
-  const { setCurrentProjectId } = useProject()
-  const queryClient = useQueryClient()
-
+export function CreateProject({
+  users = [],
+  isLoadingUsers,
+  currentUserId,
+  onSubmit,          // async (formData) => void
+  isCreating,
+  onClose,           // optional
+}) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -35,19 +27,16 @@ export function CreateProject({ onClose }) {
   })
   const [member, setMember] = useState({ userId: '', role: 'worker' })
 
-  const { data: users = [], isLoading: isLoadingUsers } = useQuery({
-    queryKey: ['users'],
-    queryFn: getAllUsers,
-    staleTime: 30000,
-  })
-
-  const usersByTeam = users.reduce((acc, u) => {
-    if (u?.team && u?.id) {
-      if (!acc[u.team]) acc[u.team] = []
-      acc[u.team].push(u)
-    }
-    return acc
-  }, {})
+  // Group users by team (preserving original logic)
+  const usersByTeam = useMemo(() => {
+    return users.reduce((acc, u) => {
+      if (u?.team && u?.id) {
+        if (!acc[u.team]) acc[u.team] = []
+        acc[u.team].push(u)
+      }
+      return acc
+    }, {})
+  }, [users])
 
   const handleInputChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -63,7 +52,7 @@ export function CreateProject({ onClose }) {
       alert('This user is already added.')
       return
     }
-    if (member.userId === user.id) {
+    if (member.userId === currentUserId) {
       alert('You will be automatically added as project admin.')
       return
     }
@@ -89,37 +78,14 @@ export function CreateProject({ onClose }) {
       members: prev.members.filter((_, i) => i !== index),
     }))
 
-  const createProjectMutation = useMutation({
-    mutationFn: () =>
-      createProject({
-        title: formData.title,
-        description: formData.description,
-        start_date: formData.start_date,
-        target_completion_date: formData.target_completion_date,
-        wip_limit: formData.wip_limit,
-        created_by: user.id,
-        project_manager: user.id,
-        members: formData.members.map((m) => ({
-          user_id: m.user_id,
-          role: m.role,
-        })),
-      }),
-    onSuccess: (newProject) => {
-      queryClient.invalidateQueries(['projects'])
-      queryClient.invalidateQueries(['project', newProject.id])
-      setCurrentProjectId(newProject.id)
-      onClose?.()
-    },
-    onError: (error) => console.error('Create project error:', error),
-  })
-
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!formData.title.trim()) {
       alert('Project title is required.')
       return
     }
-    createProjectMutation.mutate()
+    onSubmit(formData)
+    onClose?.()
   }
 
   return (
@@ -127,72 +93,58 @@ export function CreateProject({ onClose }) {
       {/* Title */}
       <div>
         <Label>Project Title *</Label>
-        <input
+        <Input
           type="text"
           name="title"
           value={formData.title}
           onChange={handleInputChange}
           placeholder="Enter project title"
           required
-          className={INPUT_CLS}
         />
       </div>
 
       {/* Description */}
       <div>
         <Label>Description</Label>
-        <textarea
+        <Textarea
           name="description"
           value={formData.description}
           onChange={handleInputChange}
           placeholder="Enter project description"
           rows={3}
-          className={INPUT_CLS}
         />
       </div>
 
       {/* Start date */}
       <div>
         <Label>Start Date (Optional)</Label>
-        <input
+        <Input
           type="date"
-          name="start_date"
           value={formData.start_date || ''}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, start_date: e.target.value || null }))
-          }
-          className={INPUT_CLS}
+          onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value || null }))}
         />
       </div>
 
       {/* Target completion */}
       <div>
         <Label>Target Completion Date (Optional)</Label>
-        <input
+        <Input
           type="date"
-          name="target_completion_date"
           value={formData.target_completion_date || ''}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              target_completion_date: e.target.value || null,
-            }))
-          }
-          className={INPUT_CLS}
+          onChange={(e) => setFormData(prev => ({ ...prev, target_completion_date: e.target.value || null }))}
         />
       </div>
 
       {/* WIP limit */}
       <div>
         <Label>WIP Limit</Label>
-        <input
+        <Input
           type="number"
           name="wip_limit"
           value={formData.wip_limit}
           onChange={handleInputChange}
           min="1"
           max="50"
-          className={INPUT_CLS}
         />
         <p className="text-xs font-mono text-neutral-black/50 mt-1">
           Max tasks in progress at once (1–50)
@@ -226,7 +178,7 @@ export function CreateProject({ onClose }) {
                     label={team.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
                   >
                     {teamUsers
-                      .filter((u) => u.id !== user.id)
+                      .filter((u) => u.id !== currentUserId)
                       .map((u) => (
                         <option key={u.id} value={u.id}>
                           {u.username} — {u.full_name} ({u.role})
@@ -303,7 +255,7 @@ export function CreateProject({ onClose }) {
       {/* Submit */}
       <button
         type="submit"
-        disabled={!formData.title.trim() || createProjectMutation.isPending}
+        disabled={!formData.title.trim() || isCreating}
         className="
           w-full py-2 px-4
           bg-primary text-neutral-white
@@ -312,22 +264,8 @@ export function CreateProject({ onClose }) {
           disabled:opacity-40 disabled:cursor-not-allowed
         "
       >
-        {createProjectMutation.isPending ? 'Creating…' : 'Create Project'}
+        {isCreating ? 'Creating…' : 'Create Project'}
       </button>
-
-      {/* Error */}
-      {createProjectMutation.isError && (
-        <div
-          className="mt-3 p-3 font-mono text-sm"
-          style={{
-            color: 'var(--color-role-admin)',
-            backgroundColor: 'color-mix(in srgb, var(--color-role-admin) 10%, transparent)',
-            border: '1px solid var(--color-role-admin)',
-          }}
-        >
-          Error: {createProjectMutation.error.message}
-        </div>
-      )}
     </form>
   )
 }

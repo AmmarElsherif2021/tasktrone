@@ -1,12 +1,8 @@
+// FormUi.jsx
 import PropTypes from 'prop-types'
-import { formCounterStyle } from './componentStyles'
+import { formCounterStyle } from './componentStyles'   
 
-/**
- * FormCounter
- * ──────────────────────────────────────────────────────────────
- * A small number input paired with a submit icon button.
- * Used for inline priority / WIP-limit editing on task cards.
- */
+/* ── Original FormCounter (unchanged) ────────────────────── */
 const FormCounter = ({
   src,
   handlePriorityChange,
@@ -24,10 +20,11 @@ const FormCounter = ({
       style={formCounterStyle.input}
       className="
         text-center
-        border border-neutral-black
-        rounded p-1
-        font-mono font-bold text-xs
+        border-2 border-neutral-black
         bg-neutral-white
+        font-mono font-bold text-xs
+        px-1 py-1
+        focus:outline-none focus:ring-1 focus:ring-primary
       "
     />
     <button
@@ -35,9 +32,11 @@ const FormCounter = ({
       disabled={!projectId}
       className="
         bg-neutral-black text-neutral-white
-        border-none rounded p-1
+        border-2 border-neutral-black
+        px-1 py-1
+        font-mono font-bold text-xs
         cursor-pointer
-        hover:opacity-80 transition-opacity duration-fast
+        hover:opacity-80 transition-opacity
         disabled:opacity-40 disabled:cursor-not-allowed
       "
     >
@@ -58,4 +57,37 @@ FormCounter.propTypes = {
   projectId:            PropTypes.string,
 }
 
-export default FormCounter
+/* ── New generic form components ──────────────────────────── */
+const sharedInputClasses = `
+  w-full border-2 border-neutral-black
+  bg-neutral-white px-3 py-2
+  font-mono text-sm
+  focus:outline-none focus:ring-1 focus:ring-primary
+`
+
+export const Input = ({ className, ...props }) => (
+  <input className={`${sharedInputClasses} ${className ?? ''}`} {...props} />
+)
+
+export const Textarea = ({ className, ...props }) => (
+  <textarea className={`${sharedInputClasses} ${className ?? ''}`} {...props} />
+)
+
+export const Select = ({ className, children, ...props }) => (
+  <select className={`${sharedInputClasses} ${className ?? ''}`} {...props}>
+    {children}
+  </select>
+)
+
+export const Label = ({ children }) => (
+  <label className="block text-xs font-mono font-bold mb-1 uppercase tracking-wider text-neutral-black/70">
+    {children}
+  </label>
+)
+
+Input.propTypes = { className: PropTypes.string }
+Textarea.propTypes = { className: PropTypes.string }
+Select.propTypes = { className: PropTypes.string, children: PropTypes.node }
+Label.propTypes = { children: PropTypes.node }
+
+export default FormCounter   // keep original default export

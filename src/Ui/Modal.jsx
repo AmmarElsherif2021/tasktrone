@@ -11,7 +11,7 @@ import { useEffect } from 'react'
  * Styling uses CSS variables from index.css @theme so it stays
  * in sync with the design system without hardcoding hex values.
  */
-export const Modal = ({ isOpen, onClose, title, children }) => {
+export const Modal = ({ isOpen, onClose, title, children }) => { 
   useEffect(() => {
     const onEsc = (e) => e.key === 'Escape' && onClose()
     document.addEventListener('keydown', onEsc)

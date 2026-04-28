@@ -138,6 +138,26 @@
   --color-bg:                var(--color-frost);
   --header-h:                3.6rem;
   --shadow-offset:           4px;
+  --color-neutral-black:        #0B1E33;
+  --color-neutral-white:        #EAF0F5;
+  --color-card-bg:              #EAF0F5;
+  --color-card-hover:           #D6E4EE;
+  --color-card-border:          #0B1E33;
+  --color-modal-text:           #0B1E33;
+  --color-modal-border:         #0B1E33;
+  --color-modal-divider:        #0B1E33;
+  --color-role-admin:           #C44040;
+  --color-role-reviewer:        #1A7F8C;
+  --color-role-worker:          #0B1E33;
+  --color-primary:              #1A7F8C;   /* accent-blue for primary actions */
+  --color-frost:                #EAF0F5;   /* used in Post.jsx */
+  --color-steel:                #2C3E50;   /* shadow and secondary elements */
+  --border-width-base:          2.5px;
+  --border-width-thick:         3px;
+  --radius-sm:                  0px;
+  --font-family-mono:           'JetBrains Mono', monospace;
+  --font-family-sans:           'DM Sans', sans-serif;
+  --font-family-display:        'Chakra Petch', sans-serif;
 }
 
 /* ------------------------------------------------------------------

@@ -1,0 +1,183 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.wrap { padding: 1rem 0; }
+.section-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
+.table-wrap { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th { background: var(--color-background-secondary); padding: 8px 12px; text-align: left; font-weight: 500; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); }
+thead th:first-child { width: 22%; }
+thead th:nth-child(2) { width: 30%; }
+thead th:nth-child(3) { width: 30%; }
+thead th:last-child { width: 18%; }
+tbody tr { border-bottom: 0.5px solid var(--color-border-tertiary); }
+tbody tr:last-child { border-bottom: none; }
+tbody td { padding: 8px 12px; color: var(--color-text-primary); vertical-align: top; line-height: 1.5; }
+tbody td:first-child { font-weight: 500; font-size: 11px; color: var(--color-text-secondary); }
+.pill { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; white-space: nowrap; }
+.pill-mfg { background: #FAECE7; color: #712B13; }
+.pill-mep { background: #E6F1FB; color: #0C447C; }
+.pill-shared { background: #EEEDFE; color: #3C3489; }
+@media (prefers-color-scheme: dark) {
+  .pill-mfg { background: #712B13; color: #F5C4B3; }
+  .pill-mep { background: #0C447C; color: #B5D4F4; }
+  .pill-shared { background: #3C3489; color: #CECBF6; }
+}
+.note { font-size: 11px; color: var(--color-text-secondary); padding: 8px 12px; background: var(--color-background-secondary); border-top: 0.5px solid var(--color-border-tertiary); line-height: 1.6; }
+</style>
+
+<div class="wrap">
+  <div class="section-label">Actor role mapping across domains</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Abstract role</th>
+          <th>Manufacturing — mechanical assembly</th>
+          <th>Construction — MEP</th>
+          <th>Coverage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Platform owner</td>
+          <td>System Administrator</td>
+          <td>System Administrator</td>
+          <td><span class="pill pill-shared">shared</span></td>
+        </tr>
+        <tr>
+          <td>Project owner</td>
+          <td>Project Manager</td>
+          <td>Project Manager / Owner Rep</td>
+          <td><span class="pill pill-shared">shared</span></td>
+        </tr>
+        <tr>
+          <td>Design lead</td>
+          <td>Design Engineer, CAD Technician</td>
+          <td>MEP Design Coordinator, BIM Technician</td>
+          <td><span class="pill pill-shared">shared</span></td>
+        </tr>
+        <tr>
+          <td>Planner / scheduler</td>
+          <td>Production Planner, Supervisor</td>
+          <td>Construction Manager, Site Superintendent</td>
+          <td><span class="pill pill-shared">shared</span></td>
+        </tr>
+        <tr>
+          <td>Execution worker</td>
+          <td>Machinist, CNC Programmer, Manufacturing Engineer</td>
+          <td>Mechanical Tech, Electrician, Plumber (trade crews)</td>
+          <td><span class="pill pill-shared">shared</span></td>
+        </tr>
+        <tr>
+          <td>Quality gatekeeper</td>
+          <td>QC Inspector, Metrology Engineer</td>
+          <td>Commissioning Engineer, AHJ Inspector</td>
+          <td><span class="pill pill-shared">shared</span></td>
+        </tr>
+        <tr>
+          <td>Logistics / handoff</td>
+          <td>Inventory Manager, Logistics Coordinator</td>
+          <td>Procurement Lead, Closeout Coordinator</td>
+          <td><span class="pill pill-shared">shared</span></td>
+        </tr>
+        <tr>
+          <td>Maintenance</td>
+          <td>Maintenance Technician</td>
+          <td>Facility Manager (post-handover)</td>
+          <td><span class="pill pill-shared">shared</span></td>
+        </tr>
+        <tr>
+          <td>Regulatory / permit</td>
+          <td>— (not applicable)</td>
+          <td>Permit Expediter, AHJ Liaison</td>
+          <td><span class="pill pill-mep">MEP only</span></td>
+        </tr>
+        <tr>
+          <td>Equipment custodian</td>
+          <td>Equipment / Machine Owner</td>
+          <td>— (assets tracked differently)</td>
+          <td><span class="pill pill-mfg">Mfg only</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note">Abstract roles are the platform's internal role model. Domain roles are the <code>project_member_role</code> and <code>task_assignment_role</code> enum values that the tenant configures. Only two rows are domain-exclusive; all others are structurally shared.</div>
+  </div>
+
+  <div class="section-label">Use case segmentation by layer</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Use case cluster</th>
+          <th>Belongs to</th>
+          <th>Scope</th>
+          <th>Domain</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>UC-1 — Project lifecycle</td>
+          <td>Platform core</td>
+          <td>Create, configure, phase-advance, close a project</td>
+          <td><span class="pill pill-shared">both</span></td>
+        </tr>
+        <tr>
+          <td>UC-2 — Task operations</td>
+          <td>Platform core</td>
+          <td>Create, assign, update, complete tasks and subtasks</td>
+          <td><span class="pill pill-shared">both</span></td>
+        </tr>
+        <tr>
+          <td>UC-3 — Board management</td>
+          <td>Platform core</td>
+          <td>Configure columns, WIP limits, swimlanes; move cards</td>
+          <td><span class="pill pill-shared">both</span></td>
+        </tr>
+        <tr>
+          <td>UC-4 — Dependency graph</td>
+          <td>Platform core</td>
+          <td>Define predecessor/successor links with lag time</td>
+          <td><span class="pill pill-shared">both</span></td>
+        </tr>
+        <tr>
+          <td>UC-5 — File & requirements</td>
+          <td>Platform core</td>
+          <td>Attach versioned files to tasks; fulfill requirements</td>
+          <td><span class="pill pill-shared">both</span></td>
+        </tr>
+        <tr>
+          <td>UC-6 — Quality checks</td>
+          <td>Platform core</td>
+          <td>Create check, record measurements, pass/fail, trigger rework</td>
+          <td><span class="pill pill-shared">both</span></td>
+        </tr>
+        <tr>
+          <td>UC-7 — Metrics & analytics</td>
+          <td>Platform core</td>
+          <td>Record cycle/lead time, defects, equipment utilization</td>
+          <td><span class="pill pill-shared">both</span></td>
+        </tr>
+        <tr>
+          <td>UC-8 — Equipment registry</td>
+          <td>Domain-specific</td>
+          <td>Track machines: status, maintenance schedule, usage per task</td>
+          <td><span class="pill pill-mfg">Mfg only</span></td>
+        </tr>
+        <tr>
+          <td>UC-9 — Permit & compliance docs</td>
+          <td>Domain-specific</td>
+          <td>Attach permit drawings; record inspection milestones by AHJ</td>
+          <td><span class="pill pill-mep">MEP only</span></td>
+        </tr>
+        <tr>
+          <td>UC-10 — Phase vocabulary</td>
+          <td>Domain mapping</td>
+          <td>Configure enum labels per tenant (phase names, role titles)</td>
+          <td><span class="pill pill-shared">both</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note">UC-1 through UC-7 are fully reusable — build them once. UC-8 and UC-9 are additive domain modules that extend the core without replacing it. UC-10 is the configuration layer that lets both verticals share a single schema.</div>
+  </div>
+</div>

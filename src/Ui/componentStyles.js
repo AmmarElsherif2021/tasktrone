@@ -1,5 +1,5 @@
 // =============================================================
-// theme/componentStyles.js
+// Ui/componentStyles.js
 // ─────────────────────────────────────────────────────────────
 // Composed inline-style objects for React components.
 //
@@ -8,14 +8,19 @@
 //   ‣ Import spacing from CSS variables — no spacing.js dependency
 //   ‣ Use Tailwind utility classes wherever possible; fall back
 //     to inline style objects ONLY for dynamic prop-driven values
-//     (e.g. color chosen at runtime, width set via a number prop)
 //   ‣ Do NOT duplicate anything already expressed in index.css
 // =============================================================
 
-import { card, modal, neutral, role as roleColors, teamRoleColor } from './colors'
+import {
+  card,
+  cold,
+  modal,
+  neutral,
+  role as roleColors,
+  teamRoleColor,
+} from './colors'
 
 // ── Spacing constants (mirrors index.css @theme --spacing-*) ──
-// Kept here as JS so iconBtnStyle can compute widths dynamically.
 const spacing = {
   xs:  '0.4rem',
   sm:  '0.5rem',
@@ -25,28 +30,25 @@ const spacing = {
 
 const borderWidth = {
   thin:  '1px',
-  base:  '2px',
-  thick: '2.5px',
+  base:  '2.5px',   // matches cold button style
+  thick: '3px',
 }
 
 const borderRadius = {
-  sm:   '0.5rem',
-  md:   '0.75rem',
-  pill: '1rem',
-  card: '10px',
+  sm:   '0px',
+  md:   '0px',
+  pill: '0px',
+  card: '0px',
 }
 
 // Icon button dimensions (mirrors --spacing-icon-*)
 const iconSize = {
-  base: 7,     // rem — default iconWidthREM
-  minBase: 4,  // rem — base - 3
+  base: 7,
+  minBase: 4,
   img: '1.7rem',
 }
 
 // ── Card ──────────────────────────────────────────────────────
-// Prefer Tailwind classes (bg-card-bg, border-card-border, etc.)
-// These inline objects are for Bootstrap Card components that
-// don't accept className.
 export const cardStyle = {
   base: {
     borderWidth:     borderWidth.thick,
@@ -55,6 +57,7 @@ export const cardStyle = {
     transition:      'background-color 0.2s ease',
     backgroundColor: card.background,
     padding:         spacing.sm,
+    boxShadow:       `4px 4px 0 ${cold.shadowCard}`,
   },
   hover: {
     backgroundColor: card.backgroundHover,
@@ -72,11 +75,6 @@ export const badgeStyle = {
     fontSize:     '0.75em',
     whiteSpace:   'nowrap',
   },
-  /**
-   * Returns role-aware color overrides.
-   * Pass null for the default (near-black) style.
-   * @param {string|null} color
-   */
   forRole: (color) => ({
     borderColor:     color ?? neutral.black,
     color:           color ?? neutral.white,
@@ -92,6 +90,7 @@ export const modalStyle = {
     borderStyle:  'solid',
     borderColor:  modal.border,
     borderRadius: borderRadius.sm,
+    boxShadow:    `4px 4px 0 ${cold.shadowCard}`,
   },
   headerFooter: {
     borderColor: modal.divider,
@@ -101,10 +100,6 @@ export const modalStyle = {
 
 // ── Round button (StaticRoundBtn) ─────────────────────────────
 export const roundBtnStyle = {
-  /**
-   * @param {string} color            – border + text color
-   * @param {string} backgroundColor  – defaults to transparent
-   */
   base: (color = neutral.black, backgroundColor = 'transparent') => ({
     borderWidth:     borderWidth.base,
     borderStyle:     'solid',
@@ -120,11 +115,34 @@ export const roundBtnStyle = {
   }),
 }
 
+// ── Cold button (factory‑grade, for primary/secondary/danger) ─
+export const coldBtn = (variant = 'primary') => {
+  const base = {
+    borderWidth: borderWidth.base,
+    borderStyle: 'solid',
+    fontFamily: 'var(--font-family-mono)',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
+    padding: `${spacing.xs} ${spacing.sm}`,
+    cursor: 'pointer',
+    display: 'inline-block',
+    boxShadow: `4px 4px 0 ${cold.shadowBtn}`,
+  }
+  switch (variant) {
+    case 'primary':
+      return { ...base, backgroundColor: cold.steel, borderColor: cold.navy, color: cold.frost }
+    case 'secondary':
+      return { ...base, backgroundColor: cold.ice, borderColor: cold.navy, color: cold.navy }
+    case 'danger':
+      return { ...base, backgroundColor: roleColors.admin, borderColor: cold.navy, color: cold.frost }
+    default:
+      return base
+  }
+}
+
 // ── Icon button ───────────────────────────────────────────────
 export const iconBtnStyle = {
-  /**
-   * @param {number} widthREM – defaults to iconSize.base (7)
-   */
   base: (widthREM = iconSize.base) => ({
     display:    'flex',
     alignItems: 'center',
@@ -147,11 +165,9 @@ export const formCounterStyle = {
 }
 
 // ── System-role color lookup ──────────────────────────────────
-// For dynamic role badges.  Source: colors.js → role
 export function getRoleColor(roleName) {
   return roleColors[roleName] ?? null
 }
 
 // ── Team / job-role color lookup ──────────────────────────────
-// Re-exported from colors.js so consumers import from one place.
 export { teamRoleColor }

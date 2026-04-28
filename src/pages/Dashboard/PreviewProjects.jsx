@@ -1,22 +1,10 @@
 import { ProjectCard } from '../../Components/Projects/ProjectCard'
-import { useProject } from '../../contexts/ProjectContext'
-import { useNavigate } from 'react-router-dom'
-import { useUserHome } from '../../contexts/UserHomeContext'
 
-export const PreviewProjects = () => {
-  const { userProjects } = useUserHome()
-  const {currentProjectId, setCurrentProjectId } = useProject()
-  const navigate = useNavigate()
-
-  const handleProjectClick = (projectId) => {
-  setCurrentProjectId(projectId)
-  navigate(`/project/${projectId}/board`)
-}
-
+export const PreviewProjects = ({ projects, onProjectClick }) => {
   return (
     <div className="p-3 max-h-[61.5vh] overflow-y-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
-        {userProjects.map((project) => (
+        {projects.map((project) => (
           <ProjectCard
             key={project.id}
             projectId={project.id}
@@ -31,7 +19,7 @@ export const PreviewProjects = () => {
             targetCompletionDate={project.target_completion_date}
             wipLimit={project.wip_limit}
             members={project.members || []}
-            onClick={handleProjectClick}
+            onClick={onProjectClick}
           />
         ))}
       </div>

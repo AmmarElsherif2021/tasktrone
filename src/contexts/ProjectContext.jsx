@@ -4,6 +4,7 @@ import { getProjectById, updateProject } from '../API/projects'
 import { getPosts } from '../API/posts'
 import { useAuth } from '../contexts/AuthContext'
 import { listTasks } from '../API/tasks'
+import { getAllUsers } from '../API/users'
 
 const ProjectContext = createContext()
 
@@ -21,20 +22,20 @@ export const ProjectProvider = ({ children }) => {
   const [currentAvgCycleTime, setCurrentAvgCycleTime] = useState(0)
   const [currentTasks, setCurrentTasks] = useState([])
   const [isTasksLoading, setIsTasksLoading] = useState(false)
-  
-  // Blog-specific states
+  const [shouldFetchUsers, setShouldFetchUsers] = useState(false)
+
+  // Blog filters
   const [postAuthorFilter, setPostAuthorFilter] = useState('')
   const [postSortBy, setPostSortBy] = useState('created_at')
   const [postSortOrder, setPostSortOrder] = useState('desc')
-  
-  // Project query - updated to match the new API structure
+
+  // ── Project query ──────────────────────────────────────────
   const currentProjectQuery = useQuery({
     queryKey: ['project', currentProjectId],
     queryFn: () => getProjectById(currentProjectId),
     enabled: !!currentProjectId && isAuthenticated,
     select: (data) => ({
       ...data,
-      // Transform project_members to match expected structure
       members: data.project_members?.map(member => ({
         user_id: member.user.id,
         role: member.role,
@@ -48,7 +49,7 @@ export const ProjectProvider = ({ children }) => {
     retry: 2
   })
 
-  // Tasks query
+  // ── Tasks query ────────────────────────────────────────────
   const tasksQuery = useQuery({
     queryKey: ['tasks', currentProjectId],
     queryFn: () => {
@@ -76,11 +77,8 @@ export const ProjectProvider = ({ children }) => {
     staleTime: 30000,
     retry: 2,
   })
-  // Update loading state based on tasks query
-  useEffect(() => {
-    if (!tasksQuery.isLoading) setIsTasksLoading(false)
-    }, [tasksQuery.isLoading])
-  // Posts query
+
+  // ── Posts query ────────────────────────────────────────────
   const postsQuery = useQuery({
     queryKey: ['posts', currentProjectId, {
       author: postAuthorFilter,
@@ -93,22 +91,36 @@ export const ProjectProvider = ({ children }) => {
       sortOrder: postSortOrder
     }),
     enabled: !!currentProjectId && isAuthenticated,
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 1000 * 60,
   })
 
-  // Update post filters
-  const updatePostFilters = ({ author, sortBy, sortOrder }) => {
-    if (author !== undefined) setPostAuthorFilter(author)
-    if (sortBy !== undefined) setPostSortBy(sortBy)
-    if (sortOrder !== undefined) setPostSortOrder(sortOrder)
-  }
+  // ── Users query (lazy) ─────────────────────────────────────
+  const usersQuery = useQuery({
+    queryKey: ['users'],
+    queryFn: getAllUsers,
+    enabled: shouldFetchUsers,
+    staleTime: 5 * 60 * 1000,
+  })
 
-  // Refresh posts function
-  const refetchPosts = () => {
-    postsQuery.refetch()
-  }
+  // ── Derived metrics (computed in context, not in Board) ────
+  useEffect(() => {
+    if (tasksQuery.data) {
+      const tasks = tasksQuery.data
+      const totalCycle = tasks.reduce((acc, t) => acc + (t.cycleTime || 0), 0)
+      const totalLead = tasks.reduce((acc, t) => acc + (t.leadTime || 0), 0)
+      setCurrentAvgCycleTime(tasks.length ? totalCycle / tasks.length : 0)
+      setCurrentAvgLeadTime(tasks.length ? totalLead / tasks.length : 0)
+    } else {
+      setCurrentAvgCycleTime(0)
+      setCurrentAvgLeadTime(0)
+    }
+  }, [tasksQuery.data])
 
-  // Handle project query result
+  // ── Side effects ───────────────────────────────────────────
+  useEffect(() => {
+    if (!tasksQuery.isLoading) setIsTasksLoading(false)
+  }, [tasksQuery.isLoading])
+
   useEffect(() => {
     if (currentProjectQuery?.data) {
       setCurrentProject(currentProjectQuery.data)
@@ -116,14 +128,12 @@ export const ProjectProvider = ({ children }) => {
     }
   }, [currentProjectQuery.data])
 
-  // Update currentTasks state
   useEffect(() => {
     if (tasksQuery.data) {
       setCurrentTasks(tasksQuery.data)
     }
   }, [tasksQuery.data, currentProjectId])
 
-  // Clear project data when project changes
   useEffect(() => {
     if (!currentProjectId) {
       setCurrentProject(null)
@@ -132,22 +142,26 @@ export const ProjectProvider = ({ children }) => {
     }
   }, [currentProjectId])
 
-  // Update WIP limit mutation
+  // ── Mutations ──────────────────────────────────────────────
   const updateWipMutation = useMutation({
-    mutationFn: ({ projectId, wip }) => 
+    mutationFn: ({ projectId, wip }) =>
       updateProject(projectId, { wip_limit: wip }),
     onSuccess: () => {
       queryClient.invalidateQueries(['project', currentProjectId])
     },
   })
 
-  const refreshTasks = () => {
-    tasksQuery.refetch()
+  // ── Helpers ────────────────────────────────────────────────
+  const updatePostFilters = ({ author, sortBy, sortOrder }) => {
+    if (author !== undefined) setPostAuthorFilter(author)
+    if (sortBy !== undefined) setPostSortBy(sortBy)
+    if (sortOrder !== undefined) setPostSortOrder(sortOrder)
   }
 
-  const refreshProject = () => {
-    currentProjectQuery.refetch()
-  }
+  const refetchPosts = () => postsQuery.refetch()
+  const refreshTasks = () => tasksQuery.refetch()
+  const refreshProject = () => currentProjectQuery.refetch()
+  const fetchUsers = () => setShouldFetchUsers(true)
 
   return (
     <ProjectContext.Provider
@@ -165,9 +179,7 @@ export const ProjectProvider = ({ children }) => {
         refreshTasks,
         refreshProject,
         updateWipMutation,
-        // Loading states
         isProjectLoading: currentProjectQuery.isLoading,
-        // Blog-related values
         posts: postsQuery.data ?? [],
         postAuthorFilter,
         postSortBy,
@@ -175,7 +187,9 @@ export const ProjectProvider = ({ children }) => {
         updatePostFilters,
         isPostsLoading: postsQuery.isLoading,
         refetchPosts,
-        // Auth data
+        // User data (hoisted)
+        users: usersQuery.data ?? [],
+        fetchUsers,
         user,
         isAuthenticated,
       }}

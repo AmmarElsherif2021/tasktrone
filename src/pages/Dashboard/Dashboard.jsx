@@ -1,18 +1,22 @@
-
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import '../../index.css'
 import { PreviewProjects } from './PreviewProjects'
 import { CreateProject } from '../../Components/Projects/CreateProject'
 import { useAuth } from '../../contexts/AuthContext'
 import { useUserHome } from '../../contexts/UserHomeContext'
+import { useProject } from '../../contexts/ProjectContext'
+import { createProject } from '../../API/projects'
+import { getAllUsers } from '../../API/users'
 import IconButton from '../../Ui/IconButton'
 import StaticRoundBtn from '../../Ui/StaticRoundBtn'
 import { ProfileImage } from '../../Components/User/ProfileImage'
 import DashboardSkeleton from '../../Ui/LoadingSkeletons/DashboardSkeleton'
 import { StyledCard } from '../../Ui/StyledCard'
 import { MessengerRegister } from './MessangerRegister'
-import { Modal } from '../../Ui/Modal'          // Custom Tailwind modal
+import { Modal } from '../../Ui/Modal'
 import folderPlus from '../../assets/folderPlus.svg'
 import userInfo from '../../assets/userInfo.svg'
 import clock from '../../assets/clock.svg'
@@ -27,7 +31,7 @@ import packageCheck from '../../assets/package.svg'
 import clipboardCheck from '../../assets/clipboardCheck.svg'
 import addNew from '../../assets/addNew.svg'
 
-// ==================== TAILWIND STYLE CONSTANTS ====================
+// -------------------- Tailwind Styles --------------------
 const METRIC_CARD_BASE_CLASS =
   'w-32 h-32 border-2 border-neutral-black rounded-card font-mono font-bold text-center flex flex-col items-center justify-evenly p-2 text-black text-sm'
 
@@ -40,9 +44,7 @@ const ALERT_CLASS =
 const BUTTON_CLASS =
   'border-2 border-primary rounded-pill text-primary px-4 py-2 hover:bg-primary/10 transition-colors'
 
-const ICON_SIZE_CLASS = 'w-8 h-8'
-
-// ==================== TOOLTIP COMPONENT (replaces OverlayTrigger) ====================
+// -------------------- Tooltip --------------------
 const Tooltip = ({ children, text }) => (
   <div className="relative inline-block group">
     {children}
@@ -52,16 +54,16 @@ const Tooltip = ({ children, text }) => (
   </div>
 )
 
-// ==================== METRIC CARD ====================
+// -------------------- MetricCard --------------------
 const MetricCard = ({ metric, value }) => (
-  <div className={`${METRIC_CARD_BASE_CLASS}`} style={{ backgroundColor: metric.color }}>
+  <div className={METRIC_CARD_BASE_CLASS} style={{ backgroundColor: metric.color }}>
     <img className="mb-2" style={{ width: '2rem' }} src={metric.icon} alt={metric.title} />
     <strong className="mb-1">{metric.title}</strong>
     <span>{value}{metric.unit && ` ${metric.unit}`}</span>
   </div>
 )
 
-// ==================== CARD HEADER ====================
+// -------------------- CardHeader --------------------
 const CardHeader = ({ icon, title, children }) => (
   <div className={CARD_HEADER_CLASS}>
     <div className="flex items-center gap-2">
@@ -72,7 +74,7 @@ const CardHeader = ({ icon, title, children }) => (
   </div>
 )
 
-// ==================== CONSTANTS ====================
+// -------------------- Constants --------------------
 const METRICS_DATA = [
   { icon: clock,         title: 'In Progress',         key: 'tasksInProgress', color: '#87CEEB' },
   { icon: alert,         title: 'Critical Tasks',       key: 'criticalTasks',   color: '#FD5C5C' },
@@ -92,36 +94,70 @@ const QUICK_ACCESS_BUTTONS = [
   { title: 'Inventory',       color: '#1f3f4f' },
 ]
 
-// ==================== MAIN COMPONENT ====================
+// -------------------- Dashboard --------------------
 export function Dashboard() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const { userProjects, currentUser, isUserLoading, areProjectsLoading, refreshProjects } = useUserHome()
+  const { setCurrentProjectId } = useProject()
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const [showCreateProject, setShowCreateProject] = useState(false)
   const [hoverStates, setHoverStates] = useState({ info: false, projects: false })
-  const [isLoading, setIsLoading] = useState(true)
 
-  // Mock metrics
+  // Mock metrics (would come from API in real app)
   const metrics = {
     tasksInProgress: 12, criticalTasks: 3, qualityIssues: 2, inventoryAlerts: 4,
     machineDowntime: 2.5, cycleTime: 4.2, onTimeDelivery: 87, pendingMaintenance: 6, oee: 92,
   }
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000)
-    return () => clearTimeout(timer)
-  }, [])
+  // ----- Hoisted user query (was in CreateProject) -----
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery({
+    queryKey: ['users'],
+    queryFn: getAllUsers,
+    staleTime: 30000,
+  })
 
-  const handleHover = (key, value) =>
-    setHoverStates((prev) => ({ ...prev, [key]: value }))
+  // ----- Hoisted create-project mutation (was in CreateProject) -----
+  const createProjectMutation = useMutation({
+    mutationFn: (projectData) => createProject(projectData),
+    onSuccess: (newProject) => {
+      queryClient.invalidateQueries(['projects'])
+      queryClient.invalidateQueries(['project', newProject.id])
+      setCurrentProjectId(newProject.id)
+      setShowCreateProject(false)
+      refreshProjects()
+    },
+    onError: (error) => console.error('Create project error:', error),
+  })
 
-  const handleProjectCreated = () => {
-    setShowCreateProject(false)
-    refreshProjects()
+  const handleCreateProject = (formData) => {
+    // Prepare the payload expected by the API
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      start_date: formData.start_date,
+      target_completion_date: formData.target_completion_date,
+      wip_limit: formData.wip_limit,
+      created_by: user.id,
+      project_manager: user.id,
+      members: formData.members.map((m) => ({
+        user_id: m.user_id,
+        role: m.role,
+      })),
+    }
+    createProjectMutation.mutate(payload)
   }
 
-  // Loading state
-  if (!isAuthenticated || isLoading || isUserLoading || areProjectsLoading) {
+  const handleProjectClick = (projectId) => {
+    setCurrentProjectId(projectId)
+    navigate(`/project/${projectId}/board`)
+  }
+
+  // ----- Loading state -----
+  const isPageLoading = !isAuthenticated || isUserLoading || areProjectsLoading || isLoadingUsers
+
+  if (isPageLoading) {
     return (
       <div className="opacity-80">
         <DashboardSkeleton />
@@ -129,6 +165,7 @@ export function Dashboard() {
     )
   }
 
+  // ----- Render helpers -----
   const renderProjectsHeader = () => (
     <div className="flex gap-2">
       <Tooltip text="View Analytics">
@@ -186,14 +223,14 @@ export function Dashboard() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-        {/* Left Column: User Info & Quick Access */}
+        {/* Left Column */}
         <div className="md:col-span-5 lg:col-span-4 space-y-4">
-          <StyledCard hoverKey="info" hoverStates={hoverStates} handleHover={handleHover} className="p-4">
+          <StyledCard hoverKey="info" hoverStates={hoverStates} handleHover={setHoverStates} className="p-4">
             <CardHeader icon={userInfo} title="Personal Information" />
             <div className="mt-3 text-sm">{renderUserInfo()}</div>
           </StyledCard>
 
-          <StyledCard hoverKey="info" hoverStates={hoverStates} handleHover={handleHover} className="p-4">
+          <StyledCard hoverKey="info" hoverStates={hoverStates} handleHover={setHoverStates} className="p-4">
             <CardHeader title="Quick Access" />
             <div className="mt-3">
               <div className="flex flex-wrap gap-2 text-xs">
@@ -205,14 +242,21 @@ export function Dashboard() {
           </StyledCard>
         </div>
 
-        {/* Right Column: Projects */}
+        {/* Right Column */}
         <div className="md:col-span-7 lg:col-span-8">
-          <StyledCard hoverKey="projects" hoverStates={hoverStates} handleHover={handleHover}>
+          <StyledCard hoverKey="projects" hoverStates={hoverStates} handleHover={setHoverStates}>
             <div className="p-4">
               <CardHeader icon={folderPlus} title="Projects">
                 {renderProjectsHeader()}
               </CardHeader>
-              {userProjects?.length ? <PreviewProjects /> : renderEmptyProjects()}
+              {userProjects?.length ? (
+                <PreviewProjects
+                  projects={userProjects}
+                  onProjectClick={handleProjectClick}
+                />
+              ) : (
+                renderEmptyProjects()
+              )}
             </div>
           </StyledCard>
 
@@ -227,9 +271,20 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Create Project Modal (custom Tailwind modal) */}
-      <Modal isOpen={showCreateProject} onClose={() => setShowCreateProject(false)} title="Create New Project">
-        <CreateProject onClose={handleProjectCreated} />
+      {/* Create Project Modal */}
+      <Modal
+        isOpen={showCreateProject}
+        onClose={() => setShowCreateProject(false)}
+        title="Create New Project"
+      >
+        <CreateProject
+          users={users}
+          isLoadingUsers={isLoadingUsers}
+          currentUserId={user.id}
+          onSubmit={handleCreateProject}
+          isCreating={createProjectMutation.isPending}
+          onClose={() => setShowCreateProject(false)}
+        />
       </Modal>
     </div>
   )

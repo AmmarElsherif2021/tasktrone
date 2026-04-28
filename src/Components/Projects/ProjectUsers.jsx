@@ -1,8 +1,5 @@
-// ProjectUsers.jsx
-import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useProject } from '../../contexts/ProjectContext'
-import { getAllUsers } from '../../API/users'
 
 const INPUT_CLS = `
   w-full px-3 py-2
@@ -15,13 +12,12 @@ const INPUT_CLS = `
 export const ProjectUsers = () => {
   const [inviteOpen, setInviteOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const { currentProjectId, currentProjectMembers } = useProject()
+  const { currentProjectId, currentProjectMembers, users, fetchUsers } = useProject()
 
-  const { data: allUsers = [], isLoading } = useQuery({
-    queryKey: ['users'],
-    queryFn: getAllUsers,
-    enabled: inviteOpen,
-  })
+  // Lazy fetch: load users only when the invite panel is opened
+  useEffect(() => {
+    if (inviteOpen) fetchUsers()
+  }, [inviteOpen, fetchUsers])
 
   const handleInvite = (userId) => {
     console.log(`Inviting ${userId} to ${currentProjectId}`)
@@ -32,9 +28,9 @@ export const ProjectUsers = () => {
     <div className="w-full">
       <ul className="divide-y divide-card-border border border-card-border">
         {currentProjectMembers?.map((member) => (
-          <li key={member.user.id} className="p-3 flex justify-between items-center">
+          <li key={member.user_id} className="p-3 flex justify-between items-center">
             <div>
-              <span className="font-mono font-bold text-sm">{member.user.username}</span>
+              <span className="font-mono font-bold text-sm">{member.username}</span>
               <br />
               <small className="font-mono text-xs text-neutral-black/60">
                 Role: {member.role}
@@ -45,12 +41,7 @@ export const ProjectUsers = () => {
 
         <li className="p-3">
           <button
-            className="
-              px-3 py-1
-              font-mono text-xs font-bold
-              border border-primary text-primary
-              hover:bg-card-bg transition-colors duration-fast
-            "
+            className="px-3 py-1 font-mono text-xs font-bold border border-primary text-primary hover:bg-card-bg transition-colors duration-fast"
             onClick={() => setInviteOpen((v) => !v)}
           >
             Invite Team Member
@@ -65,22 +56,17 @@ export const ProjectUsers = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <ul className="divide-y divide-card-border border border-card-border max-h-48 overflow-y-auto">
-                {allUsers
+                {users
                   .filter(
                     (u) =>
-                      !currentProjectMembers.some((m) => m.user.id === u.id) &&
+                      !currentProjectMembers.some((m) => m.user_id === u.id) &&
                       u.username.toLowerCase().includes(searchTerm.toLowerCase())
                   )
                   .map((u) => (
                     <li key={u.id} className="p-3 flex justify-between items-center">
                       <span className="font-mono text-sm">{u.username}</span>
                       <button
-                        className="
-                          px-3 py-1
-                          font-mono text-xs
-                          border border-card-border
-                          hover:bg-card-hover transition-colors duration-fast
-                        "
+                        className="px-3 py-1 font-mono text-xs border border-card-border hover:bg-card-hover transition-colors duration-fast"
                         onClick={() => handleInvite(u.id)}
                       >
                         Invite

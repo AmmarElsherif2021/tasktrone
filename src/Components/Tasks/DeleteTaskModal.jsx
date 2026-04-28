@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types'
+import { coldBtn } from '../../Ui/componentStyles'
 
 export const DeleteWarningModal = ({ show, onHide, onConfirm, taskTitle }) => {
   if (!show) return null
@@ -6,12 +7,13 @@ export const DeleteWarningModal = ({ show, onHide, onConfirm, taskTitle }) => {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onHide()
-      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onHide() }}
     >
-      <div className="bg-white rounded-lg max-w-md w-full p-4 border-2 border-black shadow-xl">
-        <div className="flex justify-between items-center border-b pb-2 mb-4">
+      <div
+        className="bg-neutral-white max-w-md w-full p-4 border-2 border-neutral-black"
+        style={{ boxShadow: '4px 4px 0 var(--color-steel)' }}
+      >
+        <div className="flex justify-between items-center border-b pb-2 mb-4 border-neutral-black">
           <h3 className="text-lg font-bold">Confirm Delete Task</h3>
           <button onClick={onHide} className="text-2xl leading-none">&times;</button>
         </div>
@@ -19,10 +21,16 @@ export const DeleteWarningModal = ({ show, onHide, onConfirm, taskTitle }) => {
           Are you sure you want to delete <strong>{taskTitle}</strong>? This action cannot be undone.
         </div>
         <div className="flex justify-end gap-2">
-          <button onClick={onHide} className="bg-gray-500 text-white px-4 py-2 rounded-md">
+          <button
+            onClick={onHide}
+            style={coldBtn('secondary')}
+          >
             Cancel
           </button>
-          <button onClick={onConfirm} className="bg-red-600 text-white px-4 py-2 rounded-md">
+          <button
+            onClick={onConfirm}
+            style={coldBtn('danger')}
+          >
             Delete
           </button>
         </div>
