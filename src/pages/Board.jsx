@@ -1,5 +1,3 @@
-/* eslint-disable react/display-name */
-/* eslint-disable react/prop-types */
 import { useState, useEffect, memo } from 'react'
 import { BoardSkeleton } from '../Ui/LoadingSkeletons/BoardSkeleton'
 import { TaskCard } from '../Components/Tasks/TaskCard'
@@ -9,17 +7,18 @@ import Target from '../Components/Target/Target'
 import { ANIMATION_STYLES } from '../Ui/LoadingSkeletons/animations'
 import { useProjectShell } from '../layouts/ProjectShell'
 
-const PHASE_TITLES = {
-  story:      'Story',
-  inProgress: 'In Progress',
-  reviewing:  'Review',
-  done:       'Done',
+// Kanban columns directly map to task_status enum
+const STATUS_TITLES = {
+  todo:        'To Do',
+  in_progress: 'In Progress',
+  review:      'Review',
+  done:        'Done',
 }
 
-const KanbanColumn = memo(({ phase, tasks }) => (
+const KanbanColumn = memo(({ status, tasks }) => (
   <div className="kanban-column min-h-[70vh] max-w-[50vw] transition-all duration-300 p-px bg-neutral-white">
     <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-center px-3 py-2 border-b border-card-border/30">
-      {PHASE_TITLES[phase]}
+      {STATUS_TITLES[status]}
     </h3>
     {tasks?.map((task) => (
       <TaskCard
@@ -41,16 +40,16 @@ const KanbanColumn = memo(({ phase, tasks }) => (
   </div>
 ))
 
-const BOARD_PHASES = ['story', 'inProgress', 'reviewing', 'done']
+const BOARD_STATUSES = ['todo', 'in_progress', 'review', 'done']
 
-const getTasksByPhase = (tasks) =>
+const getTasksByStatus = (tasks) =>
   tasks?.reduce(
     (acc, task) => {
-      if (!acc[task.phase]) acc[task.phase] = []
-      acc[task.phase].push(task)
+      if (!acc[task.status]) acc[task.status] = []
+      acc[task.status].push(task)
       return acc
     },
-    BOARD_PHASES.reduce((acc, phase) => ({ ...acc, [phase]: [] }), {})
+    BOARD_STATUSES.reduce((acc, s) => ({ ...acc, [s]: [] }), {})
   )
 
 export function Board() {
@@ -60,6 +59,7 @@ export function Board() {
     currentTasks,
     refreshTasks,
     isTasksLoading,
+    currentPhase,           // product‑line filter
   } = useProject()
 
   const { mainRef } = useProjectShell()
@@ -98,7 +98,12 @@ export function Board() {
     return <BoardSkeleton phase="empty" />
   }
 
-  const tasksByPhase = getTasksByPhase(currentTasks)
+  // Filter tasks by selected manufacturing phase (product line)
+  const phaseFilteredTasks = currentPhase
+    ? currentTasks.filter(t => t.phase === currentPhase)
+    : currentTasks
+
+  const tasksByStatus = getTasksByStatus(phaseFilteredTasks)
 
   return (
     currentProject && currentProjectId && (
@@ -113,8 +118,8 @@ export function Board() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 pt-3">
-          {BOARD_PHASES.map((phase) => (
-            <KanbanColumn key={phase} phase={phase} tasks={tasksByPhase[phase]} />
+          {BOARD_STATUSES.map((status) => (
+            <KanbanColumn key={status} status={status} tasks={tasksByStatus[status]} />
           ))}
         </div>
       </div>

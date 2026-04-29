@@ -1,9 +1,7 @@
-/* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react'
 import { useProject } from '../contexts/ProjectContext'
 import { StyledCard } from '../Ui/StyledCard'
 
-// Icons
 import inProgressIcon from '../assets/inProgress.svg'
 import cycleTimeIcon  from '../assets/cycleTime.svg'
 import leadTimeIcon   from '../assets/leadTime.svg'
@@ -13,35 +11,33 @@ import updateIcon     from '../assets/update.svg'
 import wipIcon        from '../assets/wip.svg'
 import { metrics as metricColors } from '../Ui/colors'
 
-// Toolbar sub-components (kept local for co-location)
 import Notifications from '../Components/Projects/Settings'
 import RefreshProject from '../Components/Projects/RefreshProject'
 import Search from '../Components/Projects/Search'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Toolbar section – extracted from ProjectToolbar.jsx
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Toolbar section – now shows current phase, uses context for stats
+// ─────────────────────────────────────────────────────────────────
 const StatChip = ({ label, value }) => (
   <span className="px-3 py-1 font-mono font-bold text-xs bg-card-bg border border-card-border">
     {label}: <strong>{value}</strong>
   </span>
 )
 
-const ToolbarSection = ({ project }) => {
+const ToolbarSection = ({ project, currentTasks }) => {
+  const { currentPhase } = useProject()
   const {
     title,
     start_date: startDate,
     target_completion_date: endDate,
     wip_limit: wip,
-    members = [],
-    integrations = {},
   } = project
 
   const formatDate = (date) =>
     date ? new Date(date).toLocaleDateString() : 'Not set'
 
-  const activeMembersCount = members.length
-  const activeIntegrationsCount = Object.values(integrations).filter(Boolean).length
+  const activeMembersCount = project.members?.length || 0
+  const activeIntegrationsCount = Object.values(project.integrations || {}).filter(Boolean).length
 
   return (
     <nav
@@ -51,11 +47,8 @@ const ToolbarSection = ({ project }) => {
         font-mono
       "
     >
-      {/* Main row: project info, stats, actions */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {/* Left: project identity */}
         <div className="flex items-center gap-3 min-w-0">
-          {/* Integration status badge */}
           <div
             className="
               w-6 h-6 flex items-center justify-center rounded-full
@@ -72,23 +65,25 @@ const ToolbarSection = ({ project }) => {
             {activeIntegrationsCount > 0 ? '✓' : '!'}
           </div>
 
-          {/* Title + dates */}
           <div className="min-w-0">
             <h5 className="font-bold text-sm truncate">{title}</h5>
             <span className="text-xs text-neutral-black/60">
               {formatDate(startDate)} — {formatDate(endDate)}
             </span>
+            {currentPhase && (
+              <span className="block text-xs text-primary font-bold mt-0.5">
+                Phase: {currentPhase.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Center: stat chips (hidden on small screens) */}
         <div className="hidden md:flex items-center gap-2">
           <StatChip label="WIP" value={wip} />
           <StatChip label="Team" value={activeMembersCount} />
           <StatChip label="Systems" value={activeIntegrationsCount} />
         </div>
 
-        {/* Right: action buttons */}
         <div className="flex items-center gap-1 flex-shrink-0">
           <Notifications />
           <RefreshProject />
@@ -99,9 +94,9 @@ const ToolbarSection = ({ project }) => {
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Metrics section – extracted from Metrics.jsx
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Metrics section – now correctly uses currentTasks from context
+// ─────────────────────────────────────────────────────────────────
 const WipControl = ({ value, onChange, onSubmit }) => (
   <div className="flex items-center justify-center gap-1 mt-2">
     <input
@@ -142,8 +137,8 @@ const METRICS_CONFIG = [
   {
     id: 'inProgress',
     title: 'In Progress',
-    getValue: (project) =>
-      project?.tasks?.filter((t) => t.status === 'in_progress')?.length || 0,
+    getValue: (_, m, currentTasks) =>
+      currentTasks?.filter(t => t.status === 'in_progress').length || 0,
     icon: inProgressIcon,
     tooltip: 'Current tasks in progress',
     color: metricColors.inProgress,
@@ -160,8 +155,8 @@ const METRICS_CONFIG = [
   {
     id: 'throughput',
     title: 'Throughput',
-    getValue: (project) => {
-      const done = project?.tasks?.filter((t) => t.status === 'done')?.length || 0
+    getValue: (_, __, currentTasks) => {
+      const done = currentTasks?.filter(t => t.status === 'done').length || 0
       return (done / 30).toFixed(1)
     },
     icon: doneIcon,
@@ -188,6 +183,7 @@ const MetricsSection = () => {
     currentProjectId,
     currentProject,
     updateWipMutation,
+    currentTasks,
     posts,
     isPostsLoading,
   } = useProject()
@@ -206,12 +202,12 @@ const MetricsSection = () => {
   }
 
   const handleHover = (key, val) =>
-    setHoverStates((prev) => ({ ...prev, [key]: val }))
+    setHoverStates(prev => ({ ...prev, [key]: val }))
 
   const metrics = { currentAvgCycleTime, currentAvgLeadTime }
 
   const latestPost = posts
-    ?.filter((p) => p?.author === currentProject?.createdBy)
+    ?.filter(p => p?.author === currentProject?.createdBy)
     ?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))?.[0]
 
   return (
@@ -230,10 +226,10 @@ const MetricsSection = () => {
 
       <div className="p-4 flex-1 overflow-y-auto">
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-          {METRICS_CONFIG.map((metric) => (
+          {METRICS_CONFIG.map(metric => (
             <div
               key={metric.id}
-              className=" relative group"
+              className="relative group"
               onMouseEnter={() => handleHover(metric.id, true)}
               onMouseLeave={() => handleHover(metric.id, false)}
             >
@@ -253,7 +249,7 @@ const MetricsSection = () => {
                   />
                 ) : (
                   <span className="text-lg font-bold text-neutral-black">
-                    {metric.getValue(currentProject, metrics)}
+                    {metric.getValue(currentProject, metrics, currentTasks)}
                   </span>
                 )}
               </div>
@@ -285,18 +281,18 @@ const MetricsSection = () => {
         )}
 
         <div className="mt-3 font-mono font-bold text-xs text-neutral-black/60">
-          Total tasks: {currentProject?.tasks?.length || 0}
+          Total tasks (this phase): {currentTasks?.length || 0}
         </div>
       </div>
     </StyledCard>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main combined component – ProjectControllers
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Main component – pass currentTasks down
+// ─────────────────────────────────────────────────────────────────
 export const ProjectControllers = () => {
-  const { currentProject } = useProject()
+  const { currentProject, currentTasks } = useProject()
 
   if (!currentProject) {
     return (
@@ -308,7 +304,7 @@ export const ProjectControllers = () => {
 
   return (
     <div className="project-controllers">
-      <ToolbarSection project={currentProject} />
+      <ToolbarSection project={currentProject} currentTasks={currentTasks} />
       <MetricsSection />
     </div>
   )

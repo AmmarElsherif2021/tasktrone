@@ -1,26 +1,3 @@
-/**
- * ProjectShell  
- * ──────────────────────────────────────────────────────────────
- * Shell for all project-level routes: /project/:id/*
- *
- * Responsibilities:
- *   - Reads :id from the URL and initialises ProjectContext
- *   - Mounts the shared <Header /> once
- *   - Provides a locked-height canvas (100vh) — only inner panes scroll
- *   - Sidebar: fixed narrow strip, always visible
- *   - Blog panel: UI toggle (not a route) — lives alongside main content
- *   - Main content: <Outlet /> — child routes render here
- *
- * Route tree (defined in App.jsx):
- *   /project/:id            → redirects to ./board
- *   /project/:id/board      → <Board />
- *   /project/:id/settings   → <ProjectSettings />  (future)
- *
- * Blog is intentionally NOT a route — its open/closed state is
- * owned here and shared via <OutletContext> so child routes can
- * read it if needed (e.g. Board adjusting its width).
- * ──────────────────────────────────────────────────────────────
- */
 import { useState, useEffect } from 'react'
 import { Outlet, useParams, useOutletContext } from 'react-router-dom'
 import { Header } from '../Components/Header/Header'
@@ -31,49 +8,85 @@ import IconButton from '../Ui/IconButton'
 import { CreateTask } from '../Components/Tasks/CreateTask'
 import { ProjectDashboard } from '../Components/Projects/ProjectDashboard'
 import { Blog } from '../pages/Blog'
-import { useProject } from '../contexts/ProjectContext'
+import { useProject, MANUFACTURING_PHASE_LABELS } from '../contexts/ProjectContext'
+import { useAuth } from '../contexts/AuthContext'
 
 export function ProjectShell() {
   const { id } = useParams()
-  const { setCurrentProjectId } = useProject()
+  const { setCurrentProjectId, currentPhase, setCurrentPhase } = useProject()
+  const { user } = useAuth()
 
   const [showBlog, setShowBlog] = useState(false)
-  const [mainRef, setMainRef]   = useState(null)
-  const [scrollToUp, setShowScrollUp] = useState(false);
+  const [mainRef, setMainRef] = useState(null)
+  const [scrollToUp, setShowScrollUp] = useState(false)
 
-  // Sync URL param → ProjectContext whenever the project changes
+  // Demo: assume platform owner mode is always active during development
+  const isPlatformOwner = true   // replace with user.role check when RBAC is wired
+
+  // Sync URL param → ProjectContext
   useEffect(() => {
     if (id) setCurrentProjectId(id)
   }, [id, setCurrentProjectId])
 
-  
-
-  //scrolling up
+  // Scroll‑to‑top
   const scrollMainToTop = () =>
     mainRef?.scrollTo({ top: 0, behavior: 'smooth' })
 
-  // Attach scroll listener
   useEffect(() => {
     if (!mainRef) return
-
     const handleScroll = () => {
       setShowScrollUp(mainRef.scrollTop > 0)
     }
-
     mainRef.addEventListener('scroll', handleScroll)
     return () => mainRef.removeEventListener('scroll', handleScroll)
   }, [mainRef])
+
   return (
     <div className="h-screen w-full overflow-hidden flex flex-col">
       {/* ── Fixed header ──────────────────────────────────── */}
       <Header />
 
-      {/* ── Content row (full height minus header) ────────── */}
+      {/* ── Platform Owner Mode Banner + Product Line Selector ─────────────────── */}
+      {isPlatformOwner && (
+        <div
+          className="flex items-center justify-between px-4 py-1.5"
+          style={{
+            backgroundColor: 'var(--color-primary)',
+            color: 'var(--color-neutral-white)',
+            fontFamily: 'var(--font-mono)',
+            fontWeight: 700,
+            fontSize: '0.75rem',
+            marginTop: 'var(--header-h)',
+          }}
+        >
+          <span>🛡️ PLATFORM OWNER MODE</span>
+          <div className="flex items-center gap-2">
+            <label htmlFor="phase-select" className="text-xs font-normal">
+              Product Line / Phase:
+            </label>
+            <select
+              id="phase-select"
+              value={currentPhase}
+              onChange={(e) => setCurrentPhase(e.target.value)}
+              className="px-2 py-0.5 text-xs font-mono text-neutral-black bg-neutral-white border border-card-border rounded"
+            >
+             {Object.entries(MANUFACTURING_PHASE_LABELS).map(([phase, label]) => (
+                <option key={phase} value={phase}>
+                  {label}
+                </option>)
+             )}
+                         
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* ── Content row (full height minus header & banner) ────────── */}
       <div
         className="flex overflow-hidden w-full bg-[var(--color-accent-blue)]"
         style={{
-          height:    'calc(100vh - var(--header-h))',
-          marginTop: 'var(--header-h)',
+          height: `calc(100vh - var(--header-h) ${isPlatformOwner ? '- 2.5rem' : ''})`,
+          marginTop: isPlatformOwner ? '2.5rem' : 'var(--header-h)',
         }}
       >
         {/* ── Sidebar ───────────────────────────────────────── */}
@@ -86,8 +99,6 @@ export function ProjectShell() {
             bg-[#EEFBF4] overflow-hidden
           "
         >
-         
-
           <IconButton
             src={showBlog ? BlogIconFlipped : BlogIcon}
             alt={showBlog ? 'Hide blog' : 'Show blog'}
@@ -98,7 +109,7 @@ export function ProjectShell() {
           <ProjectDashboard />
         </aside>
 
-        {/* ── Blog panel (UI toggle, not a route) ───────────── */}
+        {/* ── Blog panel ────────────────────────────────────── */}
         {showBlog && (
           <aside
             className="
@@ -111,7 +122,7 @@ export function ProjectShell() {
           </aside>
         )}
 
-        {/* ── Main content — child routes render here ───────── */}
+        {/* ── Main content ──────────────────────────────────── */}
         <main
           ref={setMainRef}
           className="
@@ -129,10 +140,6 @@ export function ProjectShell() {
               />
             )}
           </div>
-          {/*
-           * outletContext passes blog state so child routes can
-           * react to the panel being open (e.g. Board reflow).
-           */}
           <Outlet context={{ showBlog, mainRef }} />
         </main>
       </div>
@@ -140,9 +147,4 @@ export function ProjectShell() {
   )
 }
 
-/**
- * Convenience hook for child routes that need to read shell state.
- * Usage inside Board.jsx (or any child):
- *   const { showBlog } = useProjectShell()
- */
 export const useProjectShell = () => useOutletContext()
