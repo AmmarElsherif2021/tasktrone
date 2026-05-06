@@ -1,9 +1,7 @@
 # I have finished version 0.0 of Tasktrone entities relationships diagram:
 ### ERD Diagram:
-    ``` mermaid
-        graph TD;
-        erDiagram
-
+``` mermaid
+    erDiagram
     users {
         uuid id PK
         text username UK
