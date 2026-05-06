@@ -1,0 +1,22 @@
+[
+  {
+    "schema_name": "public",
+    "function_name": "enforce_project_member_role_domain",
+    "kind": "f",
+    "identity_args": "",
+    "language": "plpgsql",
+    "volatility": "v",
+    "parallel_safety": "u",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.enforce_project_member_role_domain()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE\n  v_domain_type domain_type_enum;\nBEGIN\n  SELECT p.domain_type\n  INTO v_domain_type\n  FROM public.projects p\n  WHERE p.id = NEW.project_id;\n\n  IF v_domain_type IS NULL THEN\n    RAISE EXCEPTION 'Invalid project_id % for project_members', NEW.project_id;\n  END IF;\n\n  IF NEW.abstract_role = 'regulatory_permit' AND v_domain_type <> 'mep' THEN\n    RAISE EXCEPTION\n      'Role regulatory_permit is only allowed for MEP projects (project_id=% domain_type=%)',\n      NEW.project_id, v_domain_type;\n  END IF;\n\n  IF NEW.abstract_role = 'equipment_custodian' AND v_domain_type <> 'mfg' THEN\n    RAISE EXCEPTION\n      'Role equipment_custodian is only allowed for MFG projects (project_id=% domain_type=%)',\n      NEW.project_id, v_domain_type;\n  END IF;\n\n  RETURN NEW;\nEND;\n$function$\n"
+  },
+  {
+    "schema_name": "public",
+    "function_name": "update_updated_at_column",
+    "kind": "f",
+    "identity_args": "",
+    "language": "plpgsql",
+    "volatility": "v",
+    "parallel_safety": "u",
+    "function_definition": "CREATE OR REPLACE FUNCTION public.update_updated_at_column()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n  NEW.updated_at = NOW();\r\n  RETURN NEW;\r\nEND;\r\n$function$\n"
+  }
+]

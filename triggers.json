@@ -34,6 +34,28 @@
   },
   {
     "schema_name": "public",
+    "table_name": "organizations",
+    "trigger_name": "organizations_updated_at_trigger",
+    "enabled": "O",
+    "trigger_type_code": 19,
+    "level": "ROW",
+    "timing": "BEFORE",
+    "trigger_definition": "CREATE TRIGGER organizations_updated_at_trigger BEFORE UPDATE ON organizations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column()",
+    "trigger_function": "update_updated_at_column"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "project_members",
+    "trigger_name": "trg_enforce_project_member_role_domain",
+    "enabled": "O",
+    "trigger_type_code": 23,
+    "level": "ROW",
+    "timing": "BEFORE",
+    "trigger_definition": "CREATE TRIGGER trg_enforce_project_member_role_domain BEFORE INSERT OR UPDATE OF abstract_role ON project_members FOR EACH ROW EXECUTE FUNCTION enforce_project_member_role_domain()",
+    "trigger_function": "enforce_project_member_role_domain"
+  },
+  {
+    "schema_name": "public",
     "table_name": "projects",
     "trigger_name": "projects_updated_at_trigger",
     "enabled": "O",

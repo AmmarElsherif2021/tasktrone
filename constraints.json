@@ -121,7 +121,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "constraint_type": "f",
     "constraint_name": "manufacturing_metrics_measured_by_fkey",
     "validated": true,
@@ -129,7 +129,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "constraint_type": "f",
     "constraint_name": "manufacturing_metrics_project_id_fkey",
     "validated": true,
@@ -137,7 +137,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "constraint_type": "f",
     "constraint_name": "manufacturing_metrics_task_id_fkey",
     "validated": true,
@@ -145,9 +145,25 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "constraint_type": "p",
     "constraint_name": "manufacturing_metrics_pkey",
+    "validated": true,
+    "constraint_definition": "PRIMARY KEY (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "constraint_type": "f",
+    "constraint_name": "organizations_created_by_fkey",
+    "validated": true,
+    "constraint_definition": "FOREIGN KEY (created_by) REFERENCES users(id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "constraint_type": "p",
+    "constraint_name": "organizations_pkey",
     "validated": true,
     "constraint_definition": "PRIMARY KEY (id)"
   },
@@ -182,6 +198,14 @@
     "constraint_name": "projects_created_by_fkey",
     "validated": true,
     "constraint_definition": "FOREIGN KEY (created_by) REFERENCES users(id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "projects",
+    "constraint_type": "f",
+    "constraint_name": "projects_org_id_fkey",
+    "validated": true,
+    "constraint_definition": "FOREIGN KEY (org_id) REFERENCES organizations(id) ON DELETE RESTRICT"
   },
   {
     "schema_name": "public",

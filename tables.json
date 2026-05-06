@@ -277,17 +277,6 @@
   {
     "schema_name": "public",
     "table_name": "boards",
-    "ordinal_position": 5,
-    "column_name": "phase",
-    "data_type": "manufacturing_phase",
-    "not_null": true,
-    "identity_property": "",
-    "default_expr": null,
-    "column_comment": null
-  },
-  {
-    "schema_name": "public",
-    "table_name": "boards",
     "ordinal_position": 6,
     "column_name": "board_type",
     "data_type": "board_type_enum",
@@ -338,6 +327,17 @@
     "not_null": false,
     "identity_property": "",
     "default_expr": "now()",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "boards",
+    "ordinal_position": 11,
+    "column_name": "abstract_phase",
+    "data_type": "abstract_phase_enum",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": null,
     "column_comment": null
   },
   {
@@ -513,7 +513,7 @@
     "data_type": "equipment_status_enum",
     "not_null": false,
     "identity_property": "",
-    "default_expr": "'operational'::equipment_status_enum",
+    "default_expr": "'active'::equipment_status_enum",
     "column_comment": null
   },
   {
@@ -562,7 +562,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 1,
     "column_name": "id",
     "data_type": "uuid",
@@ -573,7 +573,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 2,
     "column_name": "project_id",
     "data_type": "uuid",
@@ -584,7 +584,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 3,
     "column_name": "task_id",
     "data_type": "uuid",
@@ -595,7 +595,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 4,
     "column_name": "metric_type",
     "data_type": "metric_type_enum",
@@ -606,7 +606,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 5,
     "column_name": "value",
     "data_type": "numeric(12,4)",
@@ -617,7 +617,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 6,
     "column_name": "unit",
     "data_type": "text",
@@ -628,7 +628,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 7,
     "column_name": "measurement_date",
     "data_type": "timestamp with time zone",
@@ -639,7 +639,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 8,
     "column_name": "measured_by",
     "data_type": "uuid",
@@ -650,7 +650,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 9,
     "column_name": "notes",
     "data_type": "text",
@@ -661,9 +661,119 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "ordinal_position": 10,
     "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "not_null": false,
+    "identity_property": "",
+    "default_expr": "now()",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": "gen_random_uuid()",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 2,
+    "column_name": "name",
+    "data_type": "text",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": null,
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 3,
+    "column_name": "domain_type",
+    "data_type": "domain_type_enum",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": "'mfg'::domain_type_enum",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 4,
+    "column_name": "phase_labels",
+    "data_type": "jsonb",
+    "not_null": false,
+    "identity_property": "",
+    "default_expr": null,
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 5,
+    "column_name": "role_labels",
+    "data_type": "jsonb",
+    "not_null": false,
+    "identity_property": "",
+    "default_expr": null,
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 6,
+    "column_name": "team_labels",
+    "data_type": "jsonb",
+    "not_null": false,
+    "identity_property": "",
+    "default_expr": null,
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 7,
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": "true",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 8,
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "not_null": false,
+    "identity_property": "",
+    "default_expr": null,
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 9,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "not_null": false,
+    "identity_property": "",
+    "default_expr": "now()",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "ordinal_position": 10,
+    "column_name": "updated_at",
     "data_type": "timestamp with time zone",
     "not_null": false,
     "identity_property": "",
@@ -695,23 +805,23 @@
   {
     "schema_name": "public",
     "table_name": "project_members",
-    "ordinal_position": 3,
-    "column_name": "role",
-    "data_type": "project_member_role_enum",
-    "not_null": false,
-    "identity_property": "",
-    "default_expr": null,
-    "column_comment": null
-  },
-  {
-    "schema_name": "public",
-    "table_name": "project_members",
     "ordinal_position": 4,
     "column_name": "joined_at",
     "data_type": "timestamp with time zone",
     "not_null": false,
     "identity_property": "",
     "default_expr": "now()",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "project_members",
+    "ordinal_position": 5,
+    "column_name": "abstract_role",
+    "data_type": "project_abstract_role_enum",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": null,
     "column_comment": null
   },
   {
@@ -794,17 +904,6 @@
   {
     "schema_name": "public",
     "table_name": "projects",
-    "ordinal_position": 9,
-    "column_name": "current_phase",
-    "data_type": "manufacturing_phase",
-    "not_null": false,
-    "identity_property": "",
-    "default_expr": "'concept_design'::manufacturing_phase",
-    "column_comment": null
-  },
-  {
-    "schema_name": "public",
-    "table_name": "projects",
     "ordinal_position": 10,
     "column_name": "priority",
     "data_type": "priority_level",
@@ -877,6 +976,50 @@
     "not_null": false,
     "identity_property": "",
     "default_expr": "now()",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "projects",
+    "ordinal_position": 17,
+    "column_name": "current_abstract_phase",
+    "data_type": "abstract_phase_enum",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": "'pending'::abstract_phase_enum",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "projects",
+    "ordinal_position": 18,
+    "column_name": "domain_type",
+    "data_type": "domain_type_enum",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": "'mfg'::domain_type_enum",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "projects",
+    "ordinal_position": 19,
+    "column_name": "org_id",
+    "data_type": "uuid",
+    "not_null": false,
+    "identity_property": "",
+    "default_expr": null,
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "projects",
+    "ordinal_position": 20,
+    "column_name": "phase_config",
+    "data_type": "jsonb",
+    "not_null": false,
+    "identity_property": "",
+    "default_expr": null,
     "column_comment": null
   },
   {
@@ -1597,17 +1740,6 @@
   {
     "schema_name": "public",
     "table_name": "tasks",
-    "ordinal_position": 9,
-    "column_name": "phase",
-    "data_type": "manufacturing_phase",
-    "not_null": true,
-    "identity_property": "",
-    "default_expr": null,
-    "column_comment": null
-  },
-  {
-    "schema_name": "public",
-    "table_name": "tasks",
     "ordinal_position": 10,
     "column_name": "status",
     "data_type": "task_status",
@@ -1772,6 +1904,17 @@
   },
   {
     "schema_name": "public",
+    "table_name": "tasks",
+    "ordinal_position": 25,
+    "column_name": "abstract_phase",
+    "data_type": "abstract_phase_enum",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": null,
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
     "table_name": "users",
     "ordinal_position": 1,
     "column_name": "id",
@@ -1809,28 +1952,6 @@
     "ordinal_position": 4,
     "column_name": "full_name",
     "data_type": "text",
-    "not_null": true,
-    "identity_property": "",
-    "default_expr": null,
-    "column_comment": null
-  },
-  {
-    "schema_name": "public",
-    "table_name": "users",
-    "ordinal_position": 5,
-    "column_name": "role",
-    "data_type": "user_role",
-    "not_null": true,
-    "identity_property": "",
-    "default_expr": null,
-    "column_comment": null
-  },
-  {
-    "schema_name": "public",
-    "table_name": "users",
-    "ordinal_position": 6,
-    "column_name": "team",
-    "data_type": "team_type",
     "not_null": true,
     "identity_property": "",
     "default_expr": null,
@@ -1889,6 +2010,39 @@
     "not_null": false,
     "identity_property": "",
     "default_expr": "now()",
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "users",
+    "ordinal_position": 12,
+    "column_name": "abstract_role",
+    "data_type": "abstract_role_enum",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": null,
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "users",
+    "ordinal_position": 13,
+    "column_name": "abstract_team",
+    "data_type": "abstract_team_enum",
+    "not_null": true,
+    "identity_property": "",
+    "default_expr": null,
+    "column_comment": null
+  },
+  {
+    "schema_name": "public",
+    "table_name": "users",
+    "ordinal_position": 14,
+    "column_name": "job_title",
+    "data_type": "text",
+    "not_null": false,
+    "identity_property": "",
+    "default_expr": null,
     "column_comment": null
   }
 ]

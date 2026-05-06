@@ -1,0 +1,389 @@
+[
+  {
+    "schema_name": "public",
+    "table_name": "attachments",
+    "index_name": "attachments_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX attachments_pkey ON public.attachments USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "attachments",
+    "index_name": "idx_attachments_requirement_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_attachments_requirement_id ON public.attachments USING btree (requirement_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "attachments",
+    "index_name": "idx_attachments_task_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_attachments_task_id ON public.attachments USING btree (task_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "board_columns",
+    "index_name": "board_columns_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX board_columns_pkey ON public.board_columns USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "board_columns",
+    "index_name": "idx_board_columns_board_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_board_columns_board_id ON public.board_columns USING btree (board_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "boards",
+    "index_name": "boards_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX boards_pkey ON public.boards USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "boards",
+    "index_name": "idx_boards_abstract_phase",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_boards_abstract_phase ON public.boards USING btree (abstract_phase, project_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "boards",
+    "index_name": "idx_boards_project_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_boards_project_id ON public.boards USING btree (project_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "comments",
+    "index_name": "comments_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX comments_pkey ON public.comments USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "comments",
+    "index_name": "idx_comments_project_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_comments_project_id ON public.comments USING btree (project_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "comments",
+    "index_name": "idx_comments_task_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_comments_task_id ON public.comments USING btree (task_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "equipment",
+    "index_name": "equipment_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX equipment_pkey ON public.equipment USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "equipment",
+    "index_name": "equipment_serial_number_key",
+    "is_unique": true,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX equipment_serial_number_key ON public.equipment USING btree (serial_number)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "operational_metrics",
+    "index_name": "idx_manufacturing_metrics_project_task",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_manufacturing_metrics_project_task ON public.operational_metrics USING btree (project_id, task_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "operational_metrics",
+    "index_name": "manufacturing_metrics_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX manufacturing_metrics_pkey ON public.operational_metrics USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "index_name": "organizations_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX organizations_pkey ON public.organizations USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "project_members",
+    "index_name": "idx_project_members_user_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_project_members_user_id ON public.project_members USING btree (user_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "project_members",
+    "index_name": "project_members_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX project_members_pkey ON public.project_members USING btree (project_id, user_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "projects",
+    "index_name": "projects_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX projects_pkey ON public.projects USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "quality_checks",
+    "index_name": "idx_quality_checks_task_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_quality_checks_task_id ON public.quality_checks USING btree (task_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "quality_checks",
+    "index_name": "quality_checks_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX quality_checks_pkey ON public.quality_checks USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "swimlanes",
+    "index_name": "swimlanes_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX swimlanes_pkey ON public.swimlanes USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_dependencies",
+    "index_name": "task_dependencies_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX task_dependencies_pkey ON public.task_dependencies USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_dependencies",
+    "index_name": "task_dependencies_predecessor_task_id_successor_task_id_key",
+    "is_unique": true,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX task_dependencies_predecessor_task_id_successor_task_id_key ON public.task_dependencies USING btree (predecessor_task_id, successor_task_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_equipment",
+    "index_name": "idx_task_equipment_task_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_task_equipment_task_id ON public.task_equipment USING btree (task_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_equipment",
+    "index_name": "task_equipment_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX task_equipment_pkey ON public.task_equipment USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_history",
+    "index_name": "idx_task_history_task_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_task_history_task_id ON public.task_history USING btree (task_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_history",
+    "index_name": "task_history_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX task_history_pkey ON public.task_history USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_members",
+    "index_name": "idx_task_members_user_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_task_members_user_id ON public.task_members USING btree (user_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_members",
+    "index_name": "task_members_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX task_members_pkey ON public.task_members USING btree (task_id, user_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_requirements",
+    "index_name": "task_requirements_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX task_requirements_pkey ON public.task_requirements USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_swimlanes",
+    "index_name": "idx_task_swimlanes_swimlane_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_task_swimlanes_swimlane_id ON public.task_swimlanes USING btree (swimlane_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "task_swimlanes",
+    "index_name": "task_swimlanes_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX task_swimlanes_pkey ON public.task_swimlanes USING btree (task_id, swimlane_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "tasks",
+    "index_name": "idx_tasks_abstract_phase",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_tasks_abstract_phase ON public.tasks USING btree (abstract_phase, project_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "tasks",
+    "index_name": "idx_tasks_assigned_to",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_tasks_assigned_to ON public.tasks USING btree (assigned_to)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "tasks",
+    "index_name": "idx_tasks_board_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_tasks_board_id ON public.tasks USING btree (board_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "tasks",
+    "index_name": "idx_tasks_due_date",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_tasks_due_date ON public.tasks USING btree (due_date)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "tasks",
+    "index_name": "idx_tasks_project_id",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_tasks_project_id ON public.tasks USING btree (project_id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "tasks",
+    "index_name": "idx_tasks_status",
+    "is_unique": false,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE INDEX idx_tasks_status ON public.tasks USING btree (status)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "tasks",
+    "index_name": "tasks_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX tasks_pkey ON public.tasks USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "users",
+    "index_name": "users_email_key",
+    "is_unique": true,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "users",
+    "index_name": "users_pkey",
+    "is_unique": true,
+    "is_primary": true,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "users",
+    "index_name": "users_username_key",
+    "is_unique": true,
+    "is_primary": false,
+    "is_valid": true,
+    "index_definition": "CREATE UNIQUE INDEX users_username_key ON public.users USING btree (username)"
+  }
+]

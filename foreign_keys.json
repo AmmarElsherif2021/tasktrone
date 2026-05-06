@@ -100,7 +100,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "fk_name": "manufacturing_metrics_measured_by_fkey",
     "fk_column": "measured_by",
     "referenced_schema": "public",
@@ -111,7 +111,7 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "fk_name": "manufacturing_metrics_project_id_fkey",
     "fk_column": "project_id",
     "referenced_schema": "public",
@@ -122,11 +122,22 @@
   },
   {
     "schema_name": "public",
-    "table_name": "manufacturing_metrics",
+    "table_name": "operational_metrics",
     "fk_name": "manufacturing_metrics_task_id_fkey",
     "fk_column": "task_id",
     "referenced_schema": "public",
     "referenced_table": "tasks",
+    "referenced_column": "id",
+    "on_delete_action_code": "a",
+    "on_update_action_code": "a"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "organizations",
+    "fk_name": "organizations_created_by_fkey",
+    "fk_column": "created_by",
+    "referenced_schema": "public",
+    "referenced_table": "users",
     "referenced_column": "id",
     "on_delete_action_code": "a",
     "on_update_action_code": "a"
@@ -162,6 +173,17 @@
     "referenced_table": "users",
     "referenced_column": "id",
     "on_delete_action_code": "a",
+    "on_update_action_code": "a"
+  },
+  {
+    "schema_name": "public",
+    "table_name": "projects",
+    "fk_name": "projects_org_id_fkey",
+    "fk_column": "org_id",
+    "referenced_schema": "public",
+    "referenced_table": "organizations",
+    "referenced_column": "id",
+    "on_delete_action_code": "r",
     "on_update_action_code": "a"
   },
   {
