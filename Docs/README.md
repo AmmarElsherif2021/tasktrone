@@ -1,213 +1,365 @@
-﻿# Tasktrone
+﻿# Tasktrone — Business & Domain Model
 
-> **AI-powered workflow & analytics platform for industrial operations.**
+> **A comprehensive blueprint of the industrial workflow platform bridging manufacturing execution and data intelligence.**
 
-Tasktrone is a production-grade task management and process intelligence system purpose-built for high-complexity operational environments — starting with **mechanical assembly manufacturing** and extending to **construction & MEP** workflows. It goes beyond kanban by combining structured task orchestration, domain-aware role management, equipment tracking, quality control, and a data layer designed for AI and analytics.
-
----
-
-## Why Tasktrone
-
-Most workflow tools are built for software teams. Tasktrone is built for the factory floor — where tasks span multiple engineering disciplines, documents carry regulatory weight, machines are first-class entities, and a missed dependency can halt an entire production line.
-
-**Key differentiators:**
-
-- Domain-specific task model (manufacturing phases, QC checks, equipment usage, BOM-linked workflows)
-- Multi-level access control (system roles + project roles + task roles)
-- Full audit trail via immutable `task_history` — every field change is recorded
-- Rich dependency graph (finish-to-start, lag time) and subtask hierarchies
-- Metrics schema designed for ETL pipelines and analytics dashboards
-- Architecture prepared for AI integration (LLM task generation, document parsing, workflow assistant)
+This document defines the **domain model**, **role framework**, **data architecture**, and **design principles** that underpin Tasktrone. It is written for architects, developers, and domain experts who need to understand *why* the system is shaped the way it is — not just *how* it works.
 
 ---
 
-## Use Cases
+## Table of Contents
 
-### Manufacturing — Mechanical Assembly
-
-Manage the full machine lifecycle from concept design through shipping and maintenance. Teams across design, CNC programming, machining, QC, inventory, and logistics collaborate on a shared task graph, with each role receiving scoped views, file requirements, and phase-appropriate workflows.
-
-### Construction & MEP (Mechanical, Electrical, Plumbing)
-
-Apply the same phase-driven task model to MEP project delivery — from design coordination and permit documentation through installation, commissioning, and handover. The domain model maps cleanly: phases become project stages, manufacturing roles map to trade disciplines, and QC checks become inspection milestones.
-
----
-
-## Core Features
-
-### Task Management
-
-Every task in Tasktrone is a rich domain object — not just a card with a title.
-
-| Capability | Detail |
-|---|---|
-| Unique task numbering | Human-readable `task_number` per task |
-| Phase tagging | Tasks are scoped to a `manufacturing_phase` enum |
-| Priority & status | `high / medium / low` priority; configurable status lifecycle |
-| Time tracking | `estimated_hours`, `actual_hours`, `start_date`, `due_date`, `completion_date` |
-| Cycle & lead time | `cycle_time` and `lead_time` stored per task for analytics |
-| Multi-member assignment | Primary assignee + additional members via `task_members`, each with a scoped `task_assignment_role` |
-| Subtask hierarchies | Self-referencing `parent_task_id` for unlimited depth |
-| Task requirements | Per-task checklist of mandatory/optional deliverables with file-type enforcement |
-| Dependency graph | `task_dependencies` table: predecessor/successor pairs with `dependency_type` and `lag_time` |
-| Audit trail | `task_history` logs every field change (old value, new value, who, when) |
-| File attachments | Versioned attachments linkable to a task, project, or specific requirement |
-
-**Task categories:** Design · Manufacturing operations · Quality control · Maintenance · Inventory · Logistics
-
-### Manufacturing Phases
-
-Each project tracks its active `current_phase`. Boards and tasks are scoped to a phase, enabling phase-based filtering, reporting, and handoff workflows.
-
-| # | Phase | Primary Teams |
-|---|---|---|
-| 1 | Concept & Design | Design Engineers, CAD Technicians |
-| 2 | Prototyping | Manufacturing Engineers, CNC Programmers, Machinists, QC Inspectors |
-| 3 | Pre-Production Planning | Production Planners, Inventory Managers, Supervisors |
-| 4 | Production | Machine Operators, Supervisors, QC Inspectors |
-| 5 | Quality Control | QC Inspectors, Metrology Engineers |
-| 6 | Assembly & Testing | Assembly Technicians, Test Engineers |
-| 7 | Packaging & Shipping | Logistics Coordinators, Inventory Managers |
-| 8 | Maintenance & Support | Maintenance Technicians, Support Teams |
-
-### Kanban Boards
-
-Boards are phase-scoped visual workspaces with production-grade controls:
-
-- **WIP limits** enforced at both board level and individual column level
-- **Swimlanes** for team/category separation (custom JSONB criteria, color, position)
-- **Standard column types**: `todo → in_progress → review → done` + custom columns
-- **Column ordering** via explicit `position` field
-- **Drag-and-drop card placement** with `position` tracking within columns
-- **Comments** with `@mention` support (stored as `mentioned_users uuid[]`)
-
-### User Roles & Teams
-
-Role assignment happens at three independent levels:
-
-| Level | Table | Enum |
-|---|---|---|
-| System-wide role | `users.role` | `user_role` |
-| Team membership | `users.team` | `team_type` |
-| Project-level role | `project_members.role` | `project_member_role` |
-| Task-level role | `task_members.role` | `task_assignment_role` |
-
-**Teams:** Design · Manufacturing · Quality Control · Inventory · Planning · Maintenance · HR · Logistics
-
-### Equipment & Quality Tracking
-
-Equipment is a first-class entity in Tasktrone — not an afterthought.
-
-**Equipment registry (`equipment` table):** Tracks serial number, operational status, last/next maintenance timestamps.
-
-**Task-equipment usage (`task_equipment`):** Per-task equipment logs with `start_time`, `end_time`, `setup_time`, `run_time` — the raw data for utilization analytics.
-
-**Quality checks (`quality_checks`):** Linked to tasks with `check_type`, `status`, structured `measurements` (JSONB), and `defects_found` count.
-
-### Data & Metrics Layer
-
-The `manufacturing_metrics` table stores timestamped numeric measurements (with unit) linked to projects and/or tasks. `metric_type` is enumerated, making this table the foundation for an ETL pipeline or analytics dashboard.
-
-**Analytics already tracked:**
-- Cycle time and lead time per task
-- WIP per board and column
-- Defect counts and QC check outcomes
-- Equipment run time and setup time
-- Estimated vs. actual hours
-
-### Projects
-
-Projects are the top-level container scoping boards, tasks, members, and metrics. Each project tracks customer, budget, current phase, priority, status, project manager, and full timestamps.
-
-### Security & Access Control
-
-- Row Level Security (RLS) on `users` table — users can read all profiles but only modify their own record
-- Project and task access governed by membership (not just role)
-- Versioned file attachments with `is_latest` flag for controlled document management
-
-### Automation
-
-`updated_at` auto-update triggers are active on: `users`, `projects`, `tasks`, `boards`, `comments`, `equipment`. Append-only tables (history, metrics, junction tables) are intentionally trigger-free.
+1. [Platform Overview](#platform-overview)  
+2. [Core Domain Concepts](#core-domain-concepts)  
+   - [Layers of the Organization](#layers-of-the-organization)  
+   - [Workflow Phases: Abstract & Concrete](#workflow-phases-abstract--concrete)  
+   - [Task Lifecycle & Dependencies](#task-lifecycle--dependencies)  
+3. [Role-Based Access Control (RBAC)](#role-based-access-control-rbac)  
+   - [Abstract Roles & Real-World Mapping](#abstract-roles--real-world-mapping)  
+   - [Role Authorities & Responsibilities](#role-authorities--responsibilities)  
+   - [Role Interaction Matrix](#role-interaction-matrix)  
+4. [Data Model & Entity Relationships](#data-model--entity-relationships)  
+   - [Entity-Relationship Diagram](#entity-relationship-diagram)  
+   - [Key Relationships: Aggregation, Composition & Inheritance](#key-relationships-aggregation-composition--inheritance)  
+   - [Audit Trail & Immutable History](#audit-trail--immutable-history)  
+5. [Data Flow Architecture](#data-flow-architecture)  
+   - [Level 0: Context Diagram](#level-0-context-diagram)  
+   - [Level 1: System Processes by Role](#level-1-system-processes-by-role)  
+6. [Architectural Principles](#architectural-principles)  
+   - [Abstraction, Encapsulation, Inheritance, Polymorphism](#abstraction-encapsulation-inheritance-polymorphism)  
+7. [Domain Glossary & Mappings](#domain-glossary--mappings)
 
 ---
 
-## System Architecture
+## Platform Overview
+
+Tasktrone is a production‑grade task management and process intelligence system built for **high‑complexity industrial operations** — starting with **mechanical assembly manufacturing** and extending to **construction & MEP (Mechanical, Electrical, Plumbing)** workflows.  
+
+It sits at the intersection of **physical operations** (making and building things) and **digital systems** (managing the data and intelligence).  
+
+The platform treats tasks, equipment, quality checks, and dependencies as first‑class domain objects, not just generic cards. A multi‑layered RBAC model — enforced through database‑level Row Level Security (RLS) — ensures each role sees only what they need, while an immutable audit trail captures every significant change.
+
+---
+
+## Core Domain Concepts
+
+### Layers of the Organization
+
+The domain is structured hierarchically, providing clear boundaries for data, configuration, and authority:
+
+| Layer | Name | Purpose |
+|-------|------|---------|
+| 1 | **Organization** | Top‑level tenant representing a company. Houses all projects, users, billing, and global configuration. The **Platform Owner** operates at this layer. |
+| 2 | **Project** | A bounded manufacturing engagement (e.g., a product line launch, a client order). Contains boards, tasks, members, and metrics. The **Project Owner** governs here. |
+| 3 | **Product Line** | A recurring production type or SKU category within a project. Provides reusable templates for board structure, WIP limits, and phase definitions. |
+
+This nesting ensures that data, workflows, and roles are properly scoped — a user’s access to a task always flows through `Organization` → `Project` → `Task`.
+
+---
+
+### Workflow Phases: Abstract & Concrete
+
+Tasktrone uses a **dual‑phase model**:
+
+- **Abstract Phases** define the high‑level status of any work item, independent of industry. The platform enforces transition rules, WIP limits, and dependency blocking based on these abstract states.
+- **Concrete Phases** are tenant‑configurable labels that map onto the abstract phases, giving each industry its familiar terminology.
+
+#### Phase Model Architecture
+
+Tasktrone does **not** contain a hardcoded `manufacturing_phase` or `construction_phase` enum.
+Instead, every phase‑scoped entity (`projects`, `tasks`, `boards`) references a value from the global **abstract phase enum**:
+
+| Abstract Phase | Enum Value (Database) |
+|----------------|-----------------------|
+| Pending        | `pending`             |
+| Active         | `active`              |
+| Review         | `review`              |
+| Rework         | `rework`              |
+| Approved       | `approved`            |
+| Blocked        | `blocked`             |
+| Done           | `done`                |
+
+**Tenant‑specific labels** (e.g., “Welding” for MFG, “Rough‑in” for MEP) are stored as a JSONB mapping in the `organizations` table under the key `phase_labels`. The UI reads this mapping to display the localised phase name, while every backend rule, RLS policy, and analytics query operates purely on the abstract enum values.
+
+**Example:**  
+For an MFG tenant, `phase_labels['active'] = 'Production / Assembly'`.  
+For an MEP tenant, `phase_labels['active'] = 'Installation / Rough‑in'`.  
+The database column `tasks.abstract_phase` always contains the string `'active'`.
+
+This design guarantees that the entire platform – including AI layer, ETL pipelines, and job queues – remains completely independent of any industry‑specific vocabulary.
+#### Abstract Phase Definitions
+
+| Abstract Phase | Meaning | Typical Entry | Exit Condition |
+|----------------|---------|---------------|----------------|
+| **Pending** | Defined but not ready; waiting for prerequisites (materials, permits, approvals) | Created by authorized role | All dependencies resolved, prerequisites satisfied |
+| **Active** | Work in progress; resources allocated | Moved from Pending or Blocked | Worker marks progress complete, or review initiated |
+| **Review / Inspection** | Output requires verification against standards | Moved from Active | Pass → next phase; Fail → Rework |
+| **Rework** | Failed inspection, requires correction | Failed from Review / Inspection | Corrections made; moves back to Review |
+| **Approved** | Passed all checks, accepted | Passed Review / Inspection | Terminal for quality lifecycle |
+| **Blocked** | Cannot proceed due to external issue (material, permit, equipment down) | Manual flag or automatic dependency failure | Issue resolved → returns to previous abstract phase |
+| **Done / Closed** | Complete, no further action | After Approved and all handoffs done | Archival |
+
+#### Concrete Phase Mapping
+
+| Abstract Phase | Manufacturing (MFG) Concrete Phase | Construction/MEP Concrete Phase |
+|----------------|-----------------------------------|--------------------------------|
+| Pending | Raw Materials / Pending | Permit Application / Procurement |
+| Active | Production / Assembly | Installation / Rough‑in |
+| Review / Inspection | Quality Check / Inspection | AHJ Inspection / Commissioning Test |
+| Rework | Rework (correction) | Punch List / Non‑compliance rework |
+| Approved | Approved / Ready for Packaging | Inspection Passed / Ready for Handover |
+| Blocked | Blocked / On Hold | Blocked (stop work order / permit denial) |
+| Done / Closed | Shipped / Completed | Closeout / Certificate of Occupancy |
+
+**Platform behavior** — WIP limits, dependency blocking, audit logging, quality gates, and escalation rules — is implemented **once** on the abstract phases. Only the displayed labels differ per tenant.
+
+---
+
+### Task Lifecycle & Dependencies
+
+Every task is a rich domain object with:
+
+- **Task categories**: Abstract domain‑agnostic category (see table above), mapped to tenant‑specific labels at the UI level.
+- **Priority & status**: High/Medium/Low priority; configurable status lifecycle  
+- **Time tracking**: `estimated_hours`, `actual_hours`, `start_date`, `due_date`, `completion_date`  
+- **Cycle & lead time**: Calculated metrics stored per task for analytics  
+- **Subtask hierarchies**: Self‑referencing `parent_task_id`  
+- **Requirements**: Per‑task checklist of mandatory deliverables, enforced file‑type requirements  
+- **Dependency graph**: Predecessor/successor pairs with dependency type and lag time  
+
+### Abstract Task Categories
+
+Task categories are the third pillar of Tasktrone’s domain‑agnostic design, alongside abstract phases and abstract roles.  
+A task category defines the *nature of the work*, independent of industry. Concrete labels differ by vertical, but the platform rules — which roles can create them, which phases they appear in, and which metrics they feed — are defined once on the abstract category.
+
+| Abstract Task Category | Mfg Concrete Categories | MEP Concrete Categories |
+|------------------------|--------------------------|--------------------------|
+| **Design_Artifact** | CAD Models, Design Specifications, BOM | BIM Models, MEP Drawings, Submittal Logs |
+| **Production_Execution** | Welding, Assembly, CNC Programming | Rough‑in, Installation, Termination |
+| **Quality_Verification** | Dimensional Inspection, Weld Check, Pressure Test | Commissioning Test, AHJ Walk‑through, Continuity Test |
+| **Material_Handling** | Pick & Kit, Raw Material Delivery, Inventory Reorder | Procurement, Material Submittal Approval, Equipment Rental |
+| **Equipment_Service** | Preventive Maintenance, Calibration, Repair | Facility Equipment Check, Generator Test (post‑handover) |
+| **Regulatory_Compliance** | — (not in MFG) | Permit Application, Inspection Scheduling, Code Compliance |
+| **Logistics_Handoff** | Shipping, Receiving, Packaging | Closeout Documentation, Owner Training, Certificate of Occupancy |
+
+**How this aligns with roles and phases:**
+
+- **Roles** are scoped to create and manage specific abstract categories (e.g., Design Lead creates `Design_Artifact` tasks; Quality Gatekeeper works on `Quality_Verification` tasks).
+- **Phases** naturally contain certain abstract categories (e.g., `Active` phase holds `Production_Execution` tasks, `Review / Inspection` phase holds `Quality_Verification` tasks).
+- **Derived metrics** are calculated across abstract categories (e.g., “Design cycle time” measures only `Design_Artifact` tasks), not hard‑coded to a vertical.
+
+----
+**Example: Electric Scooter Assembly**  
+A task “Weld frame” (Active) cannot start until “Raw steel tubing delivered” (Pending → Done). Once welded, it moves to “Inspect weld” (Review). A failure sends it to “Rework weld” (Rework). The **dependency graph** and **lag time** (e.g., paint must dry 4 hours) ensure the physical constraints of the factory are respected digitally.
+
+---
+
+## Role-Based Access Control (RBAC)
+
+Tasktrone’s permission model is **abstract by design** — roles define what a person can *see and do*, not their job title. The same code, database schema, and RLS policies serve both Manufacturing and Construction/MEP tenants. Only enum labels and concrete phases change.
+
+### Abstract Roles & Real-World Mapping
+
+| Abstract Role | Manufacturing Job Titles | Construction/MEP Job Titles |
+|---------------|--------------------------|-----------------------------|
+| Platform Owner | System Administrator | System Administrator |
+| Project Owner | Project Manager | Project Manager / Owner Rep |
+| Design Lead | Design Engineer, CAD Technician | MEP Design Coordinator, BIM Technician |
+| Planner / Scheduler | Production Planner, Supervisor | Construction Manager, Site Superintendent |
+| Execution Worker | Machinist, CNC Programmer, Welder | Electrician, Plumber, HVAC Tech |
+| Quality Gatekeeper | QC Inspector, Metrology Engineer | Commissioning Engineer, AHJ Inspector |
+| Logistics / Handoff | Inventory Manager, Logistics Coordinator | Procurement Lead, Closeout Coordinator |
+| Maintenance | Maintenance Technician | Facility Manager (post‑handover) |
+| Regulatory / Permit | — (not in MFG MVP) | Permit Expediter, AHJ Liaison |
+| Equipment Custodian | Equipment / Machine Owner | — (assets tracked differently) |
+
+> The **Regulatory / Permit** role is MEP‑only (post‑MVP).  
+> The **Equipment Custodian** role is MFG‑only.
+
+---
+
+### Role Authorities & Responsibilities
+
+*(Summary — full definitions appear in the project’s role specification.)*
+
+- **Platform Owner**: Supreme authority — tenant lifecycle, system‑wide RBAC, global enums, security compliance, audit oversight.  
+- **Project Owner**: Full control over a single project — membership, board/workflow design, task oversight, metrics, equipment linking.  
+- **Design Lead**: Owns design‑phase tasks, review/approval of deliverables, design resource assignment.  
+- **Planner / Scheduler**: Master schedule, dependency management, WIP limits, capacity planning.  
+- **Execution Worker**: Executes assigned tasks — logs time, updates status, reports defects.  
+- **Quality Gatekeeper**: Creates and judges QC checks; pass/fail authority, defect tracking, standards enforcement.  
+- **Logistics / Handoff**: Inventory tasks, stock linking, material dependency gatekeeping, BOM management.  
+- **Maintenance**: Preventive/corrective tasks, equipment downtime marking, utilization analysis.  
+- **Regulatory / Permit** *(MEP)*: Permit documents, AHJ inspection milestones, code compliance checklists.  
+- **Equipment Custodian** *(MFG)*: Equipment registry, assignment, utilization tracking, calibration coordination.
+
+Each role interacts with the domain objects according to strict access boundaries — enforced by RBAC at the application layer and RLS at the database layer.
+
+---
+
+### Role Interaction Matrix
+
+| Role | Interaction with |
+|------|------------------|
+| Platform Owner | Oversees all; delegates tenant management to Project Owners |
+| Project Owner | Coordinates with Design Lead, Planner, QC, Logistics; escalates to Platform Owner |
+| Design Lead | Hands off to Manufacturing; receives feedback from QC |
+| Planner / Scheduler | Works with all team leads to define schedules and dependencies |
+| Execution Worker | Reports to task leads (Design Lead, Maintenance, etc.); flags defects to QC |
+| Quality Gatekeeper | Judges work from Execution Workers; reports to Project Owner |
+| Logistics / Handoff | Supports all teams with materials; escalates stockouts |
+| Maintenance | Services equipment for all roles; alerts Planner of downtime |
+| Regulatory / Permit | Interacts with external authorities; provides compliance evidence |
+
+---
+
+## Data Model & Entity Relationships
+
+### Entity-Relationship Diagram
+
+The core entities and their relationships are summarized below (see the full ERD for details):
+
+```mermaid
+erDiagram
+    organizations ||--o{ projects : "org_id"
+    users ||--o{ organizations : "created_by"
+    users ||--o{ projects : "created_by / project_manager"
+    projects ||--o{ boards : "project_id"
+    boards ||--o{ board_columns : "board_id"
+    boards ||--o{ swimlanes : "board_id"
+    projects ||--o{ tasks : "project_id"
+    tasks ||--o{ tasks : "parent_task_id"
+    users ||--o{ tasks : "created_by / assigned_to"
+    projects ||--o{ project_members : "project_id"
+    users ||--o{ project_members : "user_id"
+    tasks ||--o{ task_members : "task_id"
+    users ||--o{ task_members : "user_id"
+    tasks ||--o{ task_dependencies : "predecessor / successor"
+    tasks ||--o{ task_requirements : "task_id"
+    tasks ||--o{ task_equipment : "task_id"
+    equipment ||--o{ task_equipment : "equipment_id"
+    tasks ||--o{ task_history : "task_id"
+    users ||--o{ task_history : "changed_by"
+    tasks ||--o{ quality_checks : "task_id"
+    users ||--o{ quality_checks : "inspector_id"
+    projects ||--o{ operational_metrics : "project_id"
+    tasks ||--o{ operational_metrics : "task_id"
+    tasks ||--o{ attachments : "task_id"
+    projects ||--o{ attachments : "project_id"
+    task_requirements ||--o{ attachments : "requirement_id"
+    users ||--o{ attachments : "uploaded_by"
+    tasks ||--o{ comments : "task_id"
+    projects ||--o{ comments : "project_id"
+    users ||--o{ comments : "author_id"
+```
+
+Key design decisions:
+
+- **Multi‑membership**: A user belongs to a project through `project_members` and can have additional task‑scoped responsibilities via `task_members`.
+- **Equipment as a first‑class entity**: The `equipment` table holds serial numbers, status, and maintenance dates; its usage is tracked per task in `task_equipment`.
+- **Immutable history**: `task_history` records every field change, providing a forensic audit trail.
+- **Flexible requirements**: `task_requirements` define mandatory/optional checklists with file‑type enforcement, enabling phase‑gate compliance.
+
+### Key Relationships: Aggregation, Composition & Inheritance
+
+The domain model uses standard OOP relationship semantics, implemented at both the code and database levels:
+
+- **Dependency**: The analytics module depends on the `Task` structure; a change to `Task` fields may break derived metric calculations.
+- **Association**: A `Board` knows about its parent `Project`, but neither owns the other.
+- **Aggregation**: A `Project` aggregates `User` objects as members; users exist independently.
+- **Composition**: `Task` owns its `SubTask` and `TaskHistory` entries; deleting a task cascades to its subtasks and history.
+- **Inheritance**: `QualityCheckTask`, `MaintenanceTask`, and `LogisticsTask` all extend a base `Task` class, allowing polymorphic processing by job queues and AI modules.
+- **Implementation**: The `INotifiable` interface is implemented by `EmailNotifier`, `SlackNotifier`, etc., enabling pluggable notifications.
+
+### Audit Trail & Immutable History
+
+Tasktrone captures **every change** to a task as an immutable event:
 
 ```
-Frontend (React)
-    └── Drag-and-drop board UI
-    └── Phase-aware task views
-    └── Role-scoped dashboards
-
-Backend (Node.js)
-    └── REST API (tasks, boards, projects, users)
-    └── Auth middleware (role enforcement)
-    └── File upload handling
-
-Database (PostgreSQL / Supabase)
-    └── Normalized schema with enums for domain integrity
-    └── RLS policies for data isolation
-    └── Trigger-managed audit fields
-
-[Planned] AI Layer
-    └── Task generator (subtasks, roles, effort from description)
-    └── Document parser (PDF → structured JSON)
-    └── Workflow assistant ("What's blocking production?")
-
-[Planned] Data Pipeline
-    └── Event log table (task lifecycle events)
-    └── ETL (Python/pandas) → analytics tables
-    └── Metrics dashboard (cycle time, WIP trends, bottlenecks)
+Monday 09:05: Task status changed from 'Design' to 'Welding' by Alice.
+Monday 09:06: WIP limit violated – column 'Welding' now has 4 items (limit 3).
+Monday 14:22: QC check #89 marked 'Fail' by Inspector Bob.
 ```
 
----
-
-## Schema Status
-
-> ⚠️ **The database schema is currently under active refactoring.** The tables, enums, and relationships described in this document reflect the intended production design. Some fields or tables may be in transition.
-
-**Planned schema extensions:**
-
-- `organizations` table — multi-tenant support; users and boards scoped per org
-- `events` table — granular event log for task lifecycle (created, moved, completed) feeding the analytics pipeline
-- `task_metrics` table — derived metrics (cycle time, lead time) computed from events
-- Background job support (BullMQ + Redis) for AI inference and ETL jobs
-- Expanded `project_members` roles to support construction/MEP org structures
+This audit trail (`task_history`) is append‑only and serves both operational forensics and compliance reporting (e.g., ISO 27001, SOC 2). Combined with structured metrics, it enables continuous improvement analysis.
 
 ---
 
-## Roadmap
+## Data Flow Architecture
 
-| Phase | Focus | Status |
-|---|---|---|
-| 0 — Positioning | README, use case definition | ✅ Done |
-| 1 — Backend Architecture | Service/repository layers, multi-tenancy, RBAC enforcement, background jobs | 🔄 In Progress |
-| 2 — AI Layer | Task generator, document parser (PDF → JSON), workflow assistant (RAG) | 🔜 Planned |
-| 3 — Data Engineering | Event tracking, ETL pipeline, analytics dashboard | 🔜 Planned |
-| 4 — Cloud & Production | Docker, Vercel + Render deploy, CI/CD, logging | 🔜 Planned |
+### Level 0: Context Diagram
 
----
+External actors (roles) interact with the system boundary through well‑defined data flows:
 
-## Tech Stack
+- **Platform Owner** → Tenant & user admin, global config, audit monitoring  
+- **Project Owner** → Project lifecycle, membership, boards, tasks  
+- **Design Lead** → Design tasks, reviews, resource assignment  
+- **Planner / Scheduler** → Schedules, dependencies, WIP limits  
+- **Execution Worker** → Task execution, time logging, defect flagging  
+- **Quality Gatekeeper** → QC checks, pass/fail verdicts, standards enforcement  
+- **Logistics / Handoff** → Inventory tasks, stock levels, BOM management  
+- **Maintenance** → Maintenance tasks, equipment downtime, utilization  
+- **Regulatory / Permit** → Permit docs, inspection milestones (MEP only)  
+- **Equipment Custodian** → Equipment registry, assignment, calibration (MFG only)
 
-| Layer | Technology |
-|---|---|
-| Frontend | React |
-| Backend | Node.js |
-| Database | PostgreSQL (Supabase) |
-| Auth | Supabase Auth (RLS) |
-| File Storage | Supabase Storage |
-| Background Jobs *(planned)* | BullMQ + Redis |
-| AI Layer *(planned)* | OpenAI API (function calling + embeddings) |
-| Data Pipeline *(planned)* | Python, pandas, PostgreSQL |
-| Deployment *(planned)* | Docker, Vercel, Render |
+### Level 1: System Processes by Role
 
----
+Each role’s authorities decompose into specific data processes that read or write to well‑defined data stores (organizations, users, projects, boards, tasks, equipment, quality_checks, etc.). The processes are documented in detail in the Data Flow Diagram. For example:
 
-## Contributing
+- **Platform Owner** writes to `organizations` and `users`, reads from `task_history`.
+- **Project Owner** writes to `projects`, `project_members`, `boards`, `tasks`; reads from `operational_metrics`.
+- **Execution Worker** updates `tasks` (status, hours), writes to `task_equipment`, `quality_checks`, `attachments`, and `comments`.
+- **Quality Gatekeeper** creates and judges `quality_checks`, reads `task_requirements`, and writes to `task_history`.
 
-Tasktrone is under active development. Architecture decisions, domain modeling, and AI feature design are the current priority. Contributions, feedback, and use-case discussions are welcome via issues.
+The separation of responsibilities at the data‑flow level directly supports the RBAC and RLS enforcement — each role’s data process touches only the tables and columns they are permitted to access.
 
 ---
 
-*Built for engineers who understand that manufacturing workflows are not software sprints.*
+## Architectural Principles
+
+The system’s internal design follows four foundational OOP principles that ensure maintainability, extensibility, and correctness.
+
+### Abstraction
+*Expose only what's relevant; hide everything else.*
+
+Different roles see different views of a task. The service layer returns only the fields each role requires, shielding them from the full internal model. No consumer ever directly accesses the raw `FullTask` object.
+
+### Encapsulation
+*Protect internal state through a controlled interface.*
+
+The `Project` class enforces phase transitions, budget changes, and completion rules. External code never sets `currentPhase` directly — it calls `advancePhase()` or `markCompleted()`, which validate the transition, trigger internal audits, and notify members. This prevents corruption from any layer, including AI or background jobs.
+
+### Inheritance
+*Derive new classes from a base, avoiding duplication.*
+
+`QualityCheckTask`, `MaintenanceTask`, and `LogisticsTask` all extend `Task`, inheriting common fields and behaviour. New task categories can be added without modifying existing logic.
+
+### Polymorphism
+*Treat different concrete types uniformly through a common interface.*
+
+A job processor can call `task.process()` on any task subtype without conditionals. The AI layer, ETL pipeline, and message queues consume `Task` — never branching on `instanceof` — keeping them decoupled from future task types.
+
+These principles are applied throughout the backend services (Node.js) and directly influence the database schema design (e.g., using a single `tasks` table with a `task_category` discriminator rather than separate tables per type, while still allowing polymorphic behaviour in code through the repository layer).
+
+---
+
+## Domain Glossary & Mappings
+
+| Term | Definition |
+|------|------------|
+| **Abstract Phase** | Platform‑enforced high‑level status (Pending, Active, Review, etc.) |
+| **Concrete Phase** | Tenant‑specific label mapped to an abstract phase (e.g., “Welding” → Active) |
+| **WIP Limit** | Maximum number of tasks allowed in a column or board to prevent overloading |
+| **Lead Time** | Total time from order to delivery (customer’s perspective) |
+| **Cycle Time** | Actual working time spent on a task (maker’s perspective) |
+| **Dependency Graph** | Network of predecessor/successor relationships with lag time |
+| **Audit Trail** | Immutable log of all field changes (`task_history`) |
+| **RBAC** | Role‑Based Access Control – defines what roles can do |
+| **RLS** | Row Level Security – database policy enforcing data isolation per user/role |
+| **ETL** | Extract, Transform, Load – pipeline that cleans raw data into analytics tables |
+| **Derived Metric** | Calculation performed on demand rather than stored directly (e.g., efficiency = good / total) |
+| **Enum** | Fixed list of allowed values (e.g., task status) enforced at database level |
+
+---
+
+*This document serves as the authoritative reference for Tasktrone’s business and domain model. For implementation details, refer to the technical README and the database schema documentation.*
+```

@@ -10,6 +10,7 @@
  *     never hides behind the fixed Header
  *   - Provides a reliable min-height so background colors fill
  *     the viewport even on short pages
+ *   - Handles horizontal overflow on small screens
  *
  * The Header component is assumed to be `position: fixed` with a
  * height equal to `--header-h` (defined in index.css :root).
@@ -23,19 +24,16 @@ import { Header } from '../Components/Header/Header'
 
 export function AppShell() {
   return (
-    /*
-     * `min-h-screen` ensures background fills short pages.
-     * The inner div uses `paddingTop: var(--header-h)` so all child
-     * pages sit below the fixed Header without knowing its height.
-     */
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full bg-white">
       <Header />
 
       <div
-        className="min-h-[calc(100vh_-_var(--header-h))]"
+        className="w-full overflow-x-auto"
         style={{ paddingTop: 'var(--header-h)' }}
       >
-        <Outlet />
+        <div className="min-h-[calc(100vh_-_var(--header-h))] w-full">
+          <Outlet />
+        </div>
       </div>
     </div>
   )

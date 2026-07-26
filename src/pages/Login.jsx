@@ -39,7 +39,7 @@ const SpinnerCard = ({ title, subtitle }) => (
 export function Login() {
   const [session,     setSession]     = useState(null)
   const [loading,     setLoading]     = useState(false)
-  const [authLoading, setAuthLoading] = useState(true)
+  const [authLoading, setAuthLoading] = useState(false)
   const navigate  = useNavigate()
   const location  = useLocation()
 
@@ -104,7 +104,7 @@ export function Login() {
 
   // Main login card — AuthLayout provides max-w-md centering
   return (
-    <div className="w-full space-y-8">
+    <div className="space-y-8 w-[100%] min-w-200 bg-orange-500">
       <div>
         <h2 className="text-center text-3xl font-extrabold text-gray-900">
           Sign in to Tasktrone

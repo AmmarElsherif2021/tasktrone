@@ -1,4 +1,3 @@
-```markdown
 # Tasktrone
 
 > **Production Kanban for modern manufacturing.**

@@ -44,7 +44,7 @@ Imagine you are managing the production of a **custom electric scooter** (Mechan
 - **The Story:** You can't paint the scooter (Task B) until after it's welded (Task A). That's a **Dependency** (Finish-to-Start). You also need the paint to dry for 4 hours before moving it. That waiting period is **Lag Time**. A graph maps all these "waits for" and "happens after" links.
 - **Simple Point:** It's a recipe that says "Do step 2 four hours *after* step 1 is fully done."
 
-#### Data Engineering Term: **Derived Metrics (from `manufacturing_metrics`)**
+#### Data Engineering Term: **Derived Metrics (from `operational_metrics`)**
 - **The Story:** You don't store "efficiency" directly because it changes constantly. Instead, you store the raw ingredients: `good_parts_count = 95` and `bad_parts_count = 5`. A **Derived Metric** is a calculation run on demand or by a scheduled job: `95 / (95+5) = 95% efficiency`. This keeps raw data clean and calculations fresh.
 - **Simple Point:** Storing flour, eggs, and sugar, not a baked cake. You bake the cake (calculate the metric) when you're ready to eat it.
 
@@ -57,6 +57,20 @@ Imagine you are managing the production of a **custom electric scooter** (Mechan
 #### Data Engineering Term: **Enum (Enumerated Type)**
 - **The Story:** To prevent chaos, you don't let users type "Weld," "weld," "WELD" or "Welding." You give them a dropdown menu with fixed choices: `[DESIGN, WELD, PAINT, QC]`. That list is an **Enum**. It lives in the database schema itself to ensure perfect data consistency.
 - **Simple Point:** A fixed dropdown list instead of a free-text box, hardcoded into the database's DNA.
+
+### Story Point 6: What Kind of Work Is It? (Task Categories)
+
+Just like phases and roles, Tasktrone defines **task categories** – the *type* of work – in a domain‑agnostic way. Instead of having separate code for “Welding” vs “Rough‑in”, the platform uses abstract categories like **Production_Execution**. A manufacturing tenant sees it as “Welding”, an MEP tenant sees it as “Rough‑in”. Everyone else (permissions, metrics, analytics) only sees `Production_Execution`.
+
+- **Design_Artifact** – The blueprints: CAD models, BOMs, submittal logs.
+- **Production_Execution** – The hands‑on work: welding, assembly, installation.
+- **Quality_Verification** – The inspector’s checklist: dimensional checks, pressure tests, commissioning.
+- **Material_Handling** – The parts runner: picking, kitting, procurement.
+- **Equipment_Service** – The mechanic’s job: preventive maintenance, calibration, repair.
+- **Regulatory_Compliance** – The paperwork: permit applications, AHJ inspections (only for MEP).
+- **Logistics_Handoff** – The final mile: shipping, packaging, closeout documents.
+
+**Why it matters:** A “Design cycle time” report automatically measures only `Design_Artifact` tasks, regardless of whether you call them CAD Models or BIM Models. Permissions are also category‑based: the Design Lead can create `Design_Artifact` tasks, the Quality Gatekeeper can create `Quality_Verification` tasks, and so on. This is the same abstraction that makes the platform work for manufacturing and construction without changing a single line of backend code.
 
 ### The Bridge Story: How They Connect
 
@@ -82,7 +96,7 @@ The platform owner essentially sits at the top of the permission hierarchy with 
 3. **System-Wide Configuration:** Final word on technical aspects like authentication methods; can directly manage and edit all platform data.
 4. **Security & Compliance:** Setting security policy framework, ensuring compliance with standards like ISO 27001 or SOC 2.
 5. **Audit & Oversight:** Reviewing sensitive information logs, such as detailed audit trails of user activities and system events.
-6. **Process & Workflow Governance:** Defining and overseeing core process definitions (like manufacturing phases) and security policies used across the platform.
+6. **Process & Workflow Governance:** Defining and overseeing core process definitions (like abstract phases and task categories) and security policies used across the platform.
 
 Ultimately, the platform owner holds supreme authority over the entire system, responsible for its technical health, security, and governance across all organizations.
 
@@ -94,11 +108,11 @@ Ultimately, the platform owner holds supreme authority over the entire system, r
 
 The Project Owner has **full control over a single project** and its nested resources (boards, tasks, members, metrics). Their authorities include:
 
-1. **Project Configuration:** Edit project metadata (name, description, customer, budget, priority, status, current phase). Set the project’s `current_phase` – which may trigger phase handoff automation. Archive or delete the project (subject to platform-level retention policies).
+1. **Project Configuration:** Edit project metadata (name, description, customer, budget, priority, status, current abstract phase). Set the project’s `current_abstract_phase` – which may trigger phase handoff automation. Archive or delete the project (subject to platform-level retention policies).
 2. **Membership Management:** Add or remove members to/from the project (via `project_members`). Assign or change project-level roles for other members. **Cannot** change the Project Owner’s own role within the project – that requires another Project Owner or platform owner.
 3. **Board & Workflow Governance:** Create, edit, or delete Kanban boards. Configure WIP limits at board and column levels. Define swimlanes (custom JSONB criteria, colors, positions). Add, remove, or reorder columns.
-4. **Task Oversight:** Create, edit, or delete **any task** in the project. Override task dependencies, priorities, or phase tags. Reassign tasks to different members or teams. Approve or reject quality checks that require managerial sign-off.
-5. **Metrics & Reporting:** View all `manufacturing_metrics` for the project (including sensitive analytics like defect rates, cycle times). Generate project-level reports. Export audit trail (`task_history`) for the project.
+4. **Task Oversight:** Create, edit, or delete **any task** in the project, regardless of abstract category. Override task dependencies, priorities, or phase tags. Reassign tasks to different members or teams. Approve or reject quality checks that require managerial sign-off.
+5. **Metrics & Reporting:** View all `operational_metrics` for the project (including sensitive analytics like defect rates, cycle times). Generate project-level reports. Export audit trail (`task_history`) for the project.
 6. **Equipment & File Management:** Link/unlink equipment to/from project tasks. Access and manage all versioned file attachments within the project (even those restricted to specific task roles).
 
 **Responsibilities (What they are accountable for):**
@@ -119,20 +133,20 @@ The Project Owner has **full control over a single project** and its nested reso
 | Delete a project permanently | ✅ (any project) | ✅ (only own project) |
 | Override RLS policies | ✅ | ❌ |
 | Access another project’s metrics | ✅ | ❌ (unless also member there) |
-| Set global enums (e.g., manufacturing phases) | ✅ | ❌ |
+| Set global enums (e.g., abstract phases, task categories) | ✅ | ❌ |
 
 ---
 
 ### Design Lead
 
-> In Tasktrone’s role hierarchy, the **Design Lead** is typically a **team-level role** (member of the `Design` team) with **project-level authority** over design-related tasks, quality, and resources. They are not a project owner, but they own the design phase of a project.
+> In Tasktrone’s role hierarchy, the **Design Lead** is typically a **team-level role** (member of the `Design` team) with **project-level authority** over design‑related tasks, quality, and resources. They are not a project owner, but they own the design phase of a project.
 
 **Authorities (What they can do):**
 
 Within a project (or across multiple projects they are assigned to), the Design Lead has:
 
-1. **Design Task Management:** Create, update, or delete any task tagged with `manufacturing_phase = 'Concept & Design'` or `'Prototyping'` (if design-related). Assign design subtasks to individual designers or CAD technicians. Set and modify `estimated_hours`, `due_date`, and priority for design tasks. Move design tasks across board columns even if WIP limits are close – they can override with justification.
-2. **Design Review & Approval:** Approve or reject design deliverables (e.g., CAD models, drawings, BOMs) via the task requirement checklist. Mark a design task as `done` – which may trigger a phase transition to Prototyping or trigger dependent tasks. Request changes and assign rework.
+1. **Design Task Management:** Create, update, or delete any task of abstract category `Design_Artifact` (CAD models, BOMs, design specifications). Assign design subtasks to individual designers or CAD technicians. Set and modify `estimated_hours`, `due_date`, and priority for design tasks. Move design tasks across board columns even if WIP limits are close – they can override with justification.
+2. **Design Review & Approval:** Approve or reject design deliverables via the task requirement checklist. Mark a design task as `done` – which may trigger a phase transition or trigger dependent tasks. Request changes and assign rework.
 3. **Resource & Tool Access:** Assign equipment (e.g., 3D printer, CAD workstations) to design tasks via `task_equipment`. Access all design-related file attachments (blueprints, STEP files, renderings) even if created by other designers.
 4. **Team Coordination:** Add or remove members from the `Design` team *within the project* (if enabled). Change a designer’s `task_assignment_role`. Create design‑specific checklists or requirement templates.
 5. **Quality & Metrics:** Review quality checks that relate to design correctness (`check_type = 'design_review'` or `'tolerance_analysis'`). View derived metrics for the design phase: average review cycle time, rework rate, design task throughput.
@@ -166,10 +180,10 @@ Within a project (or across multiple projects they are assigned to), the Design 
 
 **Authorities (What they can do):**
 
-1. **Schedule Management:** Create and adjust the project’s master schedule by setting `start_date` and `due_date` on top‑level tasks. Override estimated cycle times for reporting (with justification).
+1. **Schedule Management:** Create and adjust the project’s master schedule by setting `start_date` and `due_date` on top‑level tasks (regardless of abstract category). Override estimated cycle times for reporting (with justification).
 2. **Dependency Control:** Define task dependencies (`task_dependencies` table) and `lag_time` for the entire project. Reorder tasks within a phase to optimize flow.
 3. **WIP Governance:** Set WIP limits at board and column level based on capacity analysis.
-4. **Analytics Access:** View all `manufacturing_metrics` for capacity planning (e.g., average lead time per task type, throughput).
+4. **Analytics Access:** View all `operational_metrics` for capacity planning (e.g., average lead time per task type, throughput).
 
 **Responsibilities (What they are accountable for):**
 
@@ -218,7 +232,7 @@ Within a project (or across multiple projects they are assigned to), the Design 
 
 **Authorities (What they can do):**
 
-1. **Check Management:** Create, edit, or delete `quality_checks` for any task in the project. Set `check_type` (e.g., `dimension`, `weld_inspection`, `pressure_test`) and required measurements.
+1. **Check Management:** Create, edit, or delete `quality_checks` for any task in the project. Additionally, they create and manage tasks of abstract category `Quality_Verification`.
 2. **Pass/Fail Authority:** Mark a quality check as `fail` – which can automatically block dependent tasks or trigger a rework task. Override a failed QC check to `pass` (with mandatory justification) if the deviation is acceptable.
 3. **Data Access:** View all `defects_found` counts and `measurements` JSONB data across the project.
 4. **Team Management:** Add or remove QC inspectors from project‑level QC tasks.
@@ -245,7 +259,7 @@ Within a project (or across multiple projects they are assigned to), the Design 
 
 **Authorities (What they can do):**
 
-1. **Inventory Task Management:** Create inventory‑related tasks (ordering, picking, kitting, shipping). Assign tasks to clerks or coordinators.
+1. **Inventory Task Management:** Create tasks of abstract categories `Material_Handling` and `Logistics_Handoff` (ordering, picking, kitting, shipping). Assign tasks to clerks or coordinators.
 2. **Stock Linking:** Link material stock records (future `inventory` table) to tasks – e.g., deduct quantities when a task completes.
 3. **Dependency Approval:** Approve or reject task dependencies that require specific stock levels (e.g., “waiting for bearings”).
 4. **Budget Editing:** Edit project’s `budget` field for material costs (if delegated by Project Owner).
@@ -272,7 +286,7 @@ Within a project (or across multiple projects they are assigned to), the Design 
 
 **Authorities (What they can do):**
 
-1. **Maintenance Tasks:** Create maintenance tasks (preventive or corrective) for any equipment in the `equipment` registry.
+1. **Maintenance Tasks:** Create tasks of abstract category `Equipment_Service` (preventive or corrective) for any equipment in the `equipment` registry.
 2. **Maintenance Scheduling:** Set `next_maintenance_date` on equipment records after completing a task.
 3. **Technician Assignment:** Assign maintenance technicians to tasks.
 4. **Equipment Downtime:** Mark equipment as `status = 'down'` (e.g., broken, awaiting service) – which blocks any production task using that machine.
@@ -301,7 +315,7 @@ The **Regulatory / Permit** role manages interactions with **external authoritie
 
 **Authorities (What they can do):**
 
-1. **Permit Documents:** Attach permit drawings and compliance docs to tasks.
+1. **Permit Documents:** Attach permit drawings and compliance docs to tasks of abstract category `Regulatory_Compliance`.
 2. **Inspection Milestones:** Record inspection milestones by AHJ (e.g., “Electrical rough-in passed”).
 3. **Checklist Management:** Create permit‑specific checklist items (e.g., “Fire marshal approval obtained”).
 4. **Approval Authority:** Mark permit‑related tasks as `approved` or `rejected`.
@@ -348,20 +362,40 @@ The **Equipment Custodian** is responsible for the **equipment registry** – tr
 
 ---
 
+## Task Categories: The What of the Work
+
+Every task in Tasktrone belongs to an **abstract category** that describes the *nature* of the job, not the industry. A factory welder and an electrician both do `Production_Execution` work – the system treats them the same, only the label changes.
+
+| Abstract Category | What it means (simplified) | MFG example | MEP example |
+|-------------------|----------------------------|-------------|-------------|
+| **Design_Artifact** | Blueprints, models, specifications | CAD model, BOM | BIM model, submittal log |
+| **Production_Execution** | Hands‑on making or installing | Welding, assembly | Rough‑in, termination |
+| **Quality_Verification** | Inspection and testing | Dimensional check, weld inspection | Commissioning test, continuity test |
+| **Material_Handling** | Moving and tracking parts | Pick & kit, raw material delivery | Procurement, equipment rental |
+| **Equipment_Service** | Keeping machines running | Preventive maintenance, calibration | Generator test (post‑handover) |
+| **Regulatory_Compliance** | Paperwork and permits | (not used) | Permit application, AHJ inspection |
+| **Logistics_Handoff** | Getting products out the door | Shipping, packaging | Closeout documentation, owner training |
+
+Because categories are abstract, the same rule applies everywhere: only a **Design Lead** can create `Design_Artifact` tasks, only a **Quality Gatekeeper** can create `Quality_Verification` tasks, and analytics like “design cycle time” automatically know to look at `Design_Artifact` tasks – no matter which industry you’re in.
+
+This is the final piece that makes Tasktrone a truly multi‑vertical platform: abstract phases track *where* a task is, abstract roles control *who* can act, and abstract task categories define *what kind* of work it is.
+
+---
+
 ## Summary Table: Abstract Roles at a Glance
 
-| Abstract Role | Domain | Can create tasks? | Can approve QC? | Equipment authority | Reports to |
-|---------------|--------|-------------------|-----------------|---------------------|------------|
-| Platform Owner | Both | ✅ (all orgs) | ✅ (override) | ✅ (all) | Board |
-| Project Owner | Both | ✅ | ✅ | ✅ (link/unlink) | Platform Owner |
-| Design Lead | Both | ✅ (design phases) | ✅ (design reviews) | ✅ (design tools) | Project Owner |
-| Planner / Scheduler | Both | ✅ (top‑level) | ❌ | ❌ | Project Owner |
-| Execution Worker | Both | ❌ (assigned only) | ❌ | ❌ (logs usage) | Team Lead |
-| Quality Gatekeeper | Both | ✅ (QC tasks) | ✅ (all QC) | ❌ | Project Owner |
-| Logistics / Handoff | Both | ✅ (inventory tasks) | ❌ | ❌ | Project Owner |
-| Maintenance | Both | ✅ (maintenance tasks) | ❌ | ✅ (status change) | Project Owner |
-| Regulatory / Permit | MEP only | ✅ (permit tasks) | ✅ (permit approvals) | ❌ | Project Owner |
-| Equipment Custodian | Mfg only | ❌ (registers only) | ❌ | ✅ (assignment) | Project Owner |
+| Abstract Role | Domain | Can create tasks? | Can approve QC? | Equipment authority | Typical task categories | Reports to |
+|---------------|--------|-------------------|-----------------|---------------------|-------------------------|------------|
+| Platform Owner | Both | ✅ (all orgs) | ✅ (override) | ✅ (all) | All (system‑wide) | Board |
+| Project Owner | Both | ✅ | ✅ | ✅ (link/unlink) | All (project‑scope) | Platform Owner |
+| Design Lead | Both | ✅ Design_Artifact | ✅ (design reviews) | ✅ (design tools) | Design_Artifact | Project Owner |
+| Planner / Scheduler | Both | ✅ (top‑level) | ❌ | ❌ | Any (scheduling) | Project Owner |
+| Execution Worker | Both | ❌ (assigned only) | ❌ | ❌ (logs usage) | Any (execution) | Team Lead |
+| Quality Gatekeeper | Both | ✅ Quality_Verification | ✅ (all QC) | ❌ | Quality_Verification | Project Owner |
+| Logistics / Handoff | Both | ✅ Material_Handling, Logistics_Handoff | ❌ | ❌ | Material_Handling, Logistics_Handoff | Project Owner |
+| Maintenance | Both | ✅ Equipment_Service | ❌ | ✅ (status change) | Equipment_Service | Project Owner |
+| Regulatory / Permit | MEP only | ✅ Regulatory_Compliance | ✅ (permit approvals) | ❌ | Regulatory_Compliance | Project Owner |
+| Equipment Custodian | Mfg only | ❌ (registers only) | ❌ | ✅ (assignment) | (equipment administration) | Project Owner |
 
 ---
 
@@ -382,4 +416,4 @@ The **Equipment Custodian** is responsible for the **equipment registry** – tr
 
 ---
 
-**This completes the role definition for Tasktrone.** The platform is built on these abstract roles, with domain‑specific labels configurable per tenant. The same code, same database schema, same RLS policies – just different hats.
+**This completes the role and task‑category definition for Tasktrone.** The platform is built on abstract phases, abstract roles, and abstract task categories — with domain‑specific labels configurable per tenant. The same code, same database schema, same RLS policies — just different hats and different job names.

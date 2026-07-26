@@ -28,121 +28,132 @@ export function ProjectShell() {
     if (id) setCurrentProjectId(id)
   }, [id, setCurrentProjectId])
 
-  // Scroll‑to‑top
-  const scrollMainToTop = () =>
-    mainRef?.scrollTo({ top: 0, behavior: 'smooth' })
-
+  // Scroll‑to‑top detection
   useEffect(() => {
     if (!mainRef) return
     const handleScroll = () => {
-      setShowScrollUp(mainRef.scrollTop > 0)
+      // Show button after scrolling down 200px for better UX
+      setShowScrollUp(mainRef.scrollTop > 200)
     }
     mainRef.addEventListener('scroll', handleScroll)
     return () => mainRef.removeEventListener('scroll', handleScroll)
   }, [mainRef])
 
+  const scrollMainToTop = () =>
+    mainRef?.scrollTo({ top: 0, behavior: 'smooth' })
+
   return (
-    <div className="h-screen w-full overflow-hidden flex flex-col">
+    <div className="h-screen w-full overflow-hidden">
       {/* ── Fixed header ──────────────────────────────────── */}
       <Header />
 
-      {/* ── Platform Owner Mode Banner + Product Line Selector ─────────────────── */}
-      {isPlatformOwner && (
-        <div
-          className="flex items-center justify-between px-4 py-1.5"
-          style={{
-            backgroundColor: 'var(--color-primary)',
-            color: 'var(--color-neutral-white)',
-            fontFamily: 'var(--font-mono)',
-            fontWeight: 700,
-            fontSize: '0.75rem',
-            marginTop: 'var(--header-h)',
-          }}
-        >
-          <span>🛡️ PLATFORM OWNER MODE</span>
-          <div className="flex items-center gap-2">
-            <label htmlFor="phase-select" className="text-xs font-normal">
-              Product Line / Phase:
-            </label>
-            <select
-              id="phase-select"
-              value={currentPhase}
-              onChange={(e) => setCurrentPhase(e.target.value)}
-              className="px-2 py-0.5 text-xs font-mono text-neutral-black bg-neutral-white border border-card-border rounded"
-            >
-             {Object.entries(MANUFACTURING_PHASE_LABELS).map(([phase, label]) => (
-                <option key={phase} value={phase}>
-                  {label}
-                </option>)
-             )}
-                         
-            </select>
-          </div>
-        </div>
-      )}
-
-      {/* ── Content row (full height minus header & banner) ────────── */}
-      <div
-        className="flex overflow-hidden w-full bg-[var(--color-accent-blue)]"
-        style={{
-          height: `calc(100vh - var(--header-h) ${isPlatformOwner ? '- 2.5rem' : ''})`,
-          marginTop: isPlatformOwner ? '2.5rem' : 'var(--header-h)',
-        }}
+      {/* 
+        Main wrapper that sits below the fixed header.
+        Uses margin-top to push content down by the header height.
+        This wrapper takes the remaining viewport height.
+      */}
+      <div 
+        className="flex flex-col w-full"
+        style={{ marginTop: 'var(--header-h)', height: 'calc(100vh - var(--header-h))' }}
       >
-        {/* ── Sidebar ───────────────────────────────────────── */}
-        <aside
-          className="
-            relative
-            flex flex-col items-center justify-evenly
-            w-14 sm:w-20 lg:w-24 flex-shrink-0
-            border-r-2 border-black border-solid
-            bg-[#EEFBF4] overflow-hidden
-          "
-        >
-          <IconButton
-            src={showBlog ? BlogIconFlipped : BlogIcon}
-            alt={showBlog ? 'Hide blog' : 'Show blog'}
-            onClick={() => setShowBlog((v) => !v)}
-            iconWidthREM={6}
-          />
-          <CreateTask />
-          <ProjectDashboard />
-        </aside>
-
-        {/* ── Blog panel ────────────────────────────────────── */}
-        {showBlog && (
-          <aside
-            className="
-              w-72 sm:w-80 lg:w-96 flex-shrink-0
-              h-full overflow-y-auto
-              border-r-2 border-black bg-[#EEFBF4]
-            "
+        {/* ── Platform Owner Mode Banner (no extra margin, sits directly below header) ── */}
+        {isPlatformOwner && (
+          <div
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-4 py-2 w-full flex-shrink-0"
+            style={{
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-neutral-white)',
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              fontSize: '0.75rem',
+            }}
           >
-            <Blog />
-          </aside>
+            <span className="whitespace-nowrap">🛡️ PLATFORM OWNER MODE</span>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <label htmlFor="phase-select" className="text-xs font-normal whitespace-nowrap">
+                Product Line / Phase:
+              </label>
+              <select
+                id="phase-select"
+                value={currentPhase}
+                onChange={(e) => setCurrentPhase(e.target.value)}
+                className="px-2 py-0.5 text-xs font-mono text-neutral-black bg-neutral-white border border-card-border rounded w-full sm:w-auto"
+              >
+                {Object.entries(MANUFACTURING_PHASE_LABELS).map(([phase, label]) => (
+                  <option key={phase} value={phase}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         )}
 
-        {/* ── Main content ──────────────────────────────────── */}
-        <main
-          ref={setMainRef}
-          className="
-            flex-1 h-full overflow-y-auto
-            px-3 sm:px-4 lg:px-6 py-4
-          "
-        >
-          <div className="fixed top-16 right-[-40px]">
-            {scrollToUp && (
-              <IconButton
-                src={toUp}
-                alt="scroll up"
-                onClick={scrollMainToTop}
-                iconWidthREM={8}
-              />
-            )}
-          </div>
-          <Outlet context={{ showBlog, mainRef }} />
-        </main>
+        {/* 
+          Content row: sidebar + blog panel (optional) + main content.
+          Takes all remaining space with flex-1 and uses overflow-hidden to contain its children.
+        */}
+        <div className="flex flex-1 overflow-hidden w-full bg-[var(--color-accent-blue)]">
+          
+          {/* ── Sidebar (responsive widths) ───────────────────────────────────────── */}
+          <aside
+            className="
+              relative
+              flex flex-col items-center justify-start gap-6
+              w-14 sm:w-20 lg:w-24 flex-shrink-0
+              border-r-2 border-black border-solid
+              bg-[#EEFBF4] overflow-y-auto
+              py-6
+            "
+          >
+            <IconButton
+              src={showBlog ? BlogIconFlipped : BlogIcon}
+              alt={showBlog ? 'Hide blog' : 'Show blog'}
+              onClick={() => setShowBlog((v) => !v)}
+              iconWidthREM={6}
+            />
+            <CreateTask />
+            <ProjectDashboard />
+          </aside>
+
+          {/* ── Blog panel (collapsible, responsive width) ─────────────────────────── */}
+          {showBlog && (
+            <aside
+              className="
+                w-64 sm:w-72 lg:w-80 xl:w-96 flex-shrink-0
+                h-full overflow-y-auto
+                border-r-2 border-black bg-[#EEFBF4]
+              "
+            >
+              <Blog />
+            </aside>
+          )}
+
+          {/* ── Main content area (scrollable) ────────────────────────────────────── */}
+          <main
+            ref={setMainRef}
+            className="
+              flex-1 h-full overflow-y-auto
+              px-3 sm:px-4 lg:px-6 py-4
+              relative
+            "
+          >
+            <Outlet context={{ showBlog, mainRef }} />
+          </main>
+        </div>
       </div>
+
+      {/* ── Scroll to top button (fixed to viewport, appears only when needed) ── */}
+      {scrollToUp && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <IconButton
+            src={toUp}
+            alt="scroll up"
+            onClick={scrollMainToTop}
+            iconWidthREM={8}
+          />
+        </div>
+      )}
     </div>
   )
 }

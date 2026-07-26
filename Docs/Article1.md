@@ -1,5 +1,5 @@
 # Tasktrone — Architecture & Design: A Developer's Journey
-## The Core Features Behind the System
+## The core OOP of the System
 **In this article, I'll walk through the architectural thinking and design process I went through while building Tasktrone — the decisions made, the tradeoffs considered, and the principles that shaped the system.**
 
 ---

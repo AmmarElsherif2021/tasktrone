@@ -11,4 +11,4 @@ for(const [key, value] of Object.entries(data)) {
     enumsMap.set(value['enum_type_name'], [value['enum_value']]);
   }
 }
-console.log('enums map', enumsMap);
+await writeFile(new URL('./enums_map.json', import.meta.url), JSON.stringify(Object.fromEntries(enumsMap)), 'utf8');

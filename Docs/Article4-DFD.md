@@ -1,3 +1,4 @@
+
 # Data Flow Diagram
 
 ---
@@ -207,7 +208,7 @@ The Design Lead manages the full lifecycle of design‑phase tasks.
 
 | Process | Detail |
 |---------|--------|
-| **Create Design Tasks** | Create tasks in `Concept & Design` or `Prototyping` phases with appropriate categories (cad_models, design_specifications, bom). |
+| **Create Design Tasks** | Create tasks of abstract category `Design_Artifact` with appropriate concrete categories (cad_models, design_specifications, bom). |
 | **Assign Designers** | Set `assigned_to` and additional `task_members` (reviewer, supporter) from the Design team. |
 | **Set Estimates & Deadlines** | Provide `estimated_hours`, `due_date`, and priority for design deliverables. |
 | **Move Tasks Across Columns** | Drag design tasks through the board, with authority to override column WIP limits with justification. |
@@ -246,7 +247,7 @@ The Design Lead is the gatekeeper for design quality before handoff.
 
 | Process | Detail |
 |---------|--------|
-| **Review Design Metrics** | View design phase cycle time, rework rate, and review turnaround. |
+| **Review Design Metrics** | View design phase cycle time, rework rate, and review turnaround for `Design_Artifact` tasks. |
 | **Monitor Design QC Checks** | See quality checks tagged as `design_review` or related to design output; respond to defects reported downstream. |
 
 ---
@@ -376,7 +377,7 @@ The Execution Worker performs the work and updates the system.
 
 | Process | Detail |
 |---------|--------|
-| **Create Inventory Tasks** | Create tasks for ordering, picking, kitting, and shipping materials (category: inventory_reports, order_processing). |
+| **Create Inventory Tasks** | Create tasks for ordering, picking, kitting, and shipping materials (category: `Material_Handling`, `Logistics_Handoff`). |
 | **Assign Logistics Personnel** | Assign workers to logistics tasks; track completion. |
 | **Record Receiving & Shipping** | Log quantities received/shipped; attach packing slips or photos. |
 
@@ -415,7 +416,7 @@ The Execution Worker performs the work and updates the system.
 
 | Process | Detail |
 |---------|--------|
-| **Create Maintenance Tasks** | Create tasks of category `maintenance_task` for any equipment, specifying corrective or preventive work. |
+| **Create Maintenance Tasks** | Create tasks of category `Equipment_Service` for any equipment, specifying corrective or preventive work. |
 | **Schedule Preventive Maintenance** | Set `next_maintenance_date` after completing a PM; the system can auto‑generate tasks based on schedule. |
 | **Assign Technicians** | Assign maintenance crew members to tasks. |
 

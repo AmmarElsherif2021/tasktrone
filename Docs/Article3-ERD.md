@@ -1,4 +1,4 @@
-# I have finished version 0.0 of Tasktrone entities relationships diagram:
+# Version 0.0 of Tasktrone's entities relationships diagram:
 
 ### ERD Diagram:
 ```mermaid
@@ -300,3 +300,5 @@ erDiagram
 
     tasks ||--o{ quality_checks : "task_id"
     users ||--o{ quality_checks : "inspector_id"
+    
+    ```
