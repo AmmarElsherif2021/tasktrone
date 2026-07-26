@@ -88,9 +88,9 @@ Database schema and RLS policies are managed through Supabase migrations.
 | Phase | Delivery |
 |-------|----------|
 | **Current** | Core manufacturing task model, Kanban boards, RBAC, audit trail, equipment tracking. |
-| **Q3 2025** | AI‑powered task generation from CAD/BOM documents, natural language “What’s blocking production?” assistant. |
-| **Q4 2025** | ETL pipeline → analytics dashboard with lead time, throughput, and defect‑rate trends. |
-| **2026** | Construction / MEP vertical — same platform, different labels. |
+| **Q3 2026** | AI‑powered task generation from CAD/BOM documents, natural language “What’s blocking production?” assistant. |
+| **Q4 2026** | ETL pipeline → analytics dashboard with lead time, throughput, and defect‑rate trends. |
+| **2027** | Construction / MEP vertical — same platform, different labels. |
 
 ---
 
