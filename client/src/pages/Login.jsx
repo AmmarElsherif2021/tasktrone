@@ -20,21 +20,13 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
+import {Spinner} from "../Ui/Spinner"
 import supabase from '../../supabaseClient'
 import { signInWithGoogle, checkUserProfileStatus } from '../API/users'
 
 const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true'
 
-// Reusable spinner card (centered by AuthLayout)
-const SpinnerCard = ({ title, subtitle }) => (
-  <div className="bg-white p-8 rounded-lg shadow-md w-full">
-    <div className="flex flex-col items-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4" />
-      <h2 className="text-xl font-semibold text-gray-700 mb-2">{title}</h2>
-      <p className="text-gray-500 text-center">{subtitle}</p>
-    </div>
-  </div>
-)
+
 
 export function Login() {
   const [session,     setSession]     = useState(null)
@@ -96,10 +88,10 @@ export function Login() {
 
   // AuthLayout centers these cards automatically
   if (authLoading) {
-    return <SpinnerCard title="Loading…" subtitle="Checking authentication status." />
+    return <Spinner title="Loading…" subtitle="Checking authentication status." />
   }
   if (session) {
-    return <SpinnerCard title="Setting up your account…" subtitle="Please wait while we prepare your workspace." />
+    return <Spinner title="Setting up your account…" subtitle="Please wait while we prepare your workspace." />
   }
 
   // Main login card — AuthLayout provides max-w-md centering
