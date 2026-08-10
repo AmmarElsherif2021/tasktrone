@@ -28,9 +28,6 @@ The result: you stop fire‑fighting and start **managing by data**.
 
 *Tasktrone was built for engineers who understand that a factory workflow is not a software sprint, it’s a physical system that deserves industrial‑grade digital tooling.*
 
-
-- This version presents Tasktrone as a production-ready manufacturing SaaS solution, with clear business value, professional tone, and subtle but compelling technical depth — no explicit recruiter mentions, just a confident product story.
-
 ---
 
 ## Why manufacturers choose Tasktrone
@@ -57,29 +54,28 @@ The result: you stop fire‑fighting and start **managing by data**.
 
 ## Under the hood (for your tech team)
 
-Tasktrone is built as a **multi‑tenant SaaS** from day one:
+Tasktrone is designed as a **multi‑tenant SaaS** from day one:
 
-- **React** frontend with real‑time drag‑and‑drop Kanban.
-- **Node.js** backend with strict service/repository layers.
-- **PostgreSQL (Supabase)** as the single source of truth — enums, JSONB, row‑level security.
-- **Supabase Realtime** pushes board updates, comments, and QC results to all connected clients instantly.
+- **React** frontend (Vite, React Router, TanStack Query) with drag‑and‑drop Kanban boards — built and working today.
+- **PostgreSQL (Supabase)** as the single source of truth — enums, JSONB, row‑level security. The frontend talks to Supabase directly for now.
+- **Node.js (NestJS) backend** with a service/repository layering — planned; see [plan.md](plan.md) for the architecture proposal. The `server/` package is scaffolded but not yet implemented.
 - **Abstract role & phase model** mapped to concrete manufacturing labels — the same core can later serve construction/MEP without a rewrite.
 
-*We designed it as if an external auditor would review the codebase. Audit trail, role enforcement, and data isolation are not afterthoughts — they’re the foundation.*
+Audit trail, RBAC enforcement, and the manufacturing‑specific domain model (phases, WIP limits, QC gates, equipment registry) described above are the direction the product is heading, not shipped functionality yet.
 
 ---
 
 ## Getting started
 
 ```bash
-git clone https://github.com/your-org/tasktrone.git
-cd tasktrone
+git clone https://github.com/AmmarElsherif2021/tasktrone.git
+cd tasktrone/client
 npm install
-cp .env.example .env   # add Supabase project credentials
+cp .env.example .env   # add your Supabase project credentials
 npm run dev
 ```
 
-Database schema and RLS policies are managed through Supabase migrations.
+The `server/` package (NestJS backend) is not yet implemented — the frontend currently talks to Supabase directly. Database schema and RLS policies are managed through Supabase migrations.
 
 ---
 
@@ -87,10 +83,10 @@ Database schema and RLS policies are managed through Supabase migrations.
 
 | Phase | Delivery |
 |-------|----------|
-| **Current** | Core manufacturing task model, Kanban boards, RBAC, audit trail, equipment tracking. |
-| **Q3 2026** | AI‑powered task generation from CAD/BOM documents, natural language “What’s blocking production?” assistant. |
-| **Q4 2026** | ETL pipeline → analytics dashboard with lead time, throughput, and defect‑rate trends. |
-| **2027** | Construction / MEP vertical — same platform, different labels. |
+| **Current** | Project/task Kanban boards, auth, and activity feed on React + Supabase. |
+| **Next** | NestJS backend (`server/`), manufacturing domain model (phases, WIP limits), RBAC, audit trail, equipment tracking. |
+| **Later** | AI‑powered task generation from CAD/BOM documents, natural‑language “What’s blocking production?” assistant, analytics dashboard. |
+| **Long‑term** | Construction / MEP vertical — same platform, different labels. |
 
 ---
 
