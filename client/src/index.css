@@ -99,10 +99,12 @@
   --color-team-role-logistics-coordinator:  #6030B8;
 
   /* ── Spacing ─────────────────────────────────────────────── */
-  --spacing-xs:        0.4rem;
-  --spacing-sm:        0.5rem;
-  --spacing-md:        1rem;
-  --spacing-lg:        1.7rem;
+  /* NOTE: don't add --spacing-xs/sm/md/lg here — those keys collide with
+     Tailwind's built-in max-w-{xs,sm,md,lg} (and similar) utilities, since
+     v4 resolves named max-width/width/etc. keys through the same
+     --spacing-* theme namespace. That collision silently broke max-w-sm/md
+     (and everywhere they're used: Login, Signup, AuthLayout, modals, the
+     landing page) by shrinking them from ~24rem to under 1rem. */
   --spacing-icon-base: 7rem;
   --spacing-icon-min:  4rem;
   --spacing-icon-img:  1.7rem;

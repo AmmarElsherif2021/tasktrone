@@ -21,8 +21,9 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import {Spinner} from "../Ui/Spinner"
-import supabase from '../../supabaseClient'
+import supabase from '../lib/supabaseClient'
 import { signInWithGoogle, checkUserProfileStatus } from '../API/users'
+import logo from '../assets/logo.svg'
 
 const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true'
 
@@ -96,8 +97,9 @@ export function Login() {
 
   // Main login card — AuthLayout provides max-w-md centering
   return (
-    <div className="space-y-8 w-[100%] min-w-200 bg-orange-500">
+    <div className="w-full space-y-8">
       <div>
+        <img src={logo} alt="Tasktrone" className="mx-auto mb-4 w-16" />
         <h2 className="text-center text-3xl font-extrabold text-gray-900">
           Sign in to Tasktrone
         </h2>

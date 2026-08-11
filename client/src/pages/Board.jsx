@@ -1,4 +1,5 @@
 import { useState, useEffect, memo } from 'react'
+import { Alert, Button } from 'react-bootstrap'
 import { BoardSkeleton } from '../Ui/LoadingSkeletons/BoardSkeleton'
 import { TaskCard } from '../Components/Tasks/TaskCard'
 import ProjectControllers from './ProjectControllers'
@@ -59,6 +60,8 @@ export function Board() {
     currentTasks,
     refreshTasks,
     isTasksLoading,
+    isTasksError,
+    tasksError,
     currentPhase,           // product‑line filter
   } = useProject()
 
@@ -96,6 +99,17 @@ export function Board() {
 
   if (isInitialLoad && isTasksLoading) {
     return <BoardSkeleton phase="empty" />
+  }
+
+  if (isTasksError) {
+    return (
+      <Alert variant="danger" className="m-3 d-flex align-items-center justify-content-between">
+        <span>Couldn&apos;t load tasks{tasksError?.message ? `: ${tasksError.message}` : '.'}</span>
+        <Button variant="outline-danger" size="sm" onClick={() => refreshTasks()}>
+          Retry
+        </Button>
+      </Alert>
+    )
   }
 
   // Filter tasks by selected manufacturing phase (product line)

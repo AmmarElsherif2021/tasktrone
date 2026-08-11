@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listProjects, getProjectById } from '../API/projects'
 import { useAuth } from '../contexts/AuthContext'
 import { getUserInfo } from '../API/users'
-import supabaseClient from '../../supabaseClient'
+import supabaseClient from '../lib/supabaseClient'
 
 const UserHomeContext = createContext()
 

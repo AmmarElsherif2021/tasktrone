@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate, Link } from 'react-router-dom'
 import { signup } from '../API/users'
+import logo from '../assets/logo.svg'
 
 export function Signup() {
   const [email,    setEmail]    = useState('')
@@ -35,6 +36,7 @@ export function Signup() {
   return (
     <div className="w-full space-y-8">
       <div>
+        <img src={logo} alt="Tasktrone" className="mx-auto mb-4 w-16" />
         <h2 className="text-center text-3xl font-extrabold text-gray-900">
           Create your account
         </h2>
