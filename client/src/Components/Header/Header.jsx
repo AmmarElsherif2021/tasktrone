@@ -6,7 +6,7 @@ import IconButton from '../../Ui/IconButton'
 import logoutIcon from '../../assets/logout.svg'
 import dashboardIcon from '../../assets/negative-dashboard.svg'
 import { useUserHome } from '../../contexts/UserHomeContext'
-import supabaseClient from '../../../supabaseClient'
+import supabaseClient from '../../lib/supabaseClient'
 
 export function Header() {
   const { user, isAuthenticated } = useAuth()

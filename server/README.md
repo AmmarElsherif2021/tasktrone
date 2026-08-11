@@ -31,10 +31,40 @@ npm run lint    # eslint --fix on src/**/*.ts
 | Variable | Required | Default | Notes |
 |---|---|---|---|
 | `PORT` | no | `3001` | HTTP port the server listens on |
-| `DATABASE_URL` | not yet used | — | Postgres connection string; wired in once `PostgresAdapter` lands |
+| `DATABASE_URL` | only for `PostgresAdapter` / integration tests | — | e.g. `postgres://tasktrone:tasktrone@localhost:5432/tasktrone`; matches `docker-compose.yml` defaults |
 
-No `.env` file is read yet — variables are picked up from the process environment. A loader
-(e.g. `@nestjs/config`) will be added alongside the DB adapter work if needed.
+Copy `.env.example` to `.env` for local values. Nothing reads `.env` automatically yet (no NestJS
+app wiring uses `PostgresAdapter` or `DATABASE_URL` at runtime yet — see DI/bootstrap wiring) —
+`DATABASE_URL` is currently only consumed directly by `PostgresAdapter` and the integration tests.
+
+## Local Postgres
+
+```bash
+docker compose up -d      # starts Postgres on localhost:5432
+npm run test:integration  # runs tests/integration/** against it
+```
+
+See [`src/db/README.md`](src/db/README.md) for the adapter/repository layer this backs.
+
+## Wiring (adapter → repos → services)
+
+[`src/bootstrap.ts`](src/bootstrap.ts) is the single factory that assembles the stack from
+`DATABASE_URL`:
+
+```ts
+import { bootstrap } from './bootstrap'
+
+const { taskService, boardService } = bootstrap(process.env.DATABASE_URL)
+
+const board = await boardService.createBoard({ organizationId: orgId, name: 'Assembly Line 1' })
+const task = await taskService.createTask({ boardId: board.id, title: 'Weld frame' })
+```
+
+`bootstrap()` doesn't open a database connection itself (`pg.Pool` connects lazily on first query),
+so it's safe to call in fast unit tests too — see [`src/bootstrap.spec.ts`](src/bootstrap.spec.ts).
+See [`src/services/README.md`](src/services/README.md) for what each service does, and
+[`src/controllers/README.md`](src/controllers/README.md) for the actual HTTP routes and validation
+behavior.
 
 ## Tests
 

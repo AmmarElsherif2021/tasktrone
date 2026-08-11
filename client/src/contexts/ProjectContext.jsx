@@ -25,14 +25,29 @@
  *     inventory_manager | production_planner | maintenance_technician |
  *     hr_personnel | logistics_coordinator
  * ─────────────────────────────────────────────────────────────
+ * Backend split (as of the server/ hexagonal-foundation migration):
+ *   - Tasks (tasksQuery below) come from the new NestJS backend via
+ *     apiClient, GET /tasks?boardId=. currentProjectId is used AS the
+ *     boardId — the new backend has no separate Project entity yet, so
+ *     "project" and "board" are 1:1 for now. Only the fields the new
+ *     Task model actually has are populated: id, boardId, title,
+ *     description, status, position3d, modelRef, createdAt, updatedAt.
+ *     Fields with no backend equivalent yet (taskType, taskCategory,
+ *     manufacturingPhase, priority, leadTime, cycleTime, startDate,
+ *     dueDate, members, requirements) are kept in the shape below so
+ *     existing consumers don't crash, but are always empty/undefined
+ *     until a later epic adds that data to the backend.
+ *   - Project details/members, posts, and users still come from
+ *     Supabase directly (client/src/API/*.js) — unchanged.
+ * ─────────────────────────────────────────────────────────────
  */
 import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getProjectById, updateProject } from '../API/projects'
 import { getPosts } from '../API/posts'
 import { useAuth } from '../contexts/AuthContext'
-import { listTasks } from '../API/tasks'
 import { getAllUsers } from '../API/users'
+import { get } from '../lib/apiClient'
 
 // ─── Manufacturing phase display labels (Layer 3 / Product Line) ──
 export const MANUFACTURING_PHASE_LABELS = {
@@ -134,35 +149,39 @@ export const ProjectProvider = ({ children }) => {
     retry: 2,
   })
 
-  // ── Tasks query ───────────────────────────────────────────────
+  // ── Tasks query (new backend, via apiClient) ────────────────────
+  // currentProjectId doubles as boardId until the backend gains a Project entity.
   const tasksQuery = useQuery({
     queryKey: ['tasks', currentProjectId],
     queryFn: () => {
       setIsTasksLoading(true)
-      return listTasks(currentProjectId, {})
+      return get('/tasks', { boardId: currentProjectId })
     },
     select: (data) =>
       data.map((task) => ({
         _id:              task.id,
-        project:          task.project_id,
-        board:            task.board_id,
+        project:          task.boardId,
+        board:            task.boardId,
         title:            task.title,
-        author:           task.created_by,
-        taskType:         task.task_type,
-        taskCategory:     task.task_category,                 // task_category_enum
-        manufacturingPhase: task.phase,                       // manufacturing_phase enum
-        status:           task.status,                        // task_status enum (kanban column)
+        description:      task.description,
+        author:           undefined,                          // no backend equivalent yet
+        taskType:         undefined,                           // no backend equivalent yet
+        taskCategory:     undefined,                            // no backend equivalent yet
+        manufacturingPhase: undefined,                          // no backend equivalent yet
+        status:           task.status,                          // task_status enum (kanban column)
         // Keep legacy `phase` alias pointing to kanban status for backward compat
         phase:            task.status,
-        priority:         task.priority,
-        leadTime:         task.lead_time,
-        cycleTime:        task.cycle_time,
-        startDate:        task.start_date,
-        dueDate:          task.due_date,
-        createdAt:        task.created_at,
-        updatedAt:        task.updated_at,
-        members:          task.task_members ?? [],
-        requirements:     task.requirements ?? [],
+        priority:         undefined,                            // no backend equivalent yet
+        leadTime:         undefined,                            // no backend equivalent yet
+        cycleTime:        undefined,                            // no backend equivalent yet
+        startDate:        undefined,                            // no backend equivalent yet
+        dueDate:          undefined,                            // no backend equivalent yet
+        position3d:       task.position3d,
+        modelRef:         task.modelRef,
+        createdAt:        task.createdAt,
+        updatedAt:        task.updatedAt,
+        members:          [],                                   // no backend equivalent yet
+        requirements:     [],                                   // no backend equivalent yet
       })),
     enabled: !!currentProjectId && isAuthenticated,
     staleTime: 30_000,
@@ -287,6 +306,8 @@ export const ProjectProvider = ({ children }) => {
         // ── Tasks (all, unfiltered) ──
         currentTasks,
         isTasksLoading,
+        isTasksError: tasksQuery.isError,
+        tasksError: tasksQuery.error,
         refreshTasks,
 
         // ── Derived metrics ──
