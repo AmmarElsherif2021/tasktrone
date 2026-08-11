@@ -5,7 +5,7 @@ module.exports = {
   },
 
   // Server (NestJS) – same, from root
-  'server/src/**/*.{ts,js}': (filenames) => {
+  'server/{src,tests}/**/*.{ts,js}': (filenames) => {
     return `npx eslint --fix ${filenames.join(' ')}`;
   },
 
