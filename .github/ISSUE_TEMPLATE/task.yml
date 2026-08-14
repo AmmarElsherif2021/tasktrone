@@ -1,0 +1,46 @@
+---
+name: "Task"
+description: "Create a task with acceptance criteria and checklists. Use this form for standardizing work items (tasks, bugs, improvements)."
+title: "[TASK] {{summary}}"
+labels: ["task"]
+assignees: ["AmmarElsherif2021"]
+body:
+  - type: markdown
+    attributes:
+      value: "Use this form to create a task. Fill the acceptance criteria clearly so reviewers and CI can verify 'done'.\n\nThis will add the issue directly to the repository with the `task` label and assign it to the default assignee."
+  - type: input
+    id: summary
+    attributes:
+      label: "One-line summary"
+      description: "Short issue title (used in the issue title)."
+      placeholder: "Close out Epic 2: confirm core API surface"
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Area"
+      description: "Which area does this task belong to?"
+      options:
+        - backend
+        - frontend
+        - ci
+        - docs
+        - tests
+  - type: textarea
+    id: description
+    attributes:
+      label: "Detailed description"
+      description: "Explain what needs to be done and link to plan.md or relevant files."
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Acceptance criteria"
+      description: "List acceptance criteria and checkboxes (one per line). Example:\n- [ ] Code changes\n- [ ] Unit tests\n- [ ] CI green"
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      options:
+        - high
+        - medium
+        - low
