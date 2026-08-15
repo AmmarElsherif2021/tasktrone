@@ -1,8 +1,8 @@
 # Tasktrone Server
 
-NestJS backend for Tasktrone. Currently a minimal skeleton (health check only) — the hexagonal
-data layer (adapters/repositories/services/API) lands in subsequent tasks; see [../plan.md](../plan.md)
-for the architecture and [../DECISION_LOG.md](../DECISION_LOG.md) (once written) for rationale.
+NestJS backend for Tasktrone. Implements the hexagonal data layer (adapters/repositories/services/API)
+for tasks and boards — see [../plan.md](../plan.md) for the original architecture proposal and
+[../DECISION_LOG.md](../DECISION_LOG.md) for why it's built this way and what's still Supabase-only.
 
 ## Requirements
 
@@ -44,7 +44,8 @@ docker compose up -d      # starts Postgres on localhost:5432
 npm run test:integration  # runs tests/integration/** against it
 ```
 
-See [`src/db/README.md`](src/db/README.md) for the adapter/repository layer this backs.
+See [`src/db/README.md`](src/db/README.md) for the adapter/repository layer this backs, and
+[`docs/CI.md`](../docs/CI.md) for how (and when) these same tests run in CI.
 
 ## Wiring (adapter → repos → services)
 

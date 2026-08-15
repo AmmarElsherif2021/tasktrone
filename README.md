@@ -57,11 +57,11 @@ The result: you stop fire‑fighting and start **managing by data**.
 Tasktrone is designed as a **multi‑tenant SaaS** from day one:
 
 - **React** frontend (Vite, React Router, TanStack Query) with drag‑and‑drop Kanban boards — built and working today.
-- **PostgreSQL (Supabase)** as the single source of truth — enums, JSONB, row‑level security. The frontend talks to Supabase directly for now.
-- **Node.js (NestJS) backend** with a service/repository layering — planned; see [plan.md](plan.md) for the architecture proposal. The `server/` package is scaffolded but not yet implemented.
+- **Node.js (NestJS) backend** (`server/`) with a hexagonal adapter/repository/service layering over Postgres — implemented for tasks and boards: `POST/GET /boards`, `POST/GET/PATCH /tasks`, with DTO validation and consistent error responses. See [server/README.md](server/README.md) for how to run it and [DECISION_LOG.md](DECISION_LOG.md) for why it's built this way.
+- **PostgreSQL (Supabase)** still backs everything else — auth, project details, posts, users — while that part of the client is incrementally migrated onto the new backend. The frontend talks to both today; see [DECISION_LOG.md](DECISION_LOG.md#5-incremental-migration-new-backend-owns-tasksboards-supabase-keeps-everything-else) for the split.
 - **Abstract role & phase model** mapped to concrete manufacturing labels — the same core can later serve construction/MEP without a rewrite.
 
-Audit trail, RBAC enforcement, and the manufacturing‑specific domain model (phases, WIP limits, QC gates, equipment registry) described above are the direction the product is heading, not shipped functionality yet.
+Audit trail, RBAC enforcement, and the manufacturing‑specific domain model (phases, WIP limits, QC gates, equipment registry) described above are still the direction the product is heading, not shipped functionality yet — the current backend covers only the Task/Board/User foundation.
 
 ---
 

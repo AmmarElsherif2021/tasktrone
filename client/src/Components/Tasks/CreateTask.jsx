@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { UploadCloud, X, UserPlus } from 'lucide-react'
 import { calculateLeadTime, calcDueDate } from '../../Ui/utils'
-import { createTask, uploadTaskAttachment } from '../../API/tasks'
+import { post } from '../../lib/apiClient'
 import createTaskIcon from '../../assets/create-task.svg'
 import { useProject } from '../../contexts/ProjectContext'
 import IconButton from '../../Ui/IconButton'
@@ -19,13 +19,6 @@ const formatFileSize = (bytes) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
 }
-
-/**
- * Generates a simple task number like "TASK-00042" using the current timestamp.
- * Replace with a server-side sequence if you prefer guaranteed uniqueness.
- */
-const generateTaskNumber = () =>
-  `TASK-${String(Date.now()).slice(-5)}`
 
 // ── Domain enums (matching task_category_enum in the DB) ─────────────────────
 const TASK_CATEGORIES = [
@@ -74,7 +67,6 @@ function useCreateTask() {
     currentPhase,
     refreshTasks,
     boards,                  // resolved board_id
-    user,                    // authenticated user (for created_by & uploaded_by)
   } = useProject()
   const queryClient = useQueryClient()
 
@@ -159,29 +151,6 @@ function useCreateTask() {
   const handleRemoveMember = (idx) =>
     setMembers(prev => prev.filter((_, i) => i !== idx))
 
-  // ── Resolve board_id (use default board for current phase) ─────────────
-  const resolveBoardId = () => {
-    if (!boards?.length) return null
-    // Prefer a board whose phase matches currentPhase, otherwise fall back to first
-    const phaseBoard = boards.find(b => b.phase === currentPhase)
-    return (phaseBoard ?? boards[0])?.id ?? null
-  }
-
-  // ── Upload attachments after task creation ─────────────────────────────
-  const uploadAttachments = async (taskId) => {
-    if (!selectedFiles.length) return
-    setIsUploading(true)
-    try {
-      await Promise.all(
-        selectedFiles.map(({ file }) =>
-          uploadTaskAttachment(taskId, file, user?.id)
-        )
-      )
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
   // ── Reset form ─────────────────────────────────────────────────────────
   const resetForm = () => {
     setTitle('')
@@ -199,35 +168,23 @@ function useCreateTask() {
   }
 
   // ── Create-task mutation ───────────────────────────────────────────────
+  // The new backend's CreateTaskDto only accepts boardId/title/description/
+  // position3d/modelRef — its ValidationPipe rejects any other field outright
+  // (forbidNonWhitelisted). So category, priority, due date, board selection,
+  // members, requirements and attachments below are collected in the form but
+  // not sent or persisted yet (see the notice in the form UI). currentProjectId
+  // doubles as boardId until the backend gains a Project entity (matches
+  // ProjectContext.jsx's tasksQuery). position3d is left out on purpose —
+  // TaskService defaults it to {x:0,y:0,z:0} server-side.
   const createTaskMutation = useMutation({
     mutationFn: async () => {
-      const boardId = resolveBoardId()
-      if (!boardId) throw new Error('No board found for this project. Please create a board first.')
-      if (!user?.id) throw new Error('You must be logged in to create a task.')
+      if (!currentProjectId) throw new Error('No project selected.')
 
-      const taskPayload = {
-        title:         title.trim(),
-        description:   description.trim() || null,
-        task_number:   generateTaskNumber(),   // required NOT NULL
-        task_category: taskCategory,           // task_category_enum
-        phase:         currentPhase? currentPhase : 'concept_design',           // manufacturing_phase enum
-        status:        'todo',
-        priority,
-        board_id:      boardId,                // required NOT NULL
-        created_by:    user.id,                // required NOT NULL
-        lead_time:     leadTime ? parseInt(leadTime, 10) : null,
-        due_date:      dueDate || null,
-      }
-
-      // createTask now accepts members as a second arg and inserts task_members rows
-      const createdTask = await createTask(currentProjectId, taskPayload, members)
-
-      // Upload attachments linked to the real task id
-      if (selectedFiles.length > 0) {
-        await uploadAttachments(createdTask.id)
-      }
-
-      return createdTask
+      return post('/tasks', {
+        boardId: currentProjectId,
+        title: title.trim(),
+        ...(description.trim() && { description: description.trim() }),
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['tasks', currentProjectId])
@@ -289,6 +246,12 @@ export function CreateTask() {
 
       <Modal isOpen={show} onClose={handleClose} title="Create New Task">
         <form onSubmit={handleSubmit}>
+
+          <p className="text-xs mb-4 px-3 py-2 rounded bg-amber-50 border border-amber-200 text-amber-800">
+            Only title and description are saved right now — category, priority,
+            due date, board selection, team members, requirements, and attachments
+            aren&apos;t persisted by the backend yet.
+          </p>
 
           {/* ── Core fields ─────────────────────────────────────────── */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
