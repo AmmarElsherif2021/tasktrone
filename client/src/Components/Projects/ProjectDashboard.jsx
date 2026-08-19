@@ -1,4 +1,3 @@
-// ProjectDashboard.jsx
 import { useState }         from 'react'
 import IconButton           from '../../Ui/IconButton'
 import Notifications        from './Settings'
@@ -23,12 +22,18 @@ export const ProjectDashboard = () => {
       {show && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-          onClick={() => setShow(false)}
         >
+          <button
+            type="button"
+            aria-label="Close project management"
+            className="absolute inset-0 cursor-default"
+            onClick={() => setShow(false)}
+          />
           <div
-            className="bg-neutral-white max-w-3xl w-full mx-4"
+            role="dialog"
+            aria-modal="true"
+            className="relative bg-neutral-white max-w-3xl w-full mx-4"
             style={{ border: 'var(--border-width-base) solid var(--color-card-border)' }}
-            onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div

@@ -1,5 +1,5 @@
 import { ProjectCard } from '../../Components/Projects/ProjectCard'
-
+import propTypes from 'prop-types'
 export const PreviewProjects = ({ projects, onProjectClick }) => {
   return (
     <div className="p-3 max-h-[61.5vh] overflow-y-auto">
@@ -25,4 +25,23 @@ export const PreviewProjects = ({ projects, onProjectClick }) => {
       </div>
     </div>
   )
+}
+PreviewProjects.propTypes = {
+  projects: propTypes.arrayOf(
+    propTypes.shape({
+      id: propTypes.string.isRequired,
+      title: propTypes.string.isRequired,
+      description: propTypes.string,
+      created_by: propTypes.string.isRequired,
+      project_manager: propTypes.string,
+      status: propTypes.string,
+      current_phase: propTypes.string,
+      priority: propTypes.string,
+      start_date: propTypes.string,
+      target_completion_date: propTypes.string,
+      wip_limit: propTypes.number,
+      members: propTypes.arrayOf(propTypes.string),
+    })
+  ).isRequired,
+  onProjectClick: propTypes.func.isRequired,
 }

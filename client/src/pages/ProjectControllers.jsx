@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useProject } from '../contexts/ProjectContext'
 import { StyledCard } from '../Ui/StyledCard'
-
+import propTypes from 'prop-types'
 import inProgressIcon from '../assets/inProgress.svg'
 import cycleTimeIcon  from '../assets/cycleTime.svg'
 import leadTimeIcon   from '../assets/leadTime.svg'
@@ -23,8 +23,13 @@ const StatChip = ({ label, value }) => (
     {label}: <strong>{value}</strong>
   </span>
 )
+StatChip.propTypes = {
+  label: propTypes.string.isRequired,
+  value: propTypes.oneOfType([propTypes.string, propTypes.number]).isRequired,
+}
 
-const ToolbarSection = ({ project, currentTasks }) => {
+//Toolbar =============================================
+const ToolbarSection = ({ project }) => {
   const { currentPhase } = useProject()
   const {
     title,
@@ -93,7 +98,9 @@ const ToolbarSection = ({ project, currentTasks }) => {
     </nav>
   )
 }
-
+ToolbarSection.propTypes = {
+  project: propTypes.object.isRequired
+}
 // ─────────────────────────────────────────────────────────────────
 // Metrics section – now correctly uses currentTasks from context
 // ─────────────────────────────────────────────────────────────────
@@ -115,6 +122,11 @@ const WipControl = ({ value, onChange, onSubmit }) => (
   </div>
 )
 
+WipControl.propTypes = {
+  value: propTypes.number.isRequired,
+  onChange: propTypes.func.isRequired,
+  onSubmit: propTypes.func.isRequired,
+}
 const METRICS_CONFIG = [
   {
     id: 'wipLimit',

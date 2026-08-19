@@ -48,7 +48,7 @@ import { getPosts } from '../API/posts'
 import { useAuth } from '../contexts/AuthContext'
 import { getAllUsers } from '../API/users'
 import { get } from '../lib/apiClient'
-
+import propTypes from 'prop-types'
 // ─── Manufacturing phase display labels (Layer 3 / Product Line) ──
 export const MANUFACTURING_PHASE_LABELS = {
   concept_design:          'Concept & Design',
@@ -340,4 +340,7 @@ export const ProjectProvider = ({ children }) => {
       {children}
     </ProjectContext.Provider>
   )
+}
+ProjectProvider.propTypes = {
+  children: propTypes.node.isRequired,
 }

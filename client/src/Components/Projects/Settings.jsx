@@ -9,6 +9,7 @@ import IconButton                        from '../../Ui/IconButton'
 import notificationIcon         from '../../assets/notification-icon.svg'
 import notificationSettingsIcon from '../../assets/notificationsSettings.svg'
 import markAllIcon              from '../../assets/markAll.svg'
+import PropTypes from 'prop-types'
 
 // ── Shared dropdown primitive ─────────────────────────────────
 const CustomDropdown = ({ trigger, children }) => {
@@ -25,9 +26,13 @@ const CustomDropdown = ({ trigger, children }) => {
 
   return (
     <div className="relative inline-block" ref={ref}>
-      <div onClick={() => setIsOpen((v) => !v)} className="cursor-pointer">
+      <button
+        type="button"
+        onClick={() => setIsOpen((v) => !v)}
+        className="cursor-pointer appearance-none border-0 bg-transparent p-0"
+      >
         {trigger}
-      </div>
+      </button>
       {isOpen && (
         <div
           className="
@@ -45,7 +50,10 @@ const CustomDropdown = ({ trigger, children }) => {
     </div>
   )
 }
-
+CustomDropdown.propTypes = {
+  trigger: PropTypes.node.isRequired,
+  children: PropTypes.node.isRequired,
+}
 // ── Notifications ─────────────────────────────────────────────
 export const Notifications = () => (
   <CustomDropdown

@@ -1,5 +1,6 @@
 import { useState, useEffect, memo } from 'react'
 import { Alert, Button } from 'react-bootstrap'
+import PropTypes from 'prop-types'
 import { BoardSkeleton } from '../Ui/LoadingSkeletons/BoardSkeleton'
 import { TaskCard } from '../Components/Tasks/TaskCard'
 import ProjectControllers from './ProjectControllers'
@@ -40,6 +41,12 @@ const KanbanColumn = memo(({ status, tasks }) => (
     ))}
   </div>
 ))
+
+KanbanColumn.displayName = 'KanbanColumn'
+KanbanColumn.propTypes = {
+  status: PropTypes.string.isRequired,
+  tasks: PropTypes.arrayOf(PropTypes.object).isRequired,
+}
 
 const BOARD_STATUSES = ['todo', 'in_progress', 'review', 'done']
 

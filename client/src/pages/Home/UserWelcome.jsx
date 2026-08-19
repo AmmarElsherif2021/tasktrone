@@ -1,7 +1,7 @@
 import { User } from '../../Components/User/User'
 import { ProfileImage } from '../../Components/User/ProfileImage'
 import { useUserHome } from '../../contexts/UserHomeContext'
-
+import propTypes from 'prop-types'
 export const UserWelcome = ({ userId, welcomeMessage, children }) => {
   const { currentUser } = useUserHome()
 
@@ -23,4 +23,9 @@ export const UserWelcome = ({ userId, welcomeMessage, children }) => {
       <p className="px-3 text-[#666] mt-2">{children}</p>
     </div>
   )
+}
+UserWelcome.propTypes = {
+  userId: propTypes.string.isRequired,
+  welcomeMessage: propTypes.string.isRequired,
+  children: propTypes.node,
 }

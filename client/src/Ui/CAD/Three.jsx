@@ -99,7 +99,7 @@ function useThreeScene(containerRef) {
         container.removeChild(rendererRef.current.domElement)
       }
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) 
   // Intentionally empty — scene must init once only.
 
   return { sceneRef, cameraRef, rendererRef, controlsRef }

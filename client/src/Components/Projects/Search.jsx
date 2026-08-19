@@ -20,7 +20,6 @@ const Search = () => {
         <input
           type="text"
           placeholder="Search…"
-          autoFocus
           className="
             ml-2 px-3 py-1
             font-mono text-sm

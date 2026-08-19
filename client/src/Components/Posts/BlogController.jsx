@@ -36,7 +36,7 @@ export function BlogControls({
         {/* All modal content – header is already handled by Modal */}
         <div className="space-y-4">
           <div>
-            <label className="block mb-1 font-medium">Filter by Author</label>
+            <label htmlFor="author" className="block mb-1 font-medium">Filter by Author</label>
             <div className="flex border-2 border-neutral-black">
               <span className="bg-neutral-black/10 px-3 py-1 border-r-2 border-neutral-black">
                 Author
@@ -47,16 +47,18 @@ export function BlogControls({
                 value={author}
                 onChange={(e) => onAuthorChange(e.target.value)}
                 className="flex-1 px-3 py-1 focus:outline-none bg-neutral-white"
+                id="author"
               />
             </div>
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">Sort By</label>
+            <label htmlFor="sortBy" className="block mb-1 font-medium">Sort By</label>
             <select
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value)}
               className="w-full border-2 border-neutral-black px-3 py-1 bg-neutral-white"
+              id="sortBy"
             >
               {sortFields.map((field) => (
                 <option key={field} value={field}>
@@ -67,11 +69,12 @@ export function BlogControls({
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">Order</label>
+            <label htmlFor="sortOrder" className="block mb-1 font-medium">Order</label>
             <select
               value={sortOrder}
               onChange={(e) => onSortOrderChange(e.target.value)}
               className="w-full border-2 border-neutral-black px-3 py-1 bg-neutral-white"
+              id='sortOrder'
             >
               <option value="ascending">Ascending</option>
               <option value="descending">Descending</option>

@@ -83,8 +83,14 @@ function TaskModal({ show, onHide, taskId, projectId, cardColor }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      role="button"
+      tabIndex={0}
+      aria-label="Close modal"
       onClick={(e) => {
         if (e.target === e.currentTarget) onHide()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') onHide()
       }}
     >
       <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl">
