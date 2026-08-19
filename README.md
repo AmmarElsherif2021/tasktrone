@@ -163,17 +163,3 @@ Document additional env vars in server/README.md when implemented.
 - Use PR titles that include the epic tag e.g., "[epic:1] Implement PostgresAdapter".
 
 ---
-
-## Where to look next
-
-- plan.md — detailed structure & example adapter/repo/service sketches.
-- issues.csv / create_milestones.sh — delivery backlog and milestone automation.
-- client/ — React app and contexts (ProjectContext is the place to wire backend integration).
-- server/ (planned) — server-side NestJS TypeScript implementation, DB adapters, and tests.
-
----
-
-If you want, I can:
-
-- Convert the CSV rows above into GitHub issues in this repository (I will need permission to create issues on AmmarElsherif2021/tasktrone), or
-- Produce a ready-to-commit DECISION_LOG.md and server/README.md drafts to land alongside the implementation plan.
