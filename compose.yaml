@@ -1,25 +1,35 @@
-version: '3.9'
 services:
   blog-database:
-    image: mongo
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=bloguser
+      - POSTGRES_PASSWORD=blogpass
+      - POSTGRES_DB=blog
     ports:
-      - '27017:27017'
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   blog-server:
     build: server/
     environment:
       - PORT=3001
-      - DATABASE_URL=mongodb://host.docker.internal:27017/blog
+      # FIXED: Use the service name 'blog-database' instead of host.docker.internal
+      - DATABASE_URL=postgresql://bloguser:blogpass@blog-database:5432/blog
     ports:
-      - '3001:3001'
+      - "3001:3001"
     depends_on:
       - blog-database
+
   blog-frontend:
     build:
       context: .
       args:
         VITE_BACKEND_URL: http://localhost:3001/api/v1
     ports:
-      - '3000:80'
+      - "3000:80"
     depends_on:
       - blog-server
+
+volumes:
+  postgres_data:
