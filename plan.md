@@ -1,464 +1,195 @@
-Let me analyze the **best design pattern** for your specific situation:
-
----
-
-## 🎯 **Your Constraints**
-
-1. **Local-first development** (PostgreSQL locally)
-2. **Ready to migrate** (to Supabase, AWS RDS, etc. later)
-3. **Rapid prototyping** (weeks 1-4)
-4. **Team coordination** (Project Manager needs clear ownership)
-5. **Eventually: Multi-tenancy, RBAC, Jobs** (Phase 1.1-1.4)
-
----
-
-## 🏆 **Best Pattern: Repository + Adapter (Hybrid)**
-
-This is **NOT just adapter**, and **NOT just repository**. It's both, layered strategically.
-
-```
-Route
-  ↓
-Service (business logic)
-  ↓
-Repository (query building + caching)
-  ↓
-Adapter (driver agnostic)
-  ↓
-PostgreSQL | Supabase | AWS
-```
-
-**Why this wins:**
-
-| Pattern | Pro | Con | Your Case |
-|---------|-----|-----|-----------|
-| **Adapter only** | Simple, swappable | Business logic creeps into routes | ❌ Won't scale to Phase 1.1 |
-| **Repository only** | Separates queries | Tightly coupled to driver | ❌ Hard to migrate later |
-| **Repository + Adapter** | Best of both | Slightly more boilerplate | ✅ Perfect fit |
-
----
-
-## 📐 **The Pattern: 3-Tier**
-
-### **Layer 1: Adapter (Database Agnostic)**
-
-```typescript
-// src/db/adapter.ts
-export interface DBAdapter {
-  query<T>(sql: string, params?: any[]): Promise<T[]>;
-  queryOne<T>(sql: string, params?: any[]): Promise<T | null>;
-  transaction<T>(cb: (db: DBAdapter) => Promise<T>): Promise<T>;
-}
-```
-
-**Why:** Contracts only. Zero implementation details.
-
----
-
-### **Layer 2: Repository (Query Building)**
-
-```typescript
-// src/db/repositories/TaskRepository.ts
-import { DBAdapter } from '../adapter';
-
-export class TaskRepository {
-  constructor(private db: DBAdapter) {}
-
-  // Query logic isolated here
-  async findByOrg(orgId: string) {
-    return this.db.query(
-      `SELECT * FROM tasks WHERE organization_id = $1 ORDER BY created_at DESC`,
-      [orgId]
-    );
-  }
-
-  async findById(id: string) {
-    return this.db.queryOne(
-      `SELECT * FROM tasks WHERE id = $1`,
-      [id]
-    );
-  }
-
-  async create(orgId: string, title: string, boardId: string) {
-    return this.db.queryOne(
-      `INSERT INTO tasks (organization_id, title, board_id) 
-       VALUES ($1, $2, $3) RETURNING *`,
-      [orgId, title, boardId]
-    );
-  }
-
-  async updateStatus(id: string, status: string) {
-    return this.db.queryOne(
-      `UPDATE tasks SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-      [status, id]
-    );
-  }
-}
-```
-
-**Why:**
-- Queries in one place (testable, reusable)
-- Receives adapter via constructor (swappable)
-- No business logic here (pure data access)
-
----
-
-### **Layer 3: Service (Business Logic)**
-
-```typescript
-// src/services/TaskService.ts
-import { TaskRepository } from '../db/repositories/TaskRepository';
-import { ValidationError, NotFoundError } from '../utils/errors';
-
-export class TaskService {
-  constructor(private taskRepo: TaskRepository) {}
-
-  async createTask(orgId: string, userId: string, data: any) {
-    // Validation (business rule)
-    if (!data.title?.trim()) {
-      throw new ValidationError('Title required');
-    }
-
-    if (data.title.length > 255) {
-      throw new ValidationError('Title too long');
-    }
-
-    // Create
-    const task = await this.taskRepo.create(orgId, data.title, data.boardId);
-    return task;
-  }
-
-  async moveTask(orgId: string, taskId: string, newStatus: string) {
-    // Check task exists
-    const task = await this.taskRepo.findById(taskId);
-    if (!task) {
-      throw new NotFoundError('Task not found');
-    }
-
-    // Check status transition is valid (business rule)
-    const validTransitions = {
-      todo: ['in_progress'],
-      in_progress: ['review', 'todo'],
-      review: ['done', 'in_progress'],
-      done: [],
-    };
-
-    if (!validTransitions[task.status]?.includes(newStatus)) {
-      throw new ValidationError(`Cannot move from ${task.status} to ${newStatus}`);
-    }
-
-    // Update
-    return this.taskRepo.updateStatus(taskId, newStatus);
-  }
-}
-```
-
-**Why:**
-- Business logic isolated
-- Knows nothing about HTTP or database drivers
-- Testable without database (mock repo)
-
----
-
-### **Layer 4: Route (HTTP Glue)**
-
-```typescript
-// src/api/routes/tasks.ts
-import { Router } from 'express';
-import { TaskService } from '../../services/TaskService';
-import { taskRepo } from '../../db/repositories';
-import { AppError } from '../../utils/errors';
-
-const taskService = new TaskService(taskRepo);
-const router = Router();
-
-router.get('/', async (req, res, next) => {
-  try {
-    const tasks = await taskService.findByOrg(req.user.organizationId);
-    res.json(tasks);
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.post('/', async (req, res, next) => {
-  try {
-    const task = await taskService.createTask(
-      req.user.organizationId,
-      req.user.id,
-      req.body
-    );
-    res.status(201).json(task);
-  } catch (err) {
-    next(err);
-  }
-});
-
-export default router;
-```
-
-**Why:**
-- Route only handles HTTP (params, response format)
-- Delegates to service
-- No database queries here
-
----
-
-## 🎲 **Why This Beats Alternatives**
-
-### **Option A: Adapter Only (No Repository)**
-```typescript
-// ❌ What you DON'T want
-async createTask(db: DBAdapter, orgId: string, title: string) {
-  // Queries scattered in routes or services
-  return db.queryOne('INSERT INTO tasks...');
-}
-
-// Problem: If you add pagination logic, you repeat it everywhere
-// Problem: Migration to Supabase means updating all query strings
-```
-
-### **Option B: Repository Only (No Adapter)**
-```typescript
-// ❌ What you DON'T want
-export class TaskRepository {
-  async createTask() {
-    // Tightly coupled to pg driver
-    const { Pool } = require('pg');
-    const pool = new Pool({ connectionString: '...' });
-    return pool.query('INSERT INTO tasks...');
-  }
-}
-
-// Problem: Swapping to Supabase means rewriting repository
-// Problem: Hard to test (requires real PostgreSQL)
-```
-
-### **Option C: Repository + Adapter (✅ Your Pattern)**
-```typescript
-export class TaskRepository {
-  constructor(private db: DBAdapter) {} // Receives abstraction
-  
-  async createTask(orgId: string, title: string) {
-    return this.db.queryOne('INSERT INTO tasks...');
-  }
-}
-
-// Benefit: Query logic stays in repo
-// Benefit: Adapter swappable → migration easy
-// Benefit: Tests can pass mock adapter
-```
-
----
-
-## 🏗️ **Concrete Structure for Your Project**
-
-```
-src/
-├── db/
-│   ├── adapter.ts                    # Interface
-│   ├── implementations/
-│   │   ├── postgres.ts               # Concrete impl
-│   │   └── supabase.ts               # Future impl
-│   ├── repositories/
-│   │   ├── TaskRepository.ts         # Query building
-│   │   ├── BoardRepository.ts
-│   │   ├── UserRepository.ts
-│   │   └── index.ts                  # Export all repos
-│   └── index.ts                      # Singleton setup
-│
-├── services/
-│   ├── TaskService.ts                # Business logic
-│   ├── BoardService.ts
-│   └── index.ts                      # Export all services
-│
-├── api/
-│   └── routes/
-│       ├── tasks.ts                  # HTTP glue
-│       ├── boards.ts
-│       └── index.ts
-│
-└── middleware/
-    └── errorHandler.ts
-```
-
----
-
-## 💾 **Minimal Implementation (All Three Layers)**
-
-### **1. Adapter**
-```typescript
-// src/db/adapter.ts
-export interface DBAdapter {
-  query<T>(sql: string, params?: any[]): Promise<T[]>;
-  queryOne<T>(sql: string, params?: any[]): Promise<T | null>;
-}
-```
-
-### **2. Implementation**
-```typescript
-// src/db/implementations/postgres.ts
-import { Pool } from 'pg';
-import { DBAdapter } from '../adapter';
-
-export class PostgresAdapter implements DBAdapter {
-  private pool: Pool;
-
-  constructor(url: string) {
-    this.pool = new Pool({ connectionString: url });
-  }
-
-  async query<T>(sql: string, params: any[] = []): Promise<T[]> {
-    const res = await this.pool.query(sql, params);
-    return res.rows;
-  }
-
-  async queryOne<T>(sql: string, params: any[] = []): Promise<T | null> {
-    const rows = await this.query<T>(sql, params);
-    return rows[0] || null;
-  }
-}
-```
-
-### **3. Repository**
-```typescript
-// src/db/repositories/TaskRepository.ts
-import { DBAdapter } from '../adapter';
-
-export class TaskRepository {
-  constructor(private db: DBAdapter) {}
-
-  async findByOrg(orgId: string) {
-    return this.db.query(
-      'SELECT * FROM tasks WHERE organization_id = $1',
-      [orgId]
-    );
-  }
-
-  async create(orgId: string, title: string, boardId: string) {
-    return this.db.queryOne(
-      'INSERT INTO tasks (organization_id, title, board_id) VALUES ($1, $2, $3) RETURNING *',
-      [orgId, title, boardId]
-    );
-  }
-}
-```
-
-### **4. Service**
-```typescript
-// src/services/TaskService.ts
-import { TaskRepository } from '../db/repositories/TaskRepository';
-
-export class TaskService {
-  constructor(private taskRepo: TaskRepository) {}
-
-  async createTask(orgId: string, title: string, boardId: string) {
-    if (!title?.trim()) throw new Error('Title required');
-    return this.taskRepo.create(orgId, title, boardId);
-  }
-}
-```
-
-### **5. Route**
-```typescript
-// src/api/routes/tasks.ts
-import { Router } from 'express';
-import { TaskService } from '../../services/TaskService';
-
-const taskService = new TaskService(new TaskRepository(db));
-const router = Router();
-
-router.post('/', async (req, res, next) => {
-  try {
-    const task = await taskService.createTask(
-      req.user.organizationId,
-      req.body.title,
-      req.body.boardId
-    );
-    res.json(task);
-  } catch (err) {
-    next(err);
-  }
-});
-```
-
----
-
-## 🧪 **Testing Benefits**
-
-```typescript
-// Test the service WITHOUT database
-describe('TaskService', () => {
-  it('should validate title', async () => {
-    const mockRepo = {
-      create: jest.fn(),
-    };
-    const service = new TaskService(mockRepo as any);
-
-    expect(() => service.createTask('org-1', '', 'board-1')).toThrow();
-    expect(mockRepo.create).not.toHaveBeenCalled();
-  });
-});
-
-// Test the repository WITH mock adapter
-describe('TaskRepository', () => {
-  it('should query tasks', async () => {
-    const mockAdapter = {
-      query: jest.fn().mockResolvedValue([{ id: '1', title: 'Test' }]),
-    };
-    const repo = new TaskRepository(mockAdapter as any);
-
-    const tasks = await repo.findByOrg('org-1');
-    expect(tasks).toHaveLength(1);
-  });
-});
-```
-
----
-
-## 🔄 **Migration Path (No Code Changes)**
-
-**Week 1-4:** Use PostgreSQL adapter
-```typescript
-const db = new PostgresAdapter(process.env.DATABASE_URL);
-```
-
-**Week 9:** Switch to Supabase adapter (create new file only)
-```typescript
-const db = new SupabaseAdapter(supabaseUrl, supabaseKey);
-```
-
-**Routes/Services/Repos unchanged.** ✅
-
----
-
-## 📊 **Decision Matrix: Why This Pattern**
-
-| Requirement | Adapter Only | Repository Only | Repository + Adapter |
-|-------------|--------------|-----------------|----------------------|
-| Local-first dev | ✅ | ✅ | ✅ |
-| Easy migration | ✅ | ❌ | ✅ |
-| Testable services | ❌ | ✅ | ✅ |
-| Testable queries | ❌ | ✅ | ✅ |
-| Reusable queries | ❌ | ✅ | ✅ |
-| Scales to Phase 1.1 | ❌ | ✅ | ✅ |
-| Scales to Phase 1.4 (jobs) | ❌ | ❌ | ✅ |
-
----
-
-## ✅ **Recommendation**
-
-**Use: Repository + Adapter Pattern**
-
-**Start with:**
-1. `DBAdapter` interface (week 1, day 1)
-2. `PostgresAdapter` implementation
-3. `TaskRepository` (first repo)
-4. `TaskService` (first service)
-5. One route to prove it works
-
-**By week 4:** You have 5-6 repos, 5-6 services, clean layering.
-
-**Week 9+:** Plug in Supabase adapter. Everything else works unchanged.
-
----
+Revised issues and tasks (PM-ready) — grouped by epic, with acceptance criteria, labels, estimates
+Notes: Est = rough size (S/M/L). Labels are comma-separated. Milestone names match your existing milestones.
+
+Epic 1: Hexagonal Foundation (milestone: Epic 1: Hexagonal Foundation)
+
+1. Create server skeleton & CI job (Est: M)
+
+- Description: Add server/ scaffold (server/package.json, server/README, basic lint/test scripts). Add a CI workflow that runs server lint and unit tests.
+- Acceptance criteria:
+  - server/package.json exists with scripts: dev, start, test, lint.
+  - server/README documents how to run server locally and run tests.
+  - GitHub Actions job runs server tests on push.
+- Labels: epic:1,backend,infra
+
+2. Define DBAdapter interface and unit test contract (Est: S)
+
+- Description: Define adapter interface (DBAdapter) that repositories depend on. Provide a MockAdapter used in unit tests.
+- Acceptance criteria:
+  - DBAdapter file exported with clear method surface (CRUD semantics or query/queryOne semantics).
+  - Example unit test demonstrates injecting MockAdapter into a repository test.
+- Labels: epic:1,backend,architecture,testing
+
+3. Implement PostgresAdapter (Est: M)
+
+- Description: Concrete adapter using node-postgres (pg) that implements DBAdapter.
+- Acceptance criteria:
+  - PostgresAdapter implements DBAdapter methods and reads DB connection from env (DATABASE_URL or POSTGRES_* vars).
+  - Integration smoke test inserts/reads rows against a local Postgres (Docker Compose or Testcontainers) and passes.
+- Labels: epic:1,backend,db,postgres,testing
+
+4. Create Repository layer (BoardRepo, TaskRepo, UserRepo) that depends on DBAdapter (Est: M)
+
+- Description: Implement server/src/db/repositories/*.js that only depend on DBAdapter.
+- Acceptance criteria:
+  - Repos implement domain persistence methods used by services (find/create/update).
+  - Unit tests use MockAdapter to assert repository behavior (no direct driver calls).
+  - Repositories do not import pg or other driver code.
+- Labels: epic:1,backend,domain,architecture,testing
+
+5. DI/bootstrap wiring (adapter → repos → services) (Est: S)
+
+- Description: Provide a bootstrap factory that constructs the PostgresAdapter, instantiates repositories with it, and exports service instances for controllers.
+- Acceptance criteria:
+  - server bootstrap demonstrates wiring and uses env vars to configure PostgresAdapter.
+  - README snippet documents how to run server with local Postgres.
+- Labels: epic:1,backend,architecture
+
+Epic 2: Minimal Core Backend (milestone: Epic 2) 6) Define domain entities and DTOs (Board, Task, User) including position3d (Est: S)
+
+- Description: Add plain JS/TS domain objects and DTO validation (class-validator or Joi) for Task with position3d.
+- Acceptance criteria:
+  - server/src/domain contains entity/DTO definitions; DTO validation schema exists.
+  - Tests validate DTOs reject invalid input and accept valid position3d values.
+- Labels: epic:2,backend,domain,api,testing
+
+7. Implement services/use-cases depending on repositories (Est: M)
+
+- Description: TaskService and BoardService should accept repository interfaces in constructor and contain business rules.
+- Acceptance criteria:
+  - Services only depend on repository interfaces, not adapters.
+  - Unit tests use mocked repositories to validate business logic and error cases.
+- Labels: epic:2,backend,service,testing
+
+8. Thin HTTP API + DTO validation (POST /boards, GET /boards/:id, POST /tasks, GET /tasks?boardId=, PATCH /tasks/:id) (Est: M)
+
+- Description: Implement routes that call services, validate input, and return consistent JSON.
+- Acceptance criteria:
+  - Endpoints respond with correct status codes and JSON shapes.
+  - Integration tests (supertest) cover create -> fetch happy path for boards/tasks using a test Postgres DB.
+  - Validation errors return consistent error shape and status.
+- Labels: epic:2,backend,api,testing
+
+9. Add global error mapping middleware (Est: S)
+
+- Description: Translate domain errors to HTTP codes with consistent error payload.
+- Acceptance criteria:
+  - Middleware exists and tests assert NotFound -> 404, ValidationError -> 400, generic -> 500.
+- Labels: epic:1,backend,api,testing
+
+Epic 3: 3D Board Prototype (milestone: Epic 3) 10) Ensure Task API supports position3d (Est: S)
+
+- Description: Add position3d to create/update DTOs and persisted task shape.
+- Acceptance criteria:
+  - POST/PATCH accept position3d and GET /tasks returns it.
+  - Integration test asserts position3d persisted and returned.
+- Labels: epic:3,frontend,api,integration,testing
+
+Epic 4: Frontend-Backend Integration (milestone: Epic 4) 11) Add client/src/lib/apiClient.js (Est: S)
+
+- Description: Small centralized API client (get/post/patch) reading VITE_BACKEND_URL.
+- Acceptance criteria:
+  - apiClient exposes get/post/patch.
+  - Client tests mock apiClient and confirm it's used by ProjectContext.
+- Labels: epic:4,frontend,integration,testing
+
+12. Wire ProjectContext to backend via apiClient & React Query (Est: M)
+
+- Description: Replace mocks with real API fetches and expose loading/error states.
+- Acceptance criteria:
+  - ProjectContext loads board and tasks from backend and exposes them to consumers.
+  - Skeletons and error UI shown appropriately; retry option present.
+  - Tests validate context behavior using MSW or mocked apiClient.
+- Labels: epic:4,frontend,integration,testing
+
+13. Submit new tasks from CreateTask to backend (Est: S)
+
+- Description: CreateTask posts to /tasks with default position3d when omitted.
+- Acceptance criteria:
+  - After create, next fetch shows the new task.
+  - Form displays validation errors when backend returns 4xx.
+- Labels: epic:4,frontend,integration,testing
+
+Epic 5: Prototype Hardening & Demo Readiness (milestone: Epic 5) 14) DECISION_LOG.md capturing hexagonal decisions & Postgres rationale (Est: S)
+
+- Description: Document adapter/repository decision, Postgres vs alternatives, and testing strategy.
+- Acceptance criteria:
+  - DECISION_LOG.md contains at least 3 decision entries with alternatives and tradeoffs.
+- Labels: epic:5,docs
+
+15. Create issues & milestones (this refined batch) (Est: S)
+
+- Description: Convert the revised plan into GitHub Issues and Milestones (this batch).
+- Acceptance criteria:
+  - Issues created with labels & milestones applied.
+- Labels: epic:5,project-management
+
+Testing backlog (concrete tasks & acceptance)
+A) Unit tests for services (Est: M)
+
+- What: Jest (or preferred) tests for TaskService and BoardService using mocked repositories.
+- Acceptance:
+  - CI job runs unit tests; coverage threshold set (e.g., 80%).
+  - Tests do not touch network or DB.
+
+B) Repository unit tests with MockAdapter (Est: S)
+
+- What: Tests assert repository method params produce expected adapter calls; use a FakeAdapter that records calls.
+- Acceptance:
+  - Tests assert expected calls made; no DB dependency.
+
+C) Adapter integration tests against Postgres (Est: M)
+
+- What: Use Docker Compose or Testcontainers to bring up a local Postgres for integration tests of PostgresAdapter.
+- Acceptance:
+  - Tests run in CI with a disposable Postgres (or run in a separate integration job).
+  - Tests insert/read/clean up data.
+
+D) API integration tests (supertest) (Est: M)
+
+- What: Start server in test mode, run create board -> create task -> fetch tasks; assert JSON shapes and codes.
+- Acceptance:
+  - Tests pass using the test Postgres DB and clean up after run.
+
+E) Contract tests between client apiClient and backend (Est: S)
+
+- What: A simple OpenAPI or assertion tests ensuring task shape (including position3d) matches client expectations.
+- Acceptance:
+  - Contract tests pass in CI.
+
+F) Frontend E2E (Playwright/Cypress) (Est: L)
+
+- What: End-to-end happy path: create board -> create task -> task visible in UI.
+- Acceptance:
+  - Runs headless in CI (optionally gated), asserts visible UI elements and load/error flows.
+
+G) CI/test matrix (fast vs integration) (Est: S)
+
+- What: CI separates quick unit tests (mock adapters) from longer integration tests (DB).
+- Acceptance:
+  - Fast job runs on every PR; integration job runs on main or nightly.
+
+Concrete infra/ops and repo consistency actions
+
+- Replace or update compose.yaml to run Postgres locally (postgres:latest) instead of mongo. Add DB env vars (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB) and a service for the backend that points to DATABASE_URL or POSTGRES_*.
+- Add server/package.json with dependency "pg" (node-postgres) and test tooling (jest, supertest). Update root .lintstagedrc.js to include server patterns.
+- Document required env vars in server/README (DATABASE_URL, NODE_ENV, JWT secrets if used).
+- Use DATABASE_URL with the form: postgres://user:password@host:5432/dbname for PostgresAdapter configuration.
+
+PM task-log template (useable in GitHub issues or project boards)
+
+- Task card fields:
+  - Title
+  - Assignee
+  - Est (S/M/L)
+  - Priority (P0/P1/P2)
+  - Status (todo/in-progress/review/done)
+  - Acceptance criteria (copy from above)
+  - Notes (blockers, env choices)
+  - CI requirement (unit/integration)
+
+Risks and decisions to confirm
+
+- Confirm Postgres for local dev — you confirmed this; next: do you want to keep Supabase references in README for later production/migration?
+- TypeScript vs JavaScript for server: TS yields stronger domain modeling but increases initial setup time. If you want fast iteration, start JS and migrate to TS before the API stabilizes.
+- CI capability: do you want integration tests to run on PRs (slower) or only on main/merge?

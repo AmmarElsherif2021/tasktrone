@@ -1,98 +1,179 @@
 # Tasktrone
 
-> **Production Kanban for modern manufacturing.**
-> Give your shop floor the visibility, control, and compliance it deserves — without adding process overhead.
+Production Kanban for modern manufacturing — a focused Kanban system that brings WIP enforcement, quality gates, equipment tracking and immutable change history to assembly-line workflows.
+
+## What this repo contains (short)
+
+- A production-ready React client (client/) implemented in JavaScript.
+- A backend server scaffold planned as a NestJS TypeScript application (server/) that follows a hexagonal (ports & adapters) architecture — Postgres is the local DB for initial phases.
+- Project-level docs, plan and delivery artifacts (plan.md, DECISION_LOG.md).
 
 ---
 
-## The problem
+## Stack
 
-Assembly lines lose **10–20 % of total cycle time** to invisible bottlenecks, unplanned rework loops and untracked machine utilisation.  
-Spreadsheets and generic project tools can’t enforce WIP limits, trace quality decisions, or keep equipment history — so you keep losing hours you can’t get back.
+- Languages: JavaScript (client), TypeScript (server / NestJS)
+- Backend runtime: Node.js + NestJS (TypeScript)
+- Database (local/dev): PostgreSQL (initial phases)
+- Frontend: React (Vite), React Query
+- Testing: Jest for unit tests, Supertest for HTTP integration; Playwright/Cypress for optional E2E; integration tests run only on main/merge
 
----
+Notable libraries (representative)
 
-## The solution
-
-Tasktrone is a **purpose‑built Kanban system for discrete manufacturing**.  
-It brings lean manufacturing principles directly into your browser:
-
-- **Phase‑scoped boards** mirror your actual production stages (Raw Materials → Production → QC → Packaging → Shipped).
-- **WIP limits** at board and column level prevent overloading and highlight constraints.
-- **Quality gatekeeping** with pass/fail authority, mandatory justifications, and automated rework loops.
-- **Equipment registry & usage logging** turns every machine into a trackable resource.
-- **Immutable audit trail** logs every field change — ready for ISO 27001 / SOC 2 evidence.
-- **Role‑based access control** ensures welders only see welding tasks and inspectors only see QC checklists.
-
-The result: you stop fire‑fighting and start **managing by data**.
-
-*Tasktrone was built for engineers who understand that a factory workflow is not a software sprint, it’s a physical system that deserves industrial‑grade digital tooling.*
+- pg (node-postgres) — Postgres client for the PostgresAdapter
+- nestjs (server) — TypeScript framework with DI for service wiring
+- react, vite, @tanstack/react-query — client stack
+- jest, supertest, msw / testcontainers — testing & harnesses
 
 ---
 
-## Why manufacturers choose Tasktrone
+## Architecture overview (hexagonal)
 
-| Capability | Business impact |
-|------------|------------------|
-| **Real‑time Kanban with WIP enforcement** | Reduces lead time by surfacing bottlenecks before they delay shipments. |
-| **Structured quality checks** | Lowers defect rate by making inspections mandatory, traceable, and un‑skippable. |
-| **Equipment tracking & utilisation** | Eliminates idle‑machine blindness — know exactly which assets are working, waiting, or down. |
-| **Full audit trail (`task_history`)** | Satisfies customer audits and regulatory reviews with a single click. |
-| **Multi‑team, multi‑phase workflows** | Keeps design, production, QC, and logistics aligned on one platform — no more tribal knowledge. |
-| **Enterprise‑grade security** | Row‑Level Security isolates tenant data; RBAC restricts actions to authorised roles only. |
+- Adapter (DBAdapter) — a small DB-agnostic interface that exposes the minimal persistence surface (CRUD or query/queryOne).
+- Concrete Adapter — PostgresAdapter (node-postgres) implements DBAdapter; reads DATABASE_URL from env.
+- Repositories — domain-facing persistence classes (TaskRepository, BoardRepository, UserRepository) that accept a DBAdapter instance and implement domain queries.
+- Services / Use Cases — TaskService / BoardService accept repositories and contain business rules and validation.
+- Controllers (HTTP) — thin controllers map DTOs -> services -> responses and rely on global error mapping middleware.
+- Tests — repositories and services are unit-tested with MockAdapter/MockRepository. Concrete PostgresAdapter and API integration tests run against a disposable Postgres and are executed only on main/merge in CI.
 
----
-
-## See it in action
-
-> **Live demo is being prepared.**
-> Below: a glimpse of the phase‑scoped board with WIP counters and swimlanes.
-
-![Tasktrone board mockup](https://via.placeholder.com/800x400?text=Tasktrone+Production+Board)
+How it fits: controllers call services; services call repositories; repositories call DBAdapter; DBAdapter talks to the driver. This keeps domain logic independent of any DB driver, enabling test doubles and migration.
 
 ---
 
-## Under the hood (for your tech team)
+## Getting started (local development)
 
-Tasktrone is designed as a **multi‑tenant SaaS** from day one:
+Prereqs
 
-- **React** frontend (Vite, React Router, TanStack Query) with drag‑and‑drop Kanban boards — built and working today.
-- **Node.js (NestJS) backend** (`server/`) with a hexagonal adapter/repository/service layering over Postgres — implemented for tasks and boards: `POST/GET /boards`, `POST/GET/PATCH /tasks`, with DTO validation and consistent error responses. See [server/README.md](server/README.md) for how to run it and [DECISION_LOG.md](DECISION_LOG.md) for why it's built this way.
-- **PostgreSQL (Supabase)** still backs everything else — auth, project details, posts, users — while that part of the client is incrementally migrated onto the new backend. The frontend talks to both today; see [DECISION_LOG.md](DECISION_LOG.md#5-incremental-migration-new-backend-owns-tasksboards-supabase-keeps-everything-else) for the split.
-- **Abstract role & phase model** mapped to concrete manufacturing labels — the same core can later serve construction/MEP without a rewrite.
+- Node.js (>=18)
+- Docker (for local Postgres in compose)
+- Yarn or npm
 
-Audit trail, RBAC enforcement, and the manufacturing‑specific domain model (phases, WIP limits, QC gates, equipment registry) described above are still the direction the product is heading, not shipped functionality yet — the current backend covers only the Task/Board/User foundation.
-
----
-
-## Getting started
+1. Clone
 
 ```bash
 git clone https://github.com/AmmarElsherif2021/tasktrone.git
-cd tasktrone/client
-npm install
-cp .env.example .env   # add your Supabase project credentials
-npm run dev
+cd tasktrone
 ```
 
-The `server/` package (NestJS backend) is not yet implemented — the frontend currently talks to Supabase directly. Database schema and RLS policies are managed through Supabase migrations.
+2. Start local Postgres (recommended: Docker Compose)
+
+- The repo includes a sample compose (update if needed). Example minimal compose snippet:
+
+```yaml
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: tasktrone
+      POSTGRES_PASSWORD: tasktrone
+      POSTGRES_DB: tasktrone_dev
+    ports:
+      - "5432:5432"
+```
+
+Set your DATABASE_URL locally:
+
+```bash
+export DATABASE_URL=postgres://tasktrone:tasktrone@localhost:5432/tasktrone_dev
+```
+
+3. Server (NestJS / TypeScript) — scaffold
+
+- The server implementation lives under server/. It uses TypeScript and NestJS.
+- Install & run:
+
+```bash
+cd server
+npm install
+npm run start:dev   # or npm run build && npm run start
+```
+
+4. Client (React / JS)
+
+```bash
+cd client
+npm install
+npm run dev
+# open http://localhost:5173 (or the port Vite reports)
+```
 
 ---
 
-## Roadmap
+## Running tests
 
-| Phase | Delivery |
-|-------|----------|
-| **Current** | Project/task Kanban boards, auth, and activity feed on React + Supabase. |
-| **Next** | NestJS backend (`server/`), manufacturing domain model (phases, WIP limits), RBAC, audit trail, equipment tracking. |
-| **Later** | AI‑powered task generation from CAD/BOM documents, natural‑language “What’s blocking production?” assistant, analytics dashboard. |
-| **Long‑term** | Construction / MEP vertical — same platform, different labels. |
+- Unit tests (fast): run on every PR
+  - Server unit tests (Jest, mocks): run locally:
+    ```bash
+    cd server
+    npm run test
+    ```
+  - Client unit tests / component tests:
+    ```bash
+    cd client
+    npm run test
+    ```
+
+- Integration tests (Postgres, adapter & API):
+  - These run only on main/merge in CI. Locally you can run them after starting a disposable Postgres instance:
+    ```bash
+    # in server
+    npm run test:integration
+    ```
+  - Integration tests require DATABASE_URL pointing to a disposable DB and will clean up after themselves.
+
+- E2E (optional):
+  - Playwright / Cypress scripts live under server/tests/e2e or client/e2e depending on configuration. These are optional to run locally and may be gated in CI.
 
 ---
 
-## License
+## Development notes & conventions
 
-MIT © Tasktrone Contributors
+- Hexagonal architecture is enforced: repositories depend only on DBAdapter; services depend only on repositories; controllers depend only on services.
+- TypeScript is used for the backend (NestJS) to enforce domain types; frontend is JavaScript (React) to match current codebase and speed iteration.
+- No Supabase integration yet — it is intentionally staged as a production/hosting option. The README and DECISION_LOG.md will capture migration steps if you choose Supabase later.
+- Integration tests (Postgres adapter + API) are heavier and thus run only on main/merge to keep PR feedback fast. Unit tests use MockAdapter and are run on PRs.
 
 ---
 
+## Environment variables (server)
+
+- DATABASE_URL — postgres connection string (postgres://user:pass@host:5432/db)
+- NODE_ENV — development | test | production
+- JWT_SECRET — if auth is enabled (configure later)
+- PORT — server HTTP port (default 3000)
+
+Document additional env vars in server/README.md when implemented.
+
+---
+
+## Project tasks & testing policy (summary)
+
+- Implement DBAdapter → PostgresAdapter → Repositories → Services → Controllers.
+- Create unit tests for services and repositories with mocks (run on PRs).
+- Run adapter & API integration tests (requiring Postgres) only on main/merge in CI.
+- Maintain DECISION_LOG.md with architectural decisions and tradeoffs (Postgres chosen initially; Supabase staged as option).
+
+---
+
+## Contributing
+
+- Open an issue for non-trivial changes, link the relevant epic milestone.
+- Follow the hexagonal pattern for persistence changes.
+- Add tests: unit tests for logic; integration tests for any adapter/DB changes (integration tests must be documented and gated to main).
+- Use PR titles that include the epic tag e.g., "[epic:1] Implement PostgresAdapter".
+
+---
+
+## Where to look next
+
+- plan.md — detailed structure & example adapter/repo/service sketches.
+- issues.csv / create_milestones.sh — delivery backlog and milestone automation.
+- client/ — React app and contexts (ProjectContext is the place to wire backend integration).
+- server/ (planned) — server-side NestJS TypeScript implementation, DB adapters, and tests.
+
+---
+
+If you want, I can:
+
+- Convert the CSV rows above into GitHub issues in this repository (I will need permission to create issues on AmmarElsherif2021/tasktrone), or
+- Produce a ready-to-commit DECISION_LOG.md and server/README.md drafts to land alongside the implementation plan.
