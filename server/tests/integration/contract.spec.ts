@@ -6,6 +6,7 @@ import { AppModule } from '../../src/app.module'
 import { PostgresAdapter } from '../../src/db/implementations/PostgresAdapter'
 import boardSchema from '../../../contracts/board.schema.json'
 import taskSchema from '../../../contracts/task.schema.json'
+import { makeBoard, makeTask } from '../factories/entities'
 import { createSchema, dropSchema } from './schema'
 
 /**
@@ -51,9 +52,10 @@ describe('Contract: server responses match contracts/*.schema.json', () => {
   })
 
   it('POST /boards response matches board.schema.json', async () => {
+    const boardInput = makeBoard()
     const res = await request(app.getHttpServer())
       .post('/boards')
-      .send({ organizationId: '11111111-1111-4111-8111-111111111111', name: 'Assembly Line 1' })
+      .send({ organizationId: boardInput.organizationId, name: boardInput.name })
       .expect(201)
 
     const valid = validateBoard(res.body)
@@ -61,14 +63,16 @@ describe('Contract: server responses match contracts/*.schema.json', () => {
   })
 
   it('POST /tasks response matches task.schema.json, including a real (non-null) position3d', async () => {
+    const boardInput = makeBoard()
     const boardRes = await request(app.getHttpServer())
       .post('/boards')
-      .send({ organizationId: '11111111-1111-4111-8111-111111111111', name: 'Assembly Line 2' })
+      .send({ organizationId: boardInput.organizationId, name: boardInput.name })
       .expect(201)
 
+    const taskInput = makeTask({ position3d: { x: 1, y: 2, z: 3 } })
     const res = await request(app.getHttpServer())
       .post('/tasks')
-      .send({ boardId: boardRes.body.id, title: 'Weld frame', position3d: { x: 1, y: 2, z: 3 } })
+      .send({ boardId: boardRes.body.id, title: taskInput.title, position3d: taskInput.position3d })
       .expect(201)
 
     const valid = validateTask(res.body)
@@ -78,14 +82,15 @@ describe('Contract: server responses match contracts/*.schema.json', () => {
   })
 
   it('GET /tasks response items each match task.schema.json', async () => {
+    const boardInput = makeBoard()
     const boardRes = await request(app.getHttpServer())
       .post('/boards')
-      .send({ organizationId: '11111111-1111-4111-8111-111111111111', name: 'Assembly Line 3' })
+      .send({ organizationId: boardInput.organizationId, name: boardInput.name })
       .expect(201)
 
     await request(app.getHttpServer())
       .post('/tasks')
-      .send({ boardId: boardRes.body.id, title: 'Untitled placement' })
+      .send({ boardId: boardRes.body.id, title: makeTask().title })
       .expect(201)
 
     const listRes = await request(app.getHttpServer()).get('/tasks').query({ boardId: boardRes.body.id }).expect(200)
