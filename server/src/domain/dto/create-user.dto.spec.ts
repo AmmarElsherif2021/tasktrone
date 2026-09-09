@@ -1,14 +1,17 @@
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 import { CreateUserDto } from './create-user.dto'
+import { makeUser } from '../../../tests/factories/entities'
+
+const { organizationId, email, displayName, role } = makeUser()
 
 describe('CreateUserDto', () => {
   it('accepts a valid payload', async () => {
     const dto = plainToInstance(CreateUserDto, {
-      organizationId: '11111111-1111-4111-8111-111111111111',
-      email: 'inspector@example.com',
-      displayName: 'QC Inspector',
-      role: 'member',
+      organizationId,
+      email,
+      displayName,
+      role,
     })
 
     const errors = await validate(dto)
@@ -18,10 +21,10 @@ describe('CreateUserDto', () => {
 
   it('rejects an invalid email', async () => {
     const dto = plainToInstance(CreateUserDto, {
-      organizationId: '11111111-1111-4111-8111-111111111111',
+      organizationId,
       email: 'not-an-email',
-      displayName: 'QC Inspector',
-      role: 'member',
+      displayName,
+      role,
     })
 
     const errors = await validate(dto)
@@ -31,9 +34,9 @@ describe('CreateUserDto', () => {
 
   it('rejects an invalid role', async () => {
     const dto = plainToInstance(CreateUserDto, {
-      organizationId: '11111111-1111-4111-8111-111111111111',
-      email: 'inspector@example.com',
-      displayName: 'QC Inspector',
+      organizationId,
+      email,
+      displayName,
       role: 'superadmin',
     })
 

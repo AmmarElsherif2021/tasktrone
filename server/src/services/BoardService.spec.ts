@@ -1,6 +1,7 @@
 import { BoardRepository } from '../db/repositories/BoardRepository'
 import { NotFoundError, ValidationError } from '../errors/domain-errors'
 import { BoardService } from './BoardService'
+import { makeBoard } from '../../tests/factories/entities'
 
 function mockBoardRepo(): jest.Mocked<BoardRepository> {
   return {
@@ -22,7 +23,7 @@ describe('BoardService', () => {
 
   it('createBoard() creates the board for a valid payload', async () => {
     const boardRepo = mockBoardRepo()
-    boardRepo.create.mockResolvedValue({ id: 'b1', name: 'Assembly Line 1' } as never)
+    boardRepo.create.mockResolvedValue(makeBoard({ id: 'b1', name: 'Assembly Line 1' }))
     const service = new BoardService(boardRepo)
 
     const board = await service.createBoard({ organizationId: 'org1', name: 'Assembly Line 1' })
@@ -49,8 +50,8 @@ describe('BoardService', () => {
 
   it('updateBoard() updates when the board exists', async () => {
     const boardRepo = mockBoardRepo()
-    boardRepo.findById.mockResolvedValue({ id: 'b1', name: 'Old' } as never)
-    boardRepo.update.mockResolvedValue({ id: 'b1', name: 'New' } as never)
+    boardRepo.findById.mockResolvedValue(makeBoard({ id: 'b1', name: 'Old' }))
+    boardRepo.update.mockResolvedValue(makeBoard({ id: 'b1', name: 'New' }))
     const service = new BoardService(boardRepo)
 
     const updated = await service.updateBoard('b1', { name: 'New' })
