@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { Input, Textarea, Label } from '../../Ui/FormUi'
+import propTypes from 'prop-types'
 
 const INPUT_CLS = `
   w-full px-3 py-2
@@ -403,3 +404,19 @@ export function CreateProject({
     </form>
   )
 }
+CreateProject.propTypes = {
+  users: propTypes.arrayOf(
+    propTypes.shape({
+      id: propTypes.string.isRequired,
+      username: propTypes.string.isRequired,
+      full_name: propTypes.string.isRequired,
+      role: propTypes.string,
+      team: propTypes.string,
+    })
+  ),
+  isLoadingUsers: propTypes.bool,
+  currentUserId: propTypes.string.isRequired,
+  onSubmit: propTypes.func.isRequired,
+  isCreating: propTypes.bool,
+  onClose: propTypes.func,
+} 

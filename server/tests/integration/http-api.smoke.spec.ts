@@ -4,6 +4,7 @@ import request from 'supertest'
 import { AppModule } from '../../src/app.module'
 import { PostgresAdapter } from '../../src/db/implementations/PostgresAdapter'
 import { DomainErrorFilter } from '../../src/errors/domain-error.filter'
+import { makeBoard, makeTask } from '../factories/entities'
 import { createSchema, dropSchema } from './schema'
 
 /**
@@ -36,20 +37,22 @@ describe('HTTP API (integration)', () => {
   })
 
   it('create board -> create task -> fetch tasks by board -> patch task', async () => {
+    const boardInput = makeBoard()
     const boardRes = await request(app.getHttpServer())
       .post('/boards')
-      .send({ organizationId: '11111111-1111-4111-8111-111111111111', name: 'Assembly Line 1' })
+      .send({ organizationId: boardInput.organizationId, name: boardInput.name })
       .expect(201)
 
     const boardId = boardRes.body.id
     expect(boardId).toBeDefined()
 
+    const taskInput = makeTask({ position3d: { x: 1, y: 2, z: 3 } })
     const taskRes = await request(app.getHttpServer())
       .post('/tasks')
-      .send({ boardId, title: 'Weld frame', position3d: { x: 1, y: 2, z: 3 } })
+      .send({ boardId, title: taskInput.title, position3d: taskInput.position3d })
       .expect(201)
 
-    expect(taskRes.body.title).toBe('Weld frame')
+    expect(taskRes.body.title).toBe(taskInput.title)
     expect(taskRes.body.position3d).toEqual({ x: 1, y: 2, z: 3 })
 
     const listRes = await request(app.getHttpServer()).get('/tasks').query({ boardId }).expect(200)
@@ -66,14 +69,16 @@ describe('HTTP API (integration)', () => {
   })
 
   it('defaults position3d to the origin when a task is created without one', async () => {
+    const boardInput = makeBoard()
     const boardRes = await request(app.getHttpServer())
       .post('/boards')
-      .send({ organizationId: '11111111-1111-4111-8111-111111111111', name: 'Assembly Line 2' })
+      .send({ organizationId: boardInput.organizationId, name: boardInput.name })
       .expect(201)
 
+    const taskInput = makeTask()
     const taskRes = await request(app.getHttpServer())
       .post('/tasks')
-      .send({ boardId: boardRes.body.id, title: 'Untitled placement' })
+      .send({ boardId: boardRes.body.id, title: taskInput.title })
       .expect(201)
 
     expect(taskRes.body.position3d).toEqual({ x: 0, y: 0, z: 0 })

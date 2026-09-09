@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Task",
+  "description": "Response shape of GET/POST /tasks and PATCH /tasks/:id (server/src/domain/task.entity.ts).",
+  "type": "object",
+  "required": ["id", "boardId", "title", "status", "createdAt", "updatedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "boardId": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": ["string", "null"] },
+    "status": { "type": "string", "enum": ["todo", "in_progress", "review", "done"] },
+    "position3d": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+    "modelRef": { "type": ["string", "null"] },
+    "createdAt": { "type": "string" },
+    "updatedAt": { "type": "string" }
+  }
+}

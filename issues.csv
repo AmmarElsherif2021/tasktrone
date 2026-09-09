@@ -1,0 +1,94 @@
+title,body,labels,milestone,estimate,priority,tasks
+Create server skeleton & CI job,"Add a server/ scaffold (server/package.json, server/README, basic lint/test scripts). Add a CI workflow that runs server lint and unit tests. Acceptance criteria: server/package.json with scripts (dev,start,test,lint); server/README documents running server & tests; GitHub Actions job that runs server lint & unit tests on PRs; root .lintstagedrc.js updated to include server patterns.","epic:1,backend,infra",Epic 1: Hexagonal Foundation,M,P0,"- [ ] Add server/ directory with package.json and basic scripts (dev,start,test,lint)
+- [ ] Add server/README.md with run/test instructions and env var notes
+- [ ] Update root .lintstagedrc.js to include server/src/**/* patterns
+- [ ] Add GitHub Actions workflow: server-lint-test (runs on PR) that installs, lints, runs unit tests
+- [ ] Verify workflow runs on a sample PR"
+Define DBAdapter interface and unit-test contract,Define DBAdapter interface (server/src/db/adapter.ts or .js) that repositories depend on. Provide a MockAdapter/fake used in unit tests. Acceptance criteria: DBAdapter file exports method surface; at least one unit test shows repository injected with MockAdapter; docs snippet showing how to mock adapter in tests.,"epic:1,backend,architecture,testing",Epic 1: Hexagonal Foundation,S,P0,"- [ ] Create server/src/db/adapter.ts (or .js) and document method surface (query/queryOne or collection CRUD)
+- [ ] Add example MockAdapter under server/tests/mocks/MockAdapter
+- [ ] Write repository unit test that injects MockAdapter and asserts expected behavior
+- [ ] Add documentation snippet in server/README.md showing how to use MockAdapter in tests"
+Implement PostgresAdapter,Implement concrete PostgresAdapter using node-postgres (pg) that implements DBAdapter. Acceptance criteria: PostgresAdapter implements interface methods and reads DATABASE_URL (or POSTGRES_* envs); integration smoke test that connects to local Postgres (via Docker compose or test container) and performs CRUD; README documents env vars for Postgres.,"epic:1,backend,db,postgres,testing",Epic 1: Hexagonal Foundation,M,P1,"- [ ] Add dependency 'pg' and minimal PostgresAdapter at server/src/db/implementations/PostgresAdapter.ts
+- [ ] Implement connection pooling reading DATABASE_URL env var
+- [ ] Implement adapter methods to satisfy DBAdapter interface
+- [ ] Add integration smoke test that runs against local Postgres (Docker Compose) and verifies basic CRUD
+- [ ] Document Postgres env vars and connection examples in server/README.md"
+Create Repository layer (Board/Task/User),Implement repository classes under server/src/db/repositories that accept a DBAdapter instance and provide domain persistence methods. Acceptance criteria: repositories expose find/create/update methods required by services; unit tests use MockAdapter to verify behavior; repositories do not import pg or driver code directly.,"epic:1,backend,domain,architecture,testing",Epic 1: Hexagonal Foundation,M,P0,"- [ ] Create server/src/db/repositories/TaskRepository.ts, BoardRepository.ts, UserRepository.ts skeletons
+- [ ] Implement methods: create, findById, findByBoard, update for TaskRepo; analogous for Board/User
+- [ ] Ensure constructors accept DBAdapter only (no direct driver imports)
+- [ ] Add unit tests for each repository using MockAdapter to verify SQL/params and behavior
+- [ ] Document repository contract in README or a short doc"
+DI/bootstrap wiring (adapter → repos → services),Add bootstrap/factory that constructs PostgresAdapter from env and instantiates repositories and services. Acceptance criteria: server/src/bootstrap (or index) exports configured services; README includes a wiring example and how to run server with Postgres env; bootstrapping is tested in an integration smoke test.,"epic:1,backend,architecture",Epic 1: Hexagonal Foundation,S,P1,"- [ ] Implement server/src/bootstrap.ts that creates PostgresAdapter from DATABASE_URL
+- [ ] Instantiate repositories with the adapter and create service instances
+- [ ] Export configured services for controllers to consume
+- [ ] Add example usage in server/README.md showing wiring and env vars
+- [ ] Add a small integration smoke test verifying bootstrap creates working service instances"
+"Define domain entities and DTOs (Board, Task, User)","Add plain domain entity/DTO definitions under server/src/domain (no ORM decorators). Task must include position3d (x,y,z) or modelRef. Acceptance criteria: entity/DTO files exist; DTO validation schemas present (class-validator or Joi); unit tests verify validation rejects/accepts expected inputs.","epic:2,backend,domain,api,testing",Epic 2: Minimal Core Backend,S,P0,"- [ ] Add server/src/domain/Task.ts, Board.ts, User.ts with plain type/interface definitions
+- [ ] Create DTO validation schemas (class-validator or Joi) for create/update operations, including position3d
+- [ ] Add unit tests validating DTOs accept valid input and reject invalid input
+- [ ] Document entity fields and their types in server/README or domain/README"
+Implement services/use-cases depending on repositories,"Implement TaskService and BoardService that accept repository interfaces in constructors and encapsulate business rules. Acceptance criteria: services import only repo interfaces (not adapters/drivers); unit tests use mocked repositories to validate business logic, validations, and error flows.","epic:2,backend,service,testing",Epic 2: Minimal Core Backend,M,P0,"- [ ] Create server/src/services/TaskService.ts and BoardService.ts skeletons
+- [ ] Implement business logic: validation, transactional steps (if any), and error mapping
+- [ ] Ensure services accept repository interfaces in constructors
+- [ ] Add unit tests for happy path and error cases using mocked repositories
+- [ ] Document service responsibilities and interactions with repos"
+Thin HTTP API + DTO validation,"Implement HTTP routes that map to services: POST /boards, GET /boards/:id, POST /tasks, GET /tasks?boardId=, PATCH /tasks/:id. Acceptance criteria: controllers validate DTOs and call services; integration tests (supertest) cover the happy path using a test Postgres DB; validation errors produce consistent error shape and codes.","epic:2,backend,api,testing",Epic 2: Minimal Core Backend,M,P0,"- [ ] Add controller/route files for boards and tasks (server/src/controllers or routes)
+- [ ] Wire DTO validation middleware to each route
+- [ ] Ensure controllers obtain service instances via bootstrap
+- [ ] Add supertest-based integration tests (run on main/merge) covering create->fetch flows
+- [ ] Add tests asserting validation errors return expected JSON shape"
+Add global error mapping middleware,"Add middleware to map domain/service errors to HTTP status codes and consistent JSON error shapes. Acceptance criteria: middleware exists; tests assert NotFound->404, ValidationError->400, generic->500; controllers use middleware and do not duplicate mapping logic.","epic:1,backend,api,testing",Epic 1: Hexagonal Foundation,S,P1,"- [ ] Implement error mapping middleware that maps domain errors to HTTP codes
+- [ ] Add standardized error response shape documentation
+- [ ] Add unit tests for middleware mapping NotFound, ValidationError and general errors
+- [ ] Ensure server uses middleware globally and controllers rely on thrown errors"
+Ensure Task API supports position3d,Make Task create/update DTOs persist and return position3d for 3D frontend. Acceptance criteria: POST/PATCH accept position3d and persist it; GET /tasks returns position3d; integration test asserts persistence and correct JSON shape.,"epic:3,frontend,api,integration,testing",Epic 3: 3D Board Prototype,S,P1,"- [ ] Update Task DTOs to include position3d {x,y,z} or modelRef
+- [ ] Ensure repositories persist position3d in tasks table/columns (or JSONB)
+- [ ] Update services to pass position3d through to repositories (with defaults if omitted)
+- [ ] Add integration test (main-only) asserting position3d is stored and returned by GET /tasks"
+Add client/src/lib/apiClient.js,Add centralized API client for the frontend with get/post/patch helpers reading VITE_BACKEND_URL. Acceptance criteria: apiClient exposes get/post/patch; VITE_BACKEND_URL used for base URL; client tests or MSW-based mocks consume apiClient for integration tests.,"epic:4,frontend,integration,testing",Epic 4: Frontend-Backend Integration,S,P0,"- [ ] Create client/src/lib/apiClient.js with get/post/patch helpers and base URL from VITE_BACKEND_URL
+- [ ] Add small unit tests or usage examples that show apiClient is mockable (MSW or jest mock)
+- [ ] Update client package scripts/docs to mention VITE_BACKEND_URL usage
+- [ ] Add a short example in ProjectContext showing apiClient usage"
+Wire ProjectContext to backend via apiClient & React Query,Replace mocked state in ProjectContext with real API fetches using apiClient + React Query; surface loading & error states with existing skeletons/components. Acceptance criteria: ProjectContext exposes boards+tasks from API; consumers work unchanged; loading skeletons and retry UI present; tests use MSW or mocked apiClient.,"epic:4,frontend,integration,testing",Epic 4: Frontend-Backend Integration,M,P0,"- [ ] Implement apiClient calls from ProjectContext to fetch board and tasks on mount
+- [ ] Use React Query for caching/retries and expose loading/error states
+- [ ] Replace mocked data references and ensure consumers work unchanged
+- [ ] Add MSW-based tests to validate context behavior and error/loading UI"
+Submit new tasks from CreateTask to backend,Update CreateTask form to POST /tasks including a default position3d when omitted. Acceptance criteria: successful submit creates a task visible on next fetch; form shows validation errors on 4xx responses; tests mock apiClient to assert submit behavior.,"epic:4,frontend,integration,testing",Epic 4: Frontend-Backend Integration,S,P0,"- [ ] Update CreateTask submit handler to call apiClient.post('/tasks', ...)
+- [ ] Provide default position3d if user does not supply one
+- [ ] Show validation error messages on form when backend returns 4xx
+- [ ] Add unit/integration test mocking apiClient to assert submit and subsequent refresh"
+DECISION_LOG.md (hexagonal + Postgres rationale),"Write DECISION_LOG.md documenting: adapter/repository choice, why Postgres for initial phases, TypeScript for NestJS, JS for client, and the testing strategy (unit vs integration). Acceptance criteria: DECISION_LOG.md at repo root with ≥3 decisions, each listing alternatives and tradeoffs.","epic:5,docs",Epic 5: Prototype Hardening & Demo Readiness,S,P1,"- [ ] Create DECISION_LOG.md at repo root
+- [ ] Add entries: Adapter/Repository decision, Postgres-first rationale, TypeScript for server vs JS client, testing policy (unit vs integration)
+- [ ] Add tradeoffs and migration notes (e.g., staging Supabase later)
+- [ ] Link DECISION_LOG.md in README"
+Create issues & milestones for this refined plan,Convert this refined delivery plan into GitHub issues and milestones. Acceptance criteria: all items above created as GitHub issues with labels and milestones applied; milestone names match epics; one issue created for testing matrix.,"epic:5,project-management",Epic 5: Prototype Hardening & Demo Readiness,S,P1,"- [ ] Import CSV into GitHub issues (or create issues manually)
+- [ ] Ensure each issue has labels, milestone and estimate
+- [ ] Create milestone entries matching Epic 1-5
+- [ ] Verify link between issues and milestones on project board"
+Unit tests for services (Jest),"Add Jest unit tests for TaskService and BoardService using mocked repositories only (no DB). Acceptance criteria: tests run in CI; coverage threshold configured (e.g., 80%); tests do not touch network/DB.","epic:testing,backend,ci",Epic 2: Minimal Core Backend,M,P0,"- [ ] Add jest configuration to server/package.json
+- [ ] Write unit tests for TaskService and BoardService using jest and mocked repos
+- [ ] Configure coverage threshold and add to CI job (fast job)
+- [ ] Ensure tests run on PRs and pass"
+Repository unit tests with MockAdapter,Add unit tests for repository classes using a FakeAdapter that records calls to assert correct query/param construction. Acceptance criteria: tests assert repository-to-adapter calls; no DB dependency in tests.,"epic:testing,backend,db",Epic 1: Hexagonal Foundation,S,P0,"- [ ] Implement FakeAdapter that records calls under server/tests/mocks
+- [ ] Write unit tests for each repository asserting expected adapter calls and parameters
+- [ ] Run tests as part of the PR fast CI job"
+Adapter integration tests against Postgres (integration job on main),Add integration tests for PostgresAdapter that run against a disposable Postgres (Docker Compose or Testcontainers). These tests run only on main/merge. Acceptance criteria: integration tests create/read/cleanup data; CI configuration ensures these tests run only on main or scheduled runs; tests clean up DB state after run.,"epic:testing,backend,db,ci",Epic 1: Hexagonal Foundation,M,P1,"- [ ] Add integration test suite using testcontainers or Docker Compose for Postgres
+- [ ] Write tests that exercise PostgresAdapter CRUD operations
+- [ ] Configure CI to run these tests only on main/merge (separate job)
+- [ ] Ensure tests teardown DB state after run"
+API integration tests (supertest) (integration job on main),"Add API-level integration tests (supertest) that exercise create board -> create task -> fetch tasks happy path. Run only on main/merge. Acceptance criteria: tests start server in test mode, use test Postgres DB, assert JSON shapes & status codes, and clean up DB state.","epic:testing,backend,api,ci",Epic 2: Minimal Core Backend,M,P1,"- [ ] Add supertest-based integration tests under server/tests/integration
+- [ ] Implement create board -> create task -> fetch tasks happy path test
+- [ ] Configure CI to run these tests only on main/merge
+- [ ] Ensure tests reset DB state between runs"
+Contract tests between client apiClient and backend,Add basic contract assertions (OpenAPI or lightweight checks) to ensure client and server agree on task/board JSON shapes (including position3d). Acceptance criteria: contract checks run in CI (unit/integration split as preferred); failures block merging if contract deviates.,"epic:testing,integration,frontend,backend",Epic 4: Frontend-Backend Integration,S,P1,"- [ ] Publish a minimal OpenAPI or JSON schema for task/board shapes (including position3d)
+- [ ] Add a contract test that asserts server responses match the schema
+- [ ] Add a client-side test validating apiClient expects same schema (unit)
+- [ ] Wire contract check into CI pipeline (fail on mismatch)"
+Frontend E2E test (Playwright/Cypress),"Add an end-to-end test covering the happy path: create board -> create task -> task visible in UI. Acceptance criteria: E2E runs in CI (optional/gated) and verifies UI flows (loading skeletons, error handling, create flow); tests use either test backend or mocked API as decided.","epic:testing,frontend,ci",Epic 5: Prototype Hardening & Demo Readiness,L,P2,"- [ ] Choose E2E framework (Playwright or Cypress) and add config
+- [ ] Implement test for create board -> create task -> verify task visible in UI
+- [ ] Decide whether to run against test backend or MSW-mocked API in CI
+- [ ] Add job in CI (optional/gated) to run E2E tests and report results"
+CI test matrix: fast vs integration,Configure CI jobs to separate fast unit tests (mock adapters) on every PR from longer integration tests (Postgres adapter + API integration) that run only on main/merge. Acceptance criteria: PRs remain fast (unit job); main branch runs integration suites; CI docs updated.,"epic:testing,ci",Epic 5: Prototype Hardening & Demo Readiness,S,P0,"- [ ] Create CI job 'fast-tests' that runs on PRs: installs deps, runs linters, runs unit tests (mocked)
+- [ ] Create CI job 'integration-tests' that runs only on main/merge and runs Postgres adapter + API integration suites
+- [ ] Update docs/CI.md to explain the matrix and where to find logs
+- [ ] Validate CI behavior with a test merge to main"

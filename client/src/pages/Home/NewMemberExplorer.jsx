@@ -2,7 +2,7 @@ import { Header } from '../../Components/Header/Header'
 import MessangerPortion from './MessangerPortion'
 import CreateProjectPortion from './CreateProjectPortion'
 import { UserWelcome } from './UserWelcome'
-
+import propTypes from 'prop-types'
 const NewMemberExplorer = ({ userId }) => {
   return (
     <div className="bg-[#EEFBF4] min-h-screen">
@@ -23,5 +23,7 @@ const NewMemberExplorer = ({ userId }) => {
     </div>
   )
 }
-
+NewMemberExplorer.propTypes = {
+  userId: propTypes.string.isRequired,
+}
 export default NewMemberExplorer

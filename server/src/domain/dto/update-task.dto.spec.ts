@@ -1,10 +1,12 @@
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 import { UpdateTaskDto } from './update-task.dto'
+import { makeTask } from '../../../tests/factories/entities'
 
 describe('UpdateTaskDto', () => {
   it('accepts a partial update with a valid status', async () => {
-    const dto = plainToInstance(UpdateTaskDto, { status: 'in_progress' })
+    const { status } = makeTask({ status: 'in_progress' })
+    const dto = plainToInstance(UpdateTaskDto, { status })
 
     const errors = await validate(dto)
 
@@ -28,7 +30,8 @@ describe('UpdateTaskDto', () => {
   })
 
   it('rejects an invalid position3d', async () => {
-    const dto = plainToInstance(UpdateTaskDto, { position3d: { x: 1, y: 2 } })
+    const { position3d } = makeTask()
+    const dto = plainToInstance(UpdateTaskDto, { position3d: { x: position3d!.x, y: position3d!.y } })
 
     const errors = await validate(dto)
 

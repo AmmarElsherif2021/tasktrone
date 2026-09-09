@@ -2,7 +2,7 @@ import { Header } from '../../Components/Header/Header'
 import DashboardPortion from './DashboardPortion'
 import DataVisualizationPortion from './DataVisualizationPortion'
 import { UserWelcome } from './UserWelcome'
-
+import propTypes from 'prop-types'
 const OldMemberExplorer = ({ userId }) => {
   return (
     <div className="bg-[#EEFBF4] min-h-screen">
@@ -23,5 +23,7 @@ const OldMemberExplorer = ({ userId }) => {
     </div>
   )
 }
-
+OldMemberExplorer.propTypes = {
+  userId: propTypes.string.isRequired,
+}
 export default OldMemberExplorer

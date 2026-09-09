@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-
+import propTypes from 'prop-types'
 /**
  * Modal
  * ──────────────────────────────────────────────────────────────
@@ -21,15 +21,24 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null
 
   return (
-    /* Backdrop */
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
       className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 "
-      onClick={onClose}
     >
+      {/* Backdrop */}
+      <button
+        type="button"
+        aria-label="Close modal"
+        className="absolute inset-0 cursor-default"
+        onClick={onClose}
+      />
+
       {/* Panel */}
       <div
         className="
-          w-[600px] h-auto p-4 mx-4
+          relative z-10 w-[600px] h-auto p-4 mx-4
           max-h-[90vh] overflow-y-auto
           bg-neutral-white
           rounded-sm
@@ -38,7 +47,6 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
           border:       'var(--border-width-base) solid var(--color-modal-border)',
           borderRadius: 'var(--radius-sm)',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -46,6 +54,7 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
           style={{ borderBottom: 'var(--border-width-base) solid var(--color-modal-divider)' }}
         >
           <h2
+            id="modal-title"
             className="text-lg font-bold"
             style={{ fontFamily: 'var(--font-family-mono)', color: 'var(--color-modal-text)' }}
           >
@@ -71,5 +80,10 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
     </div>
   )
 }
-
-export default Modal
+Modal.propTypes = {
+  isOpen: propTypes.bool.isRequired,
+  onClose: propTypes.func.isRequired,
+  title: propTypes.string.isRequired,
+  children: propTypes.node.isRequired,
+}
+export default Modal;

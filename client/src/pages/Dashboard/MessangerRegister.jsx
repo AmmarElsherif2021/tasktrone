@@ -2,7 +2,7 @@ import { useState } from 'react'
 import '../../index.css'
 import StaticRoundBtn from '../../Ui/StaticRoundBtn'
 import userInfo from '../../assets/userInfo.svg'
-
+import propTypes from 'prop-types'
 const QUICK_ACCESS_BUTTONS = [
   { title: 'Design Tasks', color: '#E4080A' },
   { title: 'Manufacturing', color: '#0F5A38' },
@@ -48,10 +48,18 @@ export const MessengerRegister = ({ onClose, users = [] }) => {
       {/* Header */}
       <div
         className="flex items-center justify-between p-3 border-b-2 border-[#557263] cursor-pointer"
+        role="button"
+        tabIndex={0}
         style={{
           backgroundColor: isExpanded ? `${QUICK_ACCESS_BUTTONS[3].color}30` : 'transparent',
         }}
         onClick={() => setIsExpanded(!isExpanded)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            setIsExpanded(!isExpanded)
+          }
+        }}
       >
         <div className="flex items-center gap-2">
           <img src={userInfo} alt="Messenger" className="w-6 h-6" />
@@ -127,4 +135,13 @@ export const MessengerRegister = ({ onClose, users = [] }) => {
       )}
     </div>
   )
+}
+MessengerRegister.propTypes = {
+  onClose: propTypes.func.isRequired,
+  users: propTypes.arrayOf(
+    propTypes.shape({
+      id: propTypes.string.isRequired,
+      name: propTypes.string.isRequired,
+    })
+  ).isRequired,
 }

@@ -1,12 +1,12 @@
 module.exports = {
-  // Client (React) – run ESLint from root with full paths
+  // Client (React) – use the legacy .eslintrc.json
   'client/src/**/*.{js,jsx,ts,tsx}': (filenames) => {
-    return `npx eslint --fix ${filenames.join(' ')}`;
+    return `npx eslint --fix --config client/.eslintrc.json ${filenames.join(' ')}`;
   },
 
-  // Server (NestJS) – same, from root
-  'server/{src,tests}/**/*.{ts,js}': (filenames) => {
-    return `npx eslint --fix ${filenames.join(' ')}`;
+  // Server (NestJS) – use the new flat config (eslint.config.mjs)
+  'server/src/**/*.{ts,js}': (filenames) => {
+    return `npx eslint --fix --config server/eslint.config.mjs ${filenames.join(' ')}`;
   },
 
   // Other files (exclude huge package-lock.json)

@@ -23,6 +23,10 @@
   "overrides": [
     {
       "files": ["*.js", "*.jsx"]
+    },
+    {
+      "files": ["playwright.config.js", "e2e/**/*.js"],
+      "env": { "node": true, "browser": true }
     }
   ]
 }

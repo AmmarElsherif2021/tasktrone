@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Board",
+  "description": "Response shape of GET/POST /boards (server/src/domain/board.entity.ts).",
+  "type": "object",
+  "required": ["id", "organizationId", "name", "createdAt", "updatedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "organizationId": { "type": "string" },
+    "name": { "type": "string" },
+    "createdAt": { "type": "string" },
+    "updatedAt": { "type": "string" }
+  }
+}

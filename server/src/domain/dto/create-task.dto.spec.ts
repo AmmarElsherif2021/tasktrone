@@ -1,15 +1,16 @@
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 import { CreateTaskDto } from './create-task.dto'
+import { makeTask } from '../../../tests/factories/entities'
 
-const VALID_BOARD_ID = '11111111-1111-4111-8111-111111111111'
+const { boardId, title, description, position3d, modelRef } = makeTask()
 
 describe('CreateTaskDto', () => {
   it('accepts a valid payload with position3d', async () => {
     const dto = plainToInstance(CreateTaskDto, {
-      boardId: VALID_BOARD_ID,
-      title: 'Weld frame',
-      position3d: { x: 1, y: 2, z: 3 },
+      boardId,
+      title,
+      position3d,
     })
 
     const errors = await validate(dto)
@@ -19,8 +20,8 @@ describe('CreateTaskDto', () => {
 
   it('accepts a valid payload without position3d', async () => {
     const dto = plainToInstance(CreateTaskDto, {
-      boardId: VALID_BOARD_ID,
-      title: 'Weld frame',
+      boardId,
+      title,
     })
 
     const errors = await validate(dto)
@@ -29,7 +30,7 @@ describe('CreateTaskDto', () => {
   })
 
   it('rejects a payload missing the required title', async () => {
-    const dto = plainToInstance(CreateTaskDto, { boardId: VALID_BOARD_ID })
+    const dto = plainToInstance(CreateTaskDto, { boardId })
 
     const errors = await validate(dto)
 
@@ -37,7 +38,7 @@ describe('CreateTaskDto', () => {
   })
 
   it('rejects a non-UUID boardId', async () => {
-    const dto = plainToInstance(CreateTaskDto, { boardId: 'not-a-uuid', title: 'Weld frame' })
+    const dto = plainToInstance(CreateTaskDto, { boardId: 'not-a-uuid', title })
 
     const errors = await validate(dto)
 
@@ -46,8 +47,10 @@ describe('CreateTaskDto', () => {
 
   it('rejects an invalid position3d', async () => {
     const dto = plainToInstance(CreateTaskDto, {
-      boardId: VALID_BOARD_ID,
-      title: 'Weld frame',
+      boardId,
+      title,
+      description,
+      modelRef,
       position3d: { x: 'a', y: 2, z: 3 },
     })
 

@@ -1,12 +1,15 @@
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 import { CreateBoardDto } from './create-board.dto'
+import { makeBoard } from '../../../tests/factories/entities'
+
+const { organizationId, name } = makeBoard()
 
 describe('CreateBoardDto', () => {
   it('accepts a valid payload', async () => {
     const dto = plainToInstance(CreateBoardDto, {
-      organizationId: '11111111-1111-4111-8111-111111111111',
-      name: 'Assembly Line 1',
+      organizationId,
+      name,
     })
 
     const errors = await validate(dto)
@@ -15,7 +18,7 @@ describe('CreateBoardDto', () => {
   })
 
   it('rejects a non-UUID organizationId', async () => {
-    const dto = plainToInstance(CreateBoardDto, { organizationId: 'not-a-uuid', name: 'Assembly Line 1' })
+    const dto = plainToInstance(CreateBoardDto, { organizationId: 'not-a-uuid', name })
 
     const errors = await validate(dto)
 
@@ -23,7 +26,7 @@ describe('CreateBoardDto', () => {
   })
 
   it('rejects a missing name', async () => {
-    const dto = plainToInstance(CreateBoardDto, { organizationId: '11111111-1111-4111-8111-111111111111' })
+    const dto = plainToInstance(CreateBoardDto, { organizationId })
 
     const errors = await validate(dto)
 

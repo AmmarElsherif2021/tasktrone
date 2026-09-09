@@ -25,9 +25,20 @@ export async function createSchema(db: DBAdapter): Promise<void> {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `)
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      organization_id UUID NOT NULL,
+      email TEXT NOT NULL,
+      display_name TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'member',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
 }
 
 export async function dropSchema(db: DBAdapter): Promise<void> {
   await db.query('DROP TABLE IF EXISTS tasks')
   await db.query('DROP TABLE IF EXISTS boards')
+  await db.query('DROP TABLE IF EXISTS users')
 }

@@ -9,12 +9,12 @@ import { CreateTask } from '../Components/Tasks/CreateTask'
 import { ProjectDashboard } from '../Components/Projects/ProjectDashboard'
 import { Blog } from '../pages/Blog'
 import { useProject, MANUFACTURING_PHASE_LABELS } from '../contexts/ProjectContext'
-import { useAuth } from '../contexts/AuthContext'
+//import { useAuth } from '../contexts/AuthContext'
 
 export function ProjectShell() {
   const { id } = useParams()
   const { setCurrentProjectId, currentPhase, setCurrentPhase } = useProject()
-  const { user } = useAuth()
+  //const { user } = useAuth()
 
   const [showBlog, setShowBlog] = useState(false)
   const [mainRef, setMainRef] = useState(null)

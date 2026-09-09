@@ -1,10 +1,11 @@
+import { makeUser } from '../../../tests/factories/entities'
 import { MockAdapter } from '../../../tests/mocks/MockAdapter'
 import { UserRepository } from './UserRepository'
 
 describe('UserRepository', () => {
   it('create() inserts a user and returns the row', async () => {
     const adapter = new MockAdapter()
-    const row = { id: '1', organizationId: 'org1', email: 'a@b.com', displayName: 'A', role: 'member' }
+    const row = makeUser({ id: '1', organizationId: 'org1', email: 'a@b.com', displayName: 'A', role: 'member' })
     adapter.mockNextResult([row])
     const repo = new UserRepository(adapter)
 
@@ -28,7 +29,7 @@ describe('UserRepository', () => {
 
   it('update() only sets the provided fields', async () => {
     const adapter = new MockAdapter()
-    adapter.mockNextResult([{ id: '1', role: 'admin' }])
+    adapter.mockNextResult([makeUser({ id: '1', role: 'admin' })])
     const repo = new UserRepository(adapter)
 
     await repo.update('1', { role: 'admin' })
@@ -40,7 +41,7 @@ describe('UserRepository', () => {
 
   it('update() with no changes re-fetches instead of writing', async () => {
     const adapter = new MockAdapter()
-    adapter.mockNextResult([{ id: '1' }])
+    adapter.mockNextResult([makeUser({ id: '1' })])
     const repo = new UserRepository(adapter)
 
     await repo.update('1', {})

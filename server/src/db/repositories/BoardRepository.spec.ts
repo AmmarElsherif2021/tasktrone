@@ -1,10 +1,11 @@
+import { makeBoard } from '../../../tests/factories/entities'
 import { MockAdapter } from '../../../tests/mocks/MockAdapter'
 import { BoardRepository } from './BoardRepository'
 
 describe('BoardRepository', () => {
   it('create() inserts a board and returns the row', async () => {
     const adapter = new MockAdapter()
-    const row = { id: '1', organizationId: 'org1', name: 'Assembly Line 1' }
+    const row = makeBoard({ id: '1', organizationId: 'org1', name: 'Assembly Line 1' })
     adapter.mockNextResult([row])
     const repo = new BoardRepository(adapter)
 
@@ -28,7 +29,7 @@ describe('BoardRepository', () => {
 
   it('update() with no name change re-fetches instead of writing', async () => {
     const adapter = new MockAdapter()
-    adapter.mockNextResult([{ id: '1' }])
+    adapter.mockNextResult([makeBoard({ id: '1' })])
     const repo = new BoardRepository(adapter)
 
     await repo.update('1', {})
@@ -38,7 +39,7 @@ describe('BoardRepository', () => {
 
   it('update() sets the new name', async () => {
     const adapter = new MockAdapter()
-    adapter.mockNextResult([{ id: '1', name: 'Renamed' }])
+    adapter.mockNextResult([makeBoard({ id: '1', name: 'Renamed' })])
     const repo = new BoardRepository(adapter)
 
     await repo.update('1', { name: 'Renamed' })

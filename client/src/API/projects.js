@@ -170,7 +170,7 @@ export const getProjectById = async (projectId) => {
  */
 // ── date strings from <input type="date"> arrive as "YYYY-MM-DD"
 // Supabase/Postgres accepts ISO 8601 directly, but to be explicit:
-const toISO = (d) => (d ? new Date(d).toISOString() : null)
+//const toISO = (d) => (d ? new Date(d).toISOString() : null)
 
 export const createProject = async (projectData) => {
   const { data, error } = await supabase.rpc('create_project_with_board', {

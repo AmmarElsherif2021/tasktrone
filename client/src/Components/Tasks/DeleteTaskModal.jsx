@@ -7,7 +7,6 @@ export const DeleteWarningModal = ({ show, onHide, onConfirm, taskTitle }) => {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={(e) => { if (e.target === e.currentTarget) onHide() }}
     >
       <div
         className="bg-neutral-white max-w-md w-full p-4 border-2 border-neutral-black"

@@ -91,9 +91,19 @@ export function TaskCard({
   return (
     <>
       <div
+        role="button"
+        tabIndex={0}
+        aria-label={`Task: ${title}`}
+        key={taskId}
         className="task-card shadow-sm border-2.5 border-black cursor-pointer p-3 rounded"
         style={{ backgroundColor: cardBg }}
         onClick={() => setShowTaskModal(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            setShowTaskModal(true)
+          }
+        }}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
       >

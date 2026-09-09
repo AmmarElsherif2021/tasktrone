@@ -1,5 +1,6 @@
 import { Pool, PoolClient, PoolConfig } from 'pg'
 import { DBAdapter } from '../adapter'
+import { toCamelCaseRow } from './case-mapping'
 
 /** Wraps a single checked-out client so queries inside a transaction share one connection. */
 class ClientAdapter implements DBAdapter {
@@ -7,7 +8,7 @@ class ClientAdapter implements DBAdapter {
 
   async query<T = unknown>(sql: string, params: unknown[] = []): Promise<T[]> {
     const result = await this.client.query(sql, params)
-    return result.rows as T[]
+    return result.rows.map((row) => toCamelCaseRow<T>(row))
   }
 
   async queryOne<T = unknown>(sql: string, params: unknown[] = []): Promise<T | null> {
@@ -30,7 +31,7 @@ export class PostgresAdapter implements DBAdapter {
 
   async query<T = unknown>(sql: string, params: unknown[] = []): Promise<T[]> {
     const result = await this.pool.query(sql, params)
-    return result.rows as T[]
+    return result.rows.map((row) => toCamelCaseRow<T>(row))
   }
 
   async queryOne<T = unknown>(sql: string, params: unknown[] = []): Promise<T | null> {

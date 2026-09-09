@@ -34,6 +34,16 @@ const db = new PostgresAdapter(process.env.DATABASE_URL)
 and passes the callback a `DBAdapter` bound to that same client so nested repository calls stay on
 one connection.
 
+### snake_case → camelCase
+
+Table/column names are snake_case (`board_id`, `model_ref`, `created_at`); the domain entities
+(`Task`, `Board`, `User`) are camelCase. Repositories write plain `SELECT *` / `RETURNING *` with no
+per-column aliasing — `PostgresAdapter` converts every row's top-level keys via
+[`implementations/case-mapping.ts`](./implementations/case-mapping.ts) before returning them, so this
+only has to be handled in one place instead of in every query. It does **not** recurse into JSONB
+values (`position3d`'s `{x,y,z}` keys are left as-is). `MockAdapter` doesn't need this — tests queue
+already-camelCase fixtures directly, so there's no snake_case to convert.
+
 ### Local Postgres for development / integration tests
 
 ```bash
@@ -45,8 +55,8 @@ npm run test:integration
 
 Integration tests live under [`../../tests/integration`](../../tests/integration) and are excluded
 from the default `npm test` run (see `testPathIgnorePatterns` in `package.json`) since they need a
-live database — run them explicitly with `npm run test:integration`, or via CI once the fast/slow
-test matrix (Epic 5) is wired up.
+live database — run them explicitly with `npm run test:integration`, or via the `integration-tests`
+CI job (main-only, see [`../../../docs/CI.md`](../../../docs/CI.md)).
 
 ## Repositories ([`repositories/`](./repositories))
 

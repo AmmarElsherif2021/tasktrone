@@ -1,3 +1,4 @@
+import propTypes from 'prop-types'
 export const Spinner= ({ title="Loading", subtitle="..." }) => (
   <div className="bg-white p-8 rounded-lg shadow-md w-full">
     <div className="flex flex-col items-center">
@@ -7,3 +8,7 @@ export const Spinner= ({ title="Loading", subtitle="..." }) => (
     </div>
   </div>
 )
+Spinner.propTypes = {
+  title: propTypes.string,
+  subtitle: propTypes.string,
+}

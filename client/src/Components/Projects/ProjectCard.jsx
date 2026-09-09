@@ -13,10 +13,13 @@ export function ProjectCard({ projectId, title, description, createdBy, members,
 
   const handleHover = (key, value) => setHoverStates(prev => ({ ...prev, [key]: value }))
 
-  const handleCardClick = (e) => {
-  console.log('Card clicked!', e.target);
-  setShowModal(true);
-};
+  const handleCardClick = () => setShowModal(true)
+  const handleCardKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleCardClick()
+    }
+  }
 
   const handleCloseModal = () => setShowModal(false);
   const handleOpenProject = () => {
@@ -25,7 +28,13 @@ export function ProjectCard({ projectId, title, description, createdBy, members,
   };
 
   return (
-    <div onClick={handleCardClick} key={projectId}>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      key={projectId}
+    >
       <StyledCard
         hoverKey="card"
         hoverStates={hoverStates}

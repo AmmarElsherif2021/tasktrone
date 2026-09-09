@@ -1,10 +1,11 @@
+import { makeTask } from '../../../tests/factories/entities'
 import { MockAdapter } from '../../../tests/mocks/MockAdapter'
 import { TaskRepository } from './TaskRepository'
 
 describe('TaskRepository', () => {
   it('create() inserts a task and returns the row', async () => {
     const adapter = new MockAdapter()
-    const row = { id: '1', boardId: 'b1', title: 'Weld frame', status: 'todo' }
+    const row = makeTask({ id: '1', boardId: 'b1', title: 'Weld frame', status: 'todo' })
     adapter.mockNextResult([row])
     const repo = new TaskRepository(adapter)
 
@@ -17,7 +18,7 @@ describe('TaskRepository', () => {
 
   it('create() serializes position3d as JSON', async () => {
     const adapter = new MockAdapter()
-    adapter.mockNextResult([{ id: '1' }])
+    adapter.mockNextResult([makeTask({ id: '1' })])
     const repo = new TaskRepository(adapter)
 
     await repo.create({ boardId: 'b1', title: 'Weld frame', position3d: { x: 1, y: 2, z: 3 } })
@@ -27,7 +28,7 @@ describe('TaskRepository', () => {
 
   it('findById() queries by id', async () => {
     const adapter = new MockAdapter()
-    adapter.mockNextResult([{ id: '1' }])
+    adapter.mockNextResult([makeTask({ id: '1' })])
     const repo = new TaskRepository(adapter)
 
     await repo.findById('1')
@@ -49,7 +50,7 @@ describe('TaskRepository', () => {
 
   it('update() only sets the provided fields', async () => {
     const adapter = new MockAdapter()
-    adapter.mockNextResult([{ id: '1', status: 'done' }])
+    adapter.mockNextResult([makeTask({ id: '1', status: 'done' })])
     const repo = new TaskRepository(adapter)
 
     await repo.update('1', { status: 'done' })
@@ -61,7 +62,7 @@ describe('TaskRepository', () => {
 
   it('update() with no changes just re-fetches the task (no adapter write)', async () => {
     const adapter = new MockAdapter()
-    adapter.mockNextResult([{ id: '1' }])
+    adapter.mockNextResult([makeTask({ id: '1' })])
     const repo = new TaskRepository(adapter)
 
     await repo.update('1', {})

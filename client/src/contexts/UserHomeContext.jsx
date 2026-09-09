@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { listProjects, getProjectById } from '../API/projects'
+import { listProjects } from '../API/projects'
 import { useAuth } from '../contexts/AuthContext'
 import { getUserInfo } from '../API/users'
 import supabaseClient from '../lib/supabaseClient'

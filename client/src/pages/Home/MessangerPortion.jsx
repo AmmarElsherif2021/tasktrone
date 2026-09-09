@@ -66,7 +66,9 @@ export default function MessangerPortion() {
         ) : (
           <>
             <div className="mb-3">
-              <label className="block mb-2 font-medium">Select Users to Notify</label>
+              <label htmlFor="user-selection" className="block mb-2 font-medium">
+                Select Users to Notify
+              </label>
               {isLoading ? (
                 <div className="flex justify-center py-4">
                   <Spinner />

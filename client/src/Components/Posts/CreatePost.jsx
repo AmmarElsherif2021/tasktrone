@@ -51,8 +51,10 @@ export function CreatePost() {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Create Post">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-1 font-medium">Content</label>
+            <label htmlFor="content" className="block mb-1 font-medium">Content</label>
             <textarea
+              id="content"
+              name="content"
               rows={3}
               value={content}
               onChange={(e) => setContent(e.target.value)}
