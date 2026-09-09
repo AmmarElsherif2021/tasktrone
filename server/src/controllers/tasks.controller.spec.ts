@@ -1,6 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
+import { makeTask } from '../../tests/factories/entities'
 import { DomainErrorFilter } from '../errors/domain-error.filter'
 import { NotFoundError, ValidationError } from '../errors/domain-errors'
 import { TaskService } from '../services/TaskService'
@@ -30,22 +31,23 @@ describe('TasksController', () => {
   afterAll(() => app.close())
 
   it('POST /tasks validates the payload (including nested position3d) and delegates to TaskService', async () => {
-    taskService.createTask.mockResolvedValue({ id: 't1', title: 'Weld frame' })
+    const task = makeTask({ id: 't1' })
+    taskService.createTask.mockResolvedValue(task)
 
     const res = await request(app.getHttpServer())
       .post('/tasks')
       .send({
-        boardId: '11111111-1111-4111-8111-111111111111',
-        title: 'Weld frame',
-        position3d: { x: 1, y: 2, z: 3 },
+        boardId: task.boardId,
+        title: task.title,
+        position3d: task.position3d,
       })
       .expect(201)
 
-    expect(res.body).toEqual({ id: 't1', title: 'Weld frame' })
+    expect(res.body).toEqual(JSON.parse(JSON.stringify(task)))
     expect(taskService.createTask).toHaveBeenCalledWith({
-      boardId: '11111111-1111-4111-8111-111111111111',
-      title: 'Weld frame',
-      position3d: { x: 1, y: 2, z: 3 },
+      boardId: task.boardId,
+      title: task.title,
+      position3d: task.position3d,
     })
   })
 
@@ -57,11 +59,13 @@ describe('TasksController', () => {
   })
 
   it('POST /tasks rejects an invalid position3d with 400', async () => {
+    const task = makeTask()
+
     await request(app.getHttpServer())
       .post('/tasks')
       .send({
-        boardId: '11111111-1111-4111-8111-111111111111',
-        title: 'Weld frame',
+        boardId: task.boardId,
+        title: task.title,
         position3d: { x: 'a', y: 2, z: 3 },
       })
       .expect(400)
@@ -70,15 +74,16 @@ describe('TasksController', () => {
   })
 
   it('GET /tasks?boardId= delegates to TaskService', async () => {
-    taskService.getTasksByBoard.mockResolvedValue([{ id: 't1' }])
+    const task = makeTask({ id: 't1' })
+    taskService.getTasksByBoard.mockResolvedValue([task])
 
     const res = await request(app.getHttpServer())
       .get('/tasks')
-      .query({ boardId: '11111111-1111-4111-8111-111111111111' })
+      .query({ boardId: task.boardId })
       .expect(200)
 
-    expect(res.body).toEqual([{ id: 't1' }])
-    expect(taskService.getTasksByBoard).toHaveBeenCalledWith('11111111-1111-4111-8111-111111111111')
+    expect(res.body).toEqual(JSON.parse(JSON.stringify([task])))
+    expect(taskService.getTasksByBoard).toHaveBeenCalledWith(task.boardId)
   })
 
   it('GET /tasks without boardId is rejected with 400', async () => {
@@ -87,12 +92,16 @@ describe('TasksController', () => {
   })
 
   it('PATCH /tasks/:id delegates to TaskService', async () => {
-    taskService.updateTask.mockResolvedValue({ id: 't1', status: 'in_progress' })
+    const task = makeTask({ id: 't1', status: 'in_progress' })
+    taskService.updateTask.mockResolvedValue(task)
 
-    const res = await request(app.getHttpServer()).patch('/tasks/t1').send({ status: 'in_progress' }).expect(200)
+    const res = await request(app.getHttpServer())
+      .patch(`/tasks/${task.id}`)
+      .send({ status: 'in_progress' })
+      .expect(200)
 
-    expect(res.body).toEqual({ id: 't1', status: 'in_progress' })
-    expect(taskService.updateTask).toHaveBeenCalledWith('t1', { status: 'in_progress' })
+    expect(res.body).toEqual(JSON.parse(JSON.stringify(task)))
+    expect(taskService.updateTask).toHaveBeenCalledWith(task.id, { status: 'in_progress' })
   })
 
   it('PATCH /tasks/:id returns 400 when TaskService rejects an invalid status transition', async () => {
@@ -104,11 +113,12 @@ describe('TasksController', () => {
   })
 
   it('GET /tasks?boardId= maps a NotFoundError thrown by TaskService to 404', async () => {
+    const task = makeTask()
     taskService.getTasksByBoard.mockRejectedValue(new NotFoundError('Board missing not found'))
 
     const res = await request(app.getHttpServer())
       .get('/tasks')
-      .query({ boardId: '11111111-1111-4111-8111-111111111111' })
+      .query({ boardId: task.boardId })
       .expect(404)
 
     expect(res.body).toEqual({ statusCode: 404, error: 'Not Found', message: 'Board missing not found' })

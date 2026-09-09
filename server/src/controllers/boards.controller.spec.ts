@@ -1,6 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
+import { makeBoard } from '../../tests/factories/entities'
 import { DomainErrorFilter } from '../errors/domain-error.filter'
 import { NotFoundError } from '../errors/domain-errors'
 import { BoardService } from '../services/BoardService'
@@ -29,17 +30,18 @@ describe('BoardsController', () => {
   afterAll(() => app.close())
 
   it('POST /boards validates the payload and delegates to BoardService', async () => {
-    boardService.createBoard.mockResolvedValue({ id: 'b1', name: 'Assembly Line 1' })
+    const board = makeBoard({ id: 'b1' })
+    boardService.createBoard.mockResolvedValue(board)
 
     const res = await request(app.getHttpServer())
       .post('/boards')
-      .send({ organizationId: '11111111-1111-4111-8111-111111111111', name: 'Assembly Line 1' })
+      .send({ organizationId: board.organizationId, name: board.name })
       .expect(201)
 
-    expect(res.body).toEqual({ id: 'b1', name: 'Assembly Line 1' })
+    expect(res.body).toEqual(JSON.parse(JSON.stringify(board)))
     expect(boardService.createBoard).toHaveBeenCalledWith({
-      organizationId: '11111111-1111-4111-8111-111111111111',
-      name: 'Assembly Line 1',
+      organizationId: board.organizationId,
+      name: board.name,
     })
   })
 
@@ -51,19 +53,22 @@ describe('BoardsController', () => {
   })
 
   it('POST /boards rejects unknown fields with 400 (whitelist)', async () => {
+    const board = makeBoard()
+
     await request(app.getHttpServer())
       .post('/boards')
-      .send({ organizationId: '11111111-1111-4111-8111-111111111111', name: 'X', extra: 'nope' })
+      .send({ organizationId: board.organizationId, name: board.name, extra: 'nope' })
       .expect(400)
   })
 
   it('GET /boards/:id delegates to BoardService', async () => {
-    boardService.getBoardById.mockResolvedValue({ id: 'b1', name: 'Assembly Line 1' })
+    const board = makeBoard({ id: 'b1' })
+    boardService.getBoardById.mockResolvedValue(board)
 
-    const res = await request(app.getHttpServer()).get('/boards/b1').expect(200)
+    const res = await request(app.getHttpServer()).get(`/boards/${board.id}`).expect(200)
 
-    expect(res.body).toEqual({ id: 'b1', name: 'Assembly Line 1' })
-    expect(boardService.getBoardById).toHaveBeenCalledWith('b1')
+    expect(res.body).toEqual(JSON.parse(JSON.stringify(board)))
+    expect(boardService.getBoardById).toHaveBeenCalledWith(board.id)
   })
 
   it('GET /boards/:id returns 404 when the board does not exist', async () => {
