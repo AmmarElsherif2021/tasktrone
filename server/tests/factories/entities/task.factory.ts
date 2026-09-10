@@ -1,26 +1,38 @@
-import { randomUUID } from 'crypto'
-import { Task } from '../../../src/domain/task.entity'
-
-/**
- * Builds a valid, fully-populated Task domain entity for unit tests. Call with
- * overrides to vary only the field(s) under test rather than restating the
- * whole object:
- *
- *   makeTask({ status: 'in_progress' })
- *   makeTask({ position3d: undefined })
- */
-export function makeTask(overrides: Partial<Task> = {}): Task {
-  const now = new Date()
-  return {
+import { randomUUID } from "crypto";
+import { faker } from "@faker-js/faker";
+import { Task } from "src/domain/task.entity";
+// This used for fixed and deterministic defaults
+export const makeTask = (overrides?: Partial<Task>): Task => {
+  const defaultTask: Task = {
     id: randomUUID(),
     boardId: randomUUID(),
-    title: 'Weld frame',
-    description: 'Weld the main chassis frame joints',
-    status: 'todo',
-    position3d: { x: 0, y: 0, z: 0 },
+    title: "Sample Task",
+    description: undefined,
+    status: "todo",
+    position3d: undefined,
     modelRef: undefined,
-    createdAt: now,
-    updatedAt: now,
-    ...overrides,
-  }
-}
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+  return { ...defaultTask, ...overrides };
+};
+
+// For randomized tests, e.g. for property-based testing
+export const makeRandomTask = (overrides?: Partial<Task>): Task => {
+  const defaultTask: Task = {
+    id: faker.string.uuid(),
+    boardId: faker.string.uuid(),
+    title: `Task ${Math.floor(Math.random() * 1000)}`,
+    description: faker.lorem.sentence(),
+    status: faker.helpers.arrayElement(["todo", "in_progress", "done"]),
+    position3d: {
+      x: faker.number.int({ min: 0, max: 100 }),
+      y: faker.number.int({ min: 0, max: 100 }),
+      z: faker.number.int({ min: 0, max: 100 }),
+    },
+    modelRef: undefined,
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.recent(),
+  };
+  return { ...defaultTask, ...overrides };
+};

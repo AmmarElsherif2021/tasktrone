@@ -1,20 +1,33 @@
-import { randomUUID } from 'crypto'
-import { User } from '../../../src/domain/user.entity'
+import { randomUUID } from "crypto";
+import { faker } from "@faker-js/faker";
+import { User } from "src/domain/user.entity";
 
-/**
- * Builds a valid, fully-populated User domain entity for unit tests. Call
- * with overrides to vary only the field(s) under test:
- *
- *   makeUser({ role: 'admin' })
- */
-export function makeUser(overrides: Partial<User> = {}): User {
-  return {
-    id: randomUUID(),
-    organizationId: randomUUID(),
-    email: 'jane.doe@example.com',
-    displayName: 'Jane Doe',
-    role: 'member',
+//For fixed and deterministic defaults
+export const makeUser = (overrides?: Partial<User>): User => {
+  const defaultUser: User = {
+    id: "1",
+    organizationId: "org-1",
+    email: "john.doe@example.com",
+    displayName: "John Doe",
+    role: "admin",
     createdAt: new Date(),
-    ...overrides,
-  }
-}
+  };
+  return { ...defaultUser, ...overrides };
+};
+
+// For randomized tests, e.g. for property-based testing
+export const createRandomUser = (overrides?: Partial<User>): User => {
+  const defaultUser: User = {
+    id: faker.string.uuid(),
+    organizationId: faker.string.uuid(),
+    email: faker.internet.email(),
+    displayName: faker.person.fullName(),
+    role: faker.helpers.arrayElement([
+      "admin",
+      "member",
+      "viewer",
+    ]) as User["role"],
+    createdAt: faker.date.past(),
+  };
+  return { ...defaultUser, ...overrides };
+};

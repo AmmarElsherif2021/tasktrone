@@ -13,9 +13,9 @@ DBAdapter interface  ──┬── PostgresAdapter (real, uses `pg`)
 
 ```ts
 interface DBAdapter {
-  query<T>(sql: string, params?: unknown[]): Promise<T[]>
-  queryOne<T>(sql: string, params?: unknown[]): Promise<T | null>
-  transaction<T>(fn: (db: DBAdapter) => Promise<T>): Promise<T>
+  query<T>(sql: string, params?: unknown[]): Promise<T[]>;
+  queryOne<T>(sql: string, params?: unknown[]): Promise<T | null>;
+  transaction<T>(fn: (db: DBAdapter) => Promise<T>): Promise<T>;
 }
 ```
 
@@ -27,7 +27,7 @@ Repositories only ever depend on this interface — never on `pg` — so they ca
 Concrete implementation backed by `pg`'s connection pool. Reads `DATABASE_URL` by default:
 
 ```ts
-const db = new PostgresAdapter(process.env.DATABASE_URL)
+const db = new PostgresAdapter(process.env.DATABASE_URL);
 ```
 
 `transaction()` checks out a single client, runs `BEGIN`/`COMMIT`/`ROLLBACK` around the callback,
@@ -43,6 +43,10 @@ per-column aliasing — `PostgresAdapter` converts every row's top-level keys vi
 only has to be handled in one place instead of in every query. It does **not** recurse into JSONB
 values (`position3d`'s `{x,y,z}` keys are left as-is). `MockAdapter` doesn't need this — tests queue
 already-camelCase fixtures directly, so there's no snake_case to convert.
+
+### camelCase → snake_case --newly added: 9/10/26
+
+When writing or updating records in the database, objects with camelCase keys must be converted to snake_case. The `toSnakeCase` function in [`implementations/case-mapping.ts`](./implementations/case-mapping.ts) performs this conversion and is primarily used by [`./tests/factories/db_row.factory.ts`](./tests/factories/db_row.factory.ts).
 
 ### Local Postgres for development / integration tests
 

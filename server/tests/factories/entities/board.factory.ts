@@ -1,20 +1,27 @@
-import { randomUUID } from 'crypto'
-import { Board } from '../../../src/domain/board.entity'
+import { randomUUID } from "crypto";
+import { Board } from "src/domain/board.entity";
+import { faker } from "@faker-js/faker";
 
-/**
- * Builds a valid, fully-populated Board domain entity for unit tests. Call
- * with overrides to vary only the field(s) under test:
- *
- *   makeBoard({ name: 'Prototype Line A' })
- */
-export function makeBoard(overrides: Partial<Board> = {}): Board {
-  const now = new Date()
-  return {
+// This used for fixed and deterministic defaults
+export const makeBoard = (overrides?: Partial<Board>): Board => {
+  const defaultBoard: Board = {
     id: randomUUID(),
-    organizationId: randomUUID(),
-    name: 'Prototype Line A',
-    createdAt: now,
-    updatedAt: now,
-    ...overrides,
-  }
-}
+    organizationId: "org-1",
+    name: "Sample Board",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+  return { ...defaultBoard, ...overrides };
+};
+
+// this used for randomized tests, e.g. for property-based testing
+export const makeRandomBoard = (overrides?: Partial<Board>): Board => {
+  const defaultBoard: Board = {
+    id: crypto.randomUUID(),
+    organizationId: faker.string.uuid(),
+    name: `Board ${Math.floor(Math.random() * 1000)}`,
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.recent(),
+  };
+  return { ...defaultBoard, ...overrides };
+};

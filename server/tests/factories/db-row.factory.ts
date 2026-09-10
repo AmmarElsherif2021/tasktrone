@@ -1,5 +1,7 @@
-import { randomUUID } from 'crypto'
-
+import { randomUUID } from "crypto";
+import { toSnakeCaseRow } from "src/db/implementations/case-mapping";
+import { makeTask, makeBoard, makeUser } from "./entities/index";
+import { Task, Board, User } from "src/domain/index";
 /**
  * Builds raw Postgres row shapes — snake_case columns, as `pg` returns them
  * before `toCamelCaseRow` (server/src/db/implementations/case-mapping.ts)
@@ -10,44 +12,29 @@ import { randomUUID } from 'crypto'
  *
  *   makeTaskRow({ status: 'done' })
  */
-export function makeTaskRow(overrides: Partial<Record<string, unknown>> = {}): Record<string, unknown> {
-  const now = new Date()
-  return {
-    id: randomUUID(),
-    board_id: randomUUID(),
-    title: 'Weld frame',
-    description: 'Weld the main chassis frame joints',
-    status: 'todo',
-    // JSONB column — its own {x,y,z} keys aren't snake_case and stay untouched
-    // by toCamelCaseRow, which only rewrites top-level column names.
-    position3d: { x: 0, y: 0, z: 0 },
-    model_ref: null,
-    created_at: now,
-    updated_at: now,
-    ...overrides,
-  }
+export function makeTaskRow(
+  overrides: Partial<Task> = {},
+): Partial<Task> & Record<string, unknown> {
+  return toSnakeCaseRow(
+    makeTask(overrides as Partial<Task>) as unknown as Record<string, unknown>,
+  );
 }
 
-export function makeBoardRow(overrides: Partial<Record<string, unknown>> = {}): Record<string, unknown> {
-  const now = new Date()
-  return {
-    id: randomUUID(),
-    organization_id: randomUUID(),
-    name: 'Prototype Line A',
-    created_at: now,
-    updated_at: now,
-    ...overrides,
-  }
+export function makeBoardRow(
+  overrides: Partial<Board> = {},
+): Record<string, unknown> {
+  return toSnakeCaseRow(
+    makeBoard(overrides as Partial<Board>) as unknown as Record<
+      string,
+      unknown
+    >,
+  );
 }
 
-export function makeUserRow(overrides: Partial<Record<string, unknown>> = {}): Record<string, unknown> {
-  return {
-    id: randomUUID(),
-    organization_id: randomUUID(),
-    email: 'jane.doe@example.com',
-    display_name: 'Jane Doe',
-    role: 'member',
-    created_at: new Date(),
-    ...overrides,
-  }
+export function makeUserRow(
+  overrides: Partial<User> = {},
+): Record<string, unknown> {
+  return toSnakeCaseRow(
+    makeUser(overrides as Partial<User>) as unknown as Record<string, unknown>,
+  );
 }

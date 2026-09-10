@@ -26,7 +26,7 @@
     "@nestjs/cli": "^10.4.5",
     "@nestjs/testing": "^10.4.4",
     "@types/express": "^4.17.21",
-    "@types/jest": "^29.5.13",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.16.10",
     "@types/pg": "^8.11.10",
     "@types/supertest": "^6.0.2",
@@ -41,14 +41,25 @@
     "typescript": "^5.6.2"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "json", "ts"],
-    "setupFiles": ["reflect-metadata"],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "setupFiles": [
+      "reflect-metadata"
+    ],
     "testRegex": ".*\\.spec\\.ts$",
-    "testPathIgnorePatterns": ["/node_modules/", "<rootDir>/tests/integration/"],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/tests/integration/"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "collectCoverageFrom": ["src/**/*.(t|j)s"],
+    "collectCoverageFrom": [
+      "src/**/*.(t|j)s"
+    ],
     "coverageDirectory": "coverage",
     "testEnvironment": "node"
   }
