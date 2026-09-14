@@ -5,6 +5,7 @@ Short description of change (1–2 lines):
 Issue(s) closed: Closes #<number>
 
 Checklist (acceptance criteria):
+
 - [ ] Code implements the requested behavior
 - [ ] Unit tests added/updated
 - [ ] CI (lint + unit tests) pass

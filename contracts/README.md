@@ -19,7 +19,7 @@ their own tests.
   matches these same schemas, with a mocked `fetch`. Runs as a normal fast test.
 
 If a field is renamed or removed on either side, whichever test reads real/expected data that no
-longer matches the schema fails — that's the whole point. Update the schema *and* both tests together
+longer matches the schema fails — that's the whole point. Update the schema _and_ both tests together
 when the shape intentionally changes.
 
 ## Why JSON Schema instead of OpenAPI

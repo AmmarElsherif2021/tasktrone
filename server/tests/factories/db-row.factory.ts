@@ -1,9 +1,17 @@
+<<<<<<< HEAD
 import { randomUUID } from "crypto";
 import { toSnakeCaseRow } from "src/db/implementations/case-mapping";
 import { makeTask, makeBoard, makeUser } from "./entities/index";
 import { Task, Board, User } from "src/domain/index";
 /**
  * Builds raw Postgres row shapes — snake_case columns, as `pg` returns them
+=======
+import { toSnakeCaseRow } from "../../src/db/implementations/case-mapping";
+import { makeTask, makeBoard, makeUser } from "./entities/index";
+import { Task, Board, User } from "src/domain/index";
+/**
+ * Builds raw SQL row shapes — snake_case columns, as `pg` returns them
+>>>>>>> e1a6194 (new file:   .github/ISSUE_TEMPLATE/task.yml)
  * before `toCamelCaseRow` (server/src/db/implementations/case-mapping.ts)
  * converts them to the camelCase domain entities. Use these wherever a test
  * needs to stand in for what the driver hands back pre-mapping (e.g.

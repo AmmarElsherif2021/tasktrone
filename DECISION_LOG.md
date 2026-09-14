@@ -1,129 +1,373 @@
-# Decision Log
+## **Dependency-Based Priority Matrix**
 
-Architecture decisions for the `server/` hexagonal-foundation rebuild, and how the new backend
-coexists with the pre-existing Supabase-backed client during the migration. Each entry lists the
-alternatives considered and the tradeoffs, not just the final call — so a later decision can be
-revisited without re-litigating context that's already been thought through.
+Here's the complete issue prioritization with **blocking relationships** for 57 open issues:
 
 ---
 
-## 1. Repository + Adapter (hexagonal) over a bare query layer or a full ORM
+## **TIER 1: Critical Foundation (Must Complete First)**
 
-**Decision**: Domain code depends only on a `DBAdapter` interface (`query`/`queryOne`/`transaction`).
-Repositories (`TaskRepository`, `BoardRepository`, `UserRepository`) build SQL and depend on
-`DBAdapter`, never on `pg` directly. Services depend on repositories, never on the adapter.
+These issues **block all downstream work**. No parallel development possible.
 
-**Alternatives considered**:
-- **Adapter only, no repository layer** — routes/services call `db.query()` directly. Rejected:
-  query strings and parameter-building end up duplicated or scattered, and there's no single place
-  to unit-test "does this repository send the SQL I expect."
-- **Full ORM (TypeORM/Prisma)** — less boilerplate for CRUD. Rejected for this phase: the schema is
-  still small and changing fast (Board/Task/User only), and an ORM's migration/entity-decorator
-  machinery is more to learn and fight than the SQL itself is to write by hand right now. Worth
-  revisiting once the schema stabilizes and grows (e.g. once Project/RBAC/audit-trail entities land).
-- **Direct Supabase client calls everywhere** (what the client still does for non-task data) —
-  fastest to prototype, but couples every caller to Supabase's specific client API and RLS model,
-  making a future driver swap (or a move off Supabase entirely) a full rewrite instead of a new
-  adapter.
+| Priority | Issue | Title                                                                  | Blocker For   | Est. Days |
+| -------- | ----- | ---------------------------------------------------------------------- | ------------- | --------- |
+| **1.1**  | #35   | Define Product entity, DTO, validation schema                          | #36, #41, #43 | 1–2       |
+| **1.2**  | #37   | Create BOMItem entity, DTO, repository, service                        | #41, #44, #52 | 2–3       |
+| **1.3**  | #38   | Create WIPBatch entity, DTO, repository, service                       | #45, #51      | 1–2       |
+| **1.4**  | #39   | Create AuditLog entity, repository (append-only), transactional helper | #41, #42, #54 | 2–3       |
+| **1.5**  | #40   | Create EngineeringComment entity, DTO, repository, service             | #47, #51      | 1–2       |
+| **1.6**  | #48   | Define current_stage and current_station enums                         | #41, #81      | 0.5–1     |
 
-**Tradeoffs accepted**: more files per feature (interface + adapter + repository + service) than a
-single query-per-route script would need. In exchange: repositories are unit-testable with
-`MockAdapter` (no database), and swapping Postgres for something else later is a new adapter, not a
-rewrite of every caller.
+**Cumulative Effort**: 8–13 days  
+**Done When**: All entities, DTOs, enums, and validation schemas are defined and tested locally.  
+**Go/No-Go**: Merge all into `develop` before moving to Tier 2.
 
 ---
 
-## 2. Postgres (via Docker Compose) as the initial database, not Supabase
+## **TIER 2: Data Layer & Database (Sequential; depends on Tier 1)**
 
-**Decision**: The new backend talks to a plain Postgres instance (`server/docker-compose.yml`)
-through `PostgresAdapter` (built on `pg`), not to Supabase.
+These create the **persistent data foundation**. Must be done before business logic.
 
-**Alternatives considered**:
-- **Point the new backend at Supabase directly** — would keep one database for the whole app.
-  Rejected for now: the client's existing Supabase schema (projects, posts, manufacturing phases,
-  RBAC, task members) is much richer than the new hexagonal backend's minimal Task/Board/User model,
-  and the whole point of this rebuild is to *not* inherit that schema's shape and coupling wholesale.
-  Building against a clean local Postgres keeps the new schema honest about what it actually models
-  today, instead of silently depending on Supabase-specific columns/enums from day one.
-- **SQLite for local dev** — even less setup than Docker. Rejected: `position3d` and future JSON-ish
-  fields want native `jsonb`, and staying on the same engine as the eventual target avoids a second
-  "does this SQL even work on the real database" surprise later.
+| Priority   | Issue                        | Title                                                       | Blocker For                       | Dependencies            | Est. Days        |
+| ---------- | ---------------------------- | ----------------------------------------------------------- | --------------------------------- | ----------------------- | ---------------- |
+| **2.1**    | #49                          | Update database schema (migration/init) for all five tables | #36, #38, #39, #44, #45, #46, #47 | #35, #37, #38, #39, #40 | 1–2              |
+| **2.2**    | #36                          | Create ProductRepository with CRUD methods                  | #41, #43, #50                     | #35, #49                | 1–2              |
+| _Parallel_ | _(#37, #38, #39, #40 repos)_ | _Embedded in Tier 1 issues_                                 | —                                 | #35–#40                 | _Included above_ |
 
-**Tradeoffs accepted**: two databases exist side by side during the migration (see decision 5) —
-more moving parts for local dev (`docker compose up -d` is a manual step) and no free real-time
-subscriptions or RLS the way Supabase gives you. Migration notes: if/when the client's Supabase data
-model is retired in favor of the new backend, the natural end states are either (a) point
-`PostgresAdapter` at the same physical Postgres Supabase already runs on, keeping this adapter layer
-as-is, or (b) keep two databases permanently and make `Project`/`User`/`RBAC` first-class in the new
-backend instead. Neither has been decided — this log entry exists so that choice isn't made silently.
+**Cumulative Effort**: 2–4 days (after Tier 1)  
+**Go/No-Go**: Database migrations run locally; repositories can CRUD against test DB.
 
 ---
 
-## 3. TypeScript for the server, JavaScript for the client
+## **TIER 3: Core Business Logic & Transactions (Depends on Tier 2)**
 
-**Decision**: `server/` is TypeScript (strict mode). `client/` stays plain JS/JSX, matching what was
-already there.
+This is the **engine** — phase-gate logic with atomicity & audit logging.
 
-**Alternatives considered**:
-- **TypeScript everywhere** — end-to-end type safety, including a shared types package for
-  request/response shapes. Rejected for now: the client is a large pre-existing JS codebase (~80
-  files); migrating it to TS is a project of its own and not a prerequisite for the backend to exist.
-  Revisit once `client/src/API/*`'s Supabase-direct calls are fully replaced by `apiClient` — at that
-  point a shared `@tasktrone/api-types` package (generated from the server's DTOs) becomes cheap and
-  high-value, and is the natural point to introduce TS on the client too.
-- **JavaScript for the server too** — would match the client and skip a build step. Rejected:
-  NestJS's DI and decorators (`@Controller`, `@Injectable`, the DTO validation pipeline) lean heavily
-  on TypeScript types and metadata; writing it in JS fights the framework more than it saves.
+| Priority | Issue | Title                                               | Blocker For             | Dependencies       | Est. Days              |
+| -------- | ----- | --------------------------------------------------- | ----------------------- | ------------------ | ---------------------- |
+| **3.1**  | #41   | Implement ProductService with full phase-gate logic | #42, #43, #50, #52, #61 | #35, #37, #39, #49 | **3–5** ← **CRITICAL** |
 
-**Tradeoffs accepted**: no compile-time guarantee that `apiClient.post('/tasks', {...})`'s payload
-shape matches `CreateTaskDto` — that gap is exactly what task #20 (contract tests) exists to catch
-at test time instead.
+**Key Requirements for #41**:
 
----
+- Load BOMItems and verify non-empty for production/validation gates
+- Compute Σ(quantity × unit_cost) vs `target_budget` with config-driven behavior
+- Verify `active_3d_model_url` is non-null past Design
+- **Wrap all checks + `repository.update()` + `AuditLog.write()` in single `DBAdapter.transaction()`**
+- Throw typed errors: `PhaseGateViolationError`, `BudgetExceededError`, `MissingAssetError`
+- Use `withAuditLog()` helper
 
-## 4. Unit tests (mocked) vs. integration tests (real Postgres) as separate suites
-
-**Decision**: `npm test` (Jest, server; Vitest, client) runs only unit tests — repositories tested
-against `MockAdapter`, services tested against mocked repositories, controllers tested against
-mocked services. Tests that need a real database live under `server/tests/integration/` and are
-excluded from `npm test` via `testPathIgnorePatterns`; they run via `npm run test:integration`.
-
-**Alternatives considered**:
-- **One test suite, everything against a real (test) Postgres** — closer to production behavior for
-  every test. Rejected: the server-lint-test CI job runs on every PR and needs to stay fast and not
-  depend on a database being reachable; conflating the two would either slow down every PR or make
-  the fast job flaky when Postgres isn't available.
-- **Mock the database for everything, including the adapter itself** — fastest possible, but then
-  nothing ever exercises real SQL against a real Postgres, so a syntax error or type mismatch in a
-  repository's query wouldn't surface until it hit production.
-
-**Tradeoffs accepted**: the integration suite needs `docker compose up -d` to run locally and isn't
-wired into CI yet (that's task #22 — a main-only CI job is the intended next step, not implemented
-as of this entry). Until then, integration tests are a local-only safety net, not a CI gate.
+**Cumulative Effort**: 3–5 days (after Tier 2)  
+**Go/No-Go**: Phase-gate transitions atomic; audit log writes only on success; all three gate conditions independently testable.
 
 ---
 
-## 5. Incremental migration: new backend owns tasks/boards, Supabase keeps everything else
+## **TIER 4: Error Handling & Middleware (Depends on Tier 3)**
 
-**Decision**: `ProjectContext` now fetches tasks through `apiClient` (the new backend), using
-`currentProjectId` as `boardId` since the new backend has no `Project` entity yet. Project details,
-project members, posts, and users still go through the original Supabase-backed
-`client/src/API/*.js` calls, restored from git history rather than rewritten against the new backend.
+Map domain errors to HTTP responses.
 
-**Alternatives considered**:
-- **Migrate everything to the new backend in one step** — cleaner end state, but the new backend's
-  Task/Board/User model has no equivalent yet for posts, project membership, or manufacturing-phase
-  metadata; building all of that first would block shipping the parts that *are* ready (tasks/boards)
-  for an indefinite, much larger unit of work.
-- **Keep everything on Supabase, don't wire the new backend into the client at all** — avoids running
-  two data sources, but then the backend built in tasks #1-#10 has no real caller exercising it
-  end-to-end, and integration bugs (like the tsconfig `rootDir` build-output bug found while wiring
-  the HTTP API) surface later and more expensively.
+| Priority | Issue | Title                                                              | Blocker For | Dependencies | Est. Days |
+| -------- | ----- | ------------------------------------------------------------------ | ----------- | ------------ | --------- |
+| **4.1**  | #42   | Wire phase-gate domain errors into global error-mapping middleware | #43         | #41          | 1–2       |
 
-**Tradeoffs accepted**: two backends are live at once. Fields the old Supabase-shaped consumers
-expect (`manufacturingPhase`, `priority`, `leadTime`, `taskCategory`, task members, requirements,
-attachments) are present in the mapped shape but always `undefined`/empty, since the new backend
-doesn't have them yet — documented inline in `ProjectContext.jsx` and in the `CreateTask` form's
-notice banner so this reads as deliberate, not broken. Migration note: the natural next steps are
-(a) give the new backend a `Project` entity so `currentProjectId` stops being an alias for `boardId`,
-then (b) move posts/members/users over one at a time the same way tasks were.
+**Deliverables**: Global error handler intercepts `PhaseGateViolationError` → 422 Unprocessable Entity, `BudgetExceededError` → 402 Payment Required (or 400), `MissingAssetError` → 400 Bad Request.
+
+---
+
+## **TIER 5: API Controllers (Depends on Tier 4)**
+
+Build HTTP endpoints consuming business logic.
+
+| Priority | Issue | Title                                                  | Blocker For   | Dependencies  | Est. Days |
+| -------- | ----- | ------------------------------------------------------ | ------------- | ------------- | --------- |
+| **5.1**  | #43   | Create ProductController (CRUD + transitions)          | #61, #73, #81 | #41, #42, #49 | 2–3       |
+| **5.2**  | #44   | Create BOMItemController (BOM CRUD)                    | #61, #73      | #37, #42, #49 | 1–2       |
+| **5.3**  | #45   | Create WIPBatchController (WIP CRUD + station updates) | #61, #73      | #38, #42, #49 | 1–2       |
+| **5.4**  | #46   | Create AuditLogController (read-only audit trails)     | #61, #73, #80 | #39, #42, #49 | 1–2       |
+| **5.5**  | #47   | Create EngineeringCommentController (spatial comments) | #61, #67, #73 | #40, #42, #49 | 1–2       |
+
+**Parallelizable**: All five controllers can be coded in parallel once #41–#42 are done.  
+**Cumulative Effort**: 6–11 days (parallel).
+
+---
+
+## **TIER 6: Dependency Injection & Bootstrap (Depends on Tier 5)**
+
+Wire up the application container.
+
+| Priority | Issue | Title                                                          | Blocker For | Dependencies | Est. Days |
+| -------- | ----- | -------------------------------------------------------------- | ----------- | ------------ | --------- |
+| **6.1**  | #50   | Update AppModule and bootstrap() for new services/repositories | #59–#61     | #43–#47      | 0.5–1     |
+
+**Cumulative Effort**: 0.5–1 day.
+
+---
+
+## **TIER 7: Backend Testing (Can start in parallel after Tier 3)**
+
+Unit & integration tests for all layers.
+
+| Priority | Issue | Title                                                                | Blocker For | Dependencies | Est. Days              |
+| -------- | ----- | -------------------------------------------------------------------- | ----------- | ------------ | ---------------------- |
+| **7.1**  | #51   | Database schema integration tests (create/transition/audit workflow) | —           | #36–#40, #49 | 2–3                    |
+| **7.2**  | #52   | Phase-gate unit tests (all conditions independent)                   | —           | #41          | **2–3** ← **CRITICAL** |
+| **7.3**  | #53   | BOM cost calculation unit tests and integration validation           | —           | #37, #41     | 1–2                    |
+| **7.4**  | #54   | Audit-log immutability unit and integration tests                    | —           | #39, #41     | 1–2                    |
+| **7.5**  | #61   | Comprehensive API contract tests for new endpoints                   | —           | #43–#47, #50 | 2–3                    |
+
+**Parallelizable**: All can run simultaneously.  
+**Cumulative Effort**: 8–13 days (parallel).  
+**Gating**: Must complete #7.1–#7.4 before **Tier 9 (Frontend Testing)** for contract-driven development.
+
+---
+
+## **TIER 8: CI/CD & Documentation (Can run in parallel with Tier 5–7)**
+
+Update pipelines and docs.
+
+| Priority | Issue | Title                                                        | Blocker For | Dependencies | Est. Days |
+| -------- | ----- | ------------------------------------------------------------ | ----------- | ------------ | --------- |
+| **8.1**  | #58   | Update `.lintstagedrc.js` to include new server files        | #59         | #35–#47      | 0.5       |
+| **8.2**  | #59   | Update CI workflow (server-lint-test.yml includes new tests) | —           | #52, #58     | 0.5–1     |
+| **8.3**  | #60   | Add integration tests job to CI (main-only)                  | —           | #51, #59     | 0.5–1     |
+| **8.4**  | #55   | Update server/src/db/README.md (entity patterns)             | —           | #36–#40, #49 | 0.5–1     |
+| **8.5**  | #56   | Update server/README.md (factory conventions)                | —           | #52–#54      | 0.5–1     |
+| **8.6**  | #57   | Update DECISION_LOG.md (Product migration strategy)          | —           | #35, #41     | 0.5–1     |
+
+**Parallelizable**: All can run simultaneously.  
+**Cumulative Effort**: 3–5 days (parallel).
+
+---
+
+## **TIER 9: Frontend Infrastructure (Depends on Tier 6 + early mock in Tier 7)**
+
+Client-side setup & mocks; can start once backend API shapes are documented.
+
+| Priority | Issue | Title                                                  | Blocker For        | Dependencies           | Est. Days                          |
+| -------- | ----- | ------------------------------------------------------ | ------------------ | ---------------------- | ---------------------------------- |
+| **9.1**  | #62   | Create centralized apiClient.js (axios/fetch helpers)  | #63, #73           | Backend API documented | 1–2                                |
+| **9.2**  | #63   | Create ProjectContext (React Context) for state        | #64–#70, #73       | #62                    | 1–2                                |
+| **9.3**  | #81   | Export CurrentStage & CurrentStation enums from server | #64, #82           | #48, #43               | 0.5                                |
+| **9.4**  | #75   | Create MSW (Mock Service Worker) handlers              | #76, #77, #78, #79 | Backend API spec       | 2–3 ← **Unblock frontend testing** |
+| **9.5**  | #73   | Create React Query hooks for CRUD                      | #64–#70            | #62, #63, #75          | 1–2                                |
+
+**Cumulative Effort**: 5–9 days.  
+**Go/No-Go**: Frontend can mock & test UI without backend running.
+
+---
+
+## **TIER 10: Frontend UI Components (Depends on Tier 9)**
+
+Core components for product management.
+
+| Priority | Issue | Title                                                      | Blocker For   | Dependencies       | Est. Days |
+| -------- | ----- | ---------------------------------------------------------- | ------------- | ------------------ | --------- |
+| **10.1** | #64   | Build Kanban board component                               | #68, #76, #79 | #63, #73, #75      | 2–3       |
+| **10.2** | #65   | Build ProductDetail panel (BOM, WIP, audit, comments tabs) | #68, #77, #79 | #63, #73, #75      | 2–3       |
+| **10.3** | #66   | Create BOM spreadsheet editor (live cost calculation)      | #65, #78      | #63, #73, #75      | 2–3       |
+| **10.4** | #67   | Create 3D model viewer (spatial comments)                  | #65, #68, #79 | #63, #73, #75, #81 | 2–4       |
+| **10.5** | #69   | Build ProductList (create/search/filter UI)                | #64, #68, #87 | #63, #73, #75      | 1–2       |
+| **10.6** | #70   | Build CreateProductForm (validation + error feedback)      | #69, #90      | #63, #73, #75      | 1–2       |
+
+**Parallelizable**: All can be coded in parallel (different feature branches).  
+**Cumulative Effort**: 10–17 days (parallel).
+
+---
+
+## **TIER 11: Support UI Components & UX (Parallelizable with Tier 10)**
+
+Error handling, loading, feedback.
+
+| Priority | Issue | Title                                                  | Blocker For             | Dependencies | Est. Days |
+| -------- | ----- | ------------------------------------------------------ | ----------------------- | ------------ | --------- |
+| **11.1** | #71   | Implement error banner component (reason code mapping) | #64, #65, #69, #70, #79 | #62, #90     | 1         |
+| **11.2** | #72   | Implement loading skeleton components                  | #64, #65, #69           | #63          | 1         |
+| **11.3** | #84   | Create loading state for app bootstrap                 | #64, #82                | #63          | 1         |
+| **11.4** | #85   | Implement notifications/toast system                   | #64–#70                 | #62, #71     | 1         |
+| **11.5** | #87   | Build ProductSearch and ProductFilter components       | #69, #91                | #75          | 1–2       |
+
+**Parallelizable**: All can run simultaneously.  
+**Cumulative Effort**: 5–7 days (parallel).
+
+---
+
+## **TIER 12: Frontend Testing (Depends on Tier 10–11)**
+
+Unit & E2E tests for client.
+
+| Priority | Issue | Title                                               | Blocker For | Dependencies              | Est. Days                      |
+| -------- | ----- | --------------------------------------------------- | ----------- | ------------------------- | ------------------------------ |
+| **12.1** | #76   | Unit tests for KanbanBoard                          | —           | #64, #75                  | 1–2                            |
+| **12.2** | #77   | Unit tests for ProductDetail                        | —           | #65, #75                  | 1–2                            |
+| **12.3** | #78   | Unit tests for BOMEditor                            | —           | #66, #75                  | 1–2                            |
+| **12.4** | #74   | Contract test suite (client/server response shapes) | —           | #75, #61                  | 2–3 ← **Gated by Backend #61** |
+| **12.5** | #79   | E2E tests with Playwright (happy path)              | —           | #64–#70, #75, all Tier 10 | 2–3                            |
+
+**Parallelizable**: #76–#78 can run in parallel with #12.4–#12.5.  
+**Cumulative Effort**: 7–12 days (parallel).
+
+---
+
+## **TIER 13: Frontend Integration (Depends on Tier 12)**
+
+Wire context to components, navigation, final UI polish.
+
+| Priority | Issue | Title                                                           | Blocker For                | Dependencies       | Est. Days |
+| -------- | ----- | --------------------------------------------------------------- | -------------------------- | ------------------ | --------- |
+| **13.1** | #68   | Wire ProductContext to KanbanBoard & ProductDetail (happy path) | #82, #79                   | #64, #65, #63, #73 | 1–2       |
+| **13.2** | #82   | Integrate React Router (multi-page navigation)                  | #79, #80, #83–#86, #89–#91 | #65, #69           | 1         |
+| **13.3** | #83   | Add auth/user context (placeholder for Supabase)                | —                          | #82                | 1         |
+| **13.4** | #86   | Add analytics/telemetry hooks (placeholder)                     | —                          | #82                | 0.5       |
+| **13.5** | #88   | Create CSV export (future-friendly)                             | —                          | #65, #75           | 1–2       |
+| **13.6** | #90   | Align apiClient errors with server contracts                    | #71                        | #62, #42, #61      | 1         |
+| **13.7** | #91   | Implement responsive design & mobile tweaks                     | —                          | #64–#70            | 1–2       |
+
+**Parallelizable**: All can run in parallel.  
+**Cumulative Effort**: 6–10 days (parallel).
+
+---
+
+## **TIER 14: CI/CD & Documentation (Final Polish)**
+
+Frontend pipeline & docs.
+
+| Priority | Issue | Title                                   | Blocker For | Dependencies          | Est. Days |
+| -------- | ----- | --------------------------------------- | ----------- | --------------------- | --------- |
+| **14.1** | #89   | Update CI (run client lint/test on PRs) | —           | All Tier 12           | 0.5–1     |
+| **14.2** | #80   | Update client/README.md (feature docs)  | —           | #64–#70, #62–#63, #73 | 0.5–1     |
+
+**Cumulative Effort**: 1–2 days.
+
+---
+
+## **Critical Path Timeline**
+
+```
+Tier 1  (8–13d):   Entities & enums
+  ↓
+Tier 2  (2–4d):    Schema & repositories
+  ↓
+Tier 3  (3–5d):    ProductService + phase-gate logic ⭐ CRITICAL MILESTONE
+  ↓
+Tier 4  (1–2d):    Error middleware
+  ↓
+Tier 5  (6–11d):   Controllers (PARALLEL)
+  ├─ Tier 7 (8–13d): Testing (PARALLEL)
+  ├─ Tier 8 (3–5d):  CI/Docs (PARALLEL)
+  └─ Tier 9 (5–9d):  Frontend setup (PARALLEL after Tier 6)
+     ↓
+  Tier 10 (10–17d): UI Components (PARALLEL)
+  ├─ Tier 11 (5–7d): Support Components (PARALLEL)
+  ├─ Tier 12 (7–12d): Testing (PARALLEL)
+  └─ Tier 13 (6–10d): Integration (PARALLEL)
+     ↓
+  Tier 14 (1–2d):   Final CI/Docs
+
+Total Critical Path: ~40–55 days
+Total Parallel Work: ~25–35 days
+```
+
+---
+
+## **Issue Dependency Map (Visual)**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ TIER 1: Entities & Enums (BLOCKER)                              │
+│ #35, #37, #38, #39, #40, #48                                    │
+└────────────┬────────────────────────────────────────────────────┘
+             │
+┌────────────▼────────────────────────────────────────────────────┐
+│ TIER 2: Schema & Repositories                                   │
+│ #49 → #36, #37, #38, #39, #40 repos                            │
+└────────────┬────────────────────────────────────────────────────┘
+             │
+┌────────────▼────────────────────────────────────────────────────┐
+│ TIER 3: ProductService ⭐ CRITICAL                             │
+│ #41 (phase-gate, transactions, audit)                           │
+└────────────┬────────────────────────────────────────────────────┘
+             │
+┌────────────▼────────────────────────────────────────────────────┐
+│ TIER 4: Error Middleware                                        │
+│ #42                                                              │
+└────────────┬────────────────────────────────────────────────────┘
+             │
+    ┌────────┴─────────┬──────────────┬─────────────────┐
+    │                  │              │                 │
+┌───▼────────┐  ┌─────▼──────┐  ┌────▼────────┐  ┌─────▼──────────┐
+│ TIER 5:    │  │ TIER 7:    │  │ TIER 8:    │  │ TIER 9:       │
+│ Controllers│  │ Testing    │  │ CI/Docs    │  │ Frontend Setup│
+│ #43–#47    │  │ #51–#54,61 │  │ #55–#60    │  │ #62, #63, #75 │
+│ #50        │  │            │  │            │  │ #73, #81      │
+└────────────┘  └────────────┘  └────────────┘  └────────┬───────┘
+                                                          │
+                                    ┌─────────────────────┘
+                                    │
+                    ┌───────────────┴──────────────┐
+                    │                              │
+            ┌───────▼────────┐          ┌──────────▼──────┐
+            │ TIER 10–11:    │          │ TIER 12:       │
+            │ UI Components  │          │ Testing        │
+            │ #64–#70, #87   │          │ #74, #76–#79   │
+            │ #71–#72, #84–85│          │                │
+            └───────┬────────┘          └────────────────┘
+                    │                          │
+                    └───────────────┬──────────┘
+                                    │
+                            ┌───────▼────────────┐
+                            │ TIER 13:           │
+                            │ Integration        │
+                            │ #68, #82–#83, #86  │
+                            │ #88, #90–#91       │
+                            └───────┬────────────┘
+                                    │
+                            ┌───────▼────────────┐
+                            │ TIER 14:           │
+                            │ Final CI/Docs      │
+                            │ #89, #80           │
+                            └────────────────────┘
+```
+
+---
+
+## **Sprint Planning (Example: 2-Week Sprints)**
+
+### **Sprint 1 (Week 1–2): Foundation**
+
+- Tier 1: Entities & enums (#35–#40, #48)
+- Tier 2: Schema & repositories (#49, #36)
+
+### **Sprint 2 (Week 3–4): Core Logic**
+
+- Tier 3: ProductService (#41) ⭐
+- Tier 4: Error middleware (#42)
+
+### **Sprint 3 (Week 5–6): Backend API**
+
+- Tier 5: Controllers (#43–#47, #50)
+- Tier 7: Testing (#51–#54, #61) [parallel]
+- Tier 8: CI/Docs (#55–#60) [parallel]
+
+### **Sprint 4 (Week 7–8): Frontend Setup & Mocks**
+
+- Tier 9: Frontend infrastructure (#62, #63, #75, #73, #81)
+
+### **Sprint 5 (Week 9–10): Frontend UI**
+
+- Tier 10–11: Components (#64–#72, #84–#87)
+- Tier 12: Testing (#76–#79, #74) [parallel]
+
+### **Sprint 6 (Week 11–12): Final Integration & Polish**
+
+- Tier 13: Integration (#68, #82–#83, #86, #88, #90–#91)
+- Tier 14: Docs & CI (#89, #80)
+
+---
+
+## **Key Insights**
+
+1. **#41 (ProductService) is the critical path** — Everything downstream depends on its transaction & audit logic.
+2. **Backend can ship Tier 1–6 independently** before frontend needs it.
+3. **Frontend can mock (Tier 9–11) in parallel** with backend Tier 7–8, unblocking component development.
+4. **Testing (Tier 7, 12) should run in parallel**, not sequentially.
+5. **Contract tests (#61, #74) are the integration gate** — Must pass before E2E (#79).
+
+---

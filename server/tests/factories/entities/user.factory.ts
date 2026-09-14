@@ -5,7 +5,11 @@ import { User } from "src/domain/user.entity";
 //For fixed and deterministic defaults
 export const makeUser = (overrides?: Partial<User>): User => {
   const defaultUser: User = {
+<<<<<<< HEAD
     id: "1",
+=======
+    id: randomUUID(),
+>>>>>>> e1a6194 (new file:   .github/ISSUE_TEMPLATE/task.yml)
     organizationId: "org-1",
     email: "john.doe@example.com",
     displayName: "John Doe",
