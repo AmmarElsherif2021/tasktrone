@@ -1,0 +1,5 @@
+[33m734184d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;32mmerge-backup[m[33m)[m merge: resolve conflicts with origin/master
+[33m021a271[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m fix: reconcile test factories:
+[33md60aee6[m Merge pull request #34 from AmmarElsherif2021/feat/server-hexagonal-foundation-v2
+[33m8aaee29[m[33m ([m[1;31morigin/feat/server-hexagonal-foundation-v2[m[33m, [m[1;31morigin/feat/server-hexagonal-foundation[m[33m)[m docs: document the test-fixture factory convention
+[33m2be986d[m test(server): retrofit integration specs onto entity and seed factories

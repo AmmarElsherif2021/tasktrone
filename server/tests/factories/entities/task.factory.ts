@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { faker } from "@faker-js/faker";
 import { Task } from "src/domain/task.entity";
-// This used for fixed and deterministic defaults
+// This used for fixed and deterministic tests
 export const makeTask = (overrides?: Partial<Task>): Task => {
   const defaultTask: Task = {
     id: randomUUID(),
@@ -19,7 +19,7 @@ export const makeTask = (overrides?: Partial<Task>): Task => {
 
 // For randomized tests, e.g. for property-based testing
 export const makeRandomTask = (overrides?: Partial<Task>): Task => {
-  const defaultTask: Task = {
+  const randomTask: Task = {
     id: faker.string.uuid(),
     boardId: faker.string.uuid(),
     title: `Task ${Math.floor(Math.random() * 1000)}`,
@@ -34,5 +34,5 @@ export const makeRandomTask = (overrides?: Partial<Task>): Task => {
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
   };
-  return { ...defaultTask, ...overrides };
+  return { ...randomTask, ...overrides };
 };
