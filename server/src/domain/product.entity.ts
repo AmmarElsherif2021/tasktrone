@@ -6,7 +6,26 @@ export const PRODUCT_STAGES = [
   "archived",
 ] as const;
 export type ProductStage = (typeof PRODUCT_STAGES)[number];
+export interface CreateProductInput {
+  boardId: string;
+  name: string;
+  skuName: string;
+  description?: string;
+  currentStage?: ProductStage;
+  active_3d_model_url?: string | null;
+  targetBudget?: number;
+  ownerId?: string;
+}
 
+export interface UpdateProductInput {
+  name?: string;
+  description?: string;
+  currentStage?: ProductStage;
+  active_3d_model_url?: string | null;
+  targetBudget?: number;
+  ownerId?: string;
+  version?: number;
+}
 export interface Product {
   id: string;
   boardId: string; // UUID

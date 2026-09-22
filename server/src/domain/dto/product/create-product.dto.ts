@@ -43,7 +43,7 @@ export class CreateProductDTO {
   active_3d_model_url?: string | null;
 
   @IsOptional()
-  @Transform(({ value }) =>
+  @Transform((value: unknown) =>
     value === null || value === undefined ? value : Number(value),
   )
   @IsNumber()

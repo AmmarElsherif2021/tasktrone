@@ -4,10 +4,10 @@ module.exports = {
     return `npx eslint --fix --config client/.eslintrc.json ${filenames.join(' ')}`;
   },
 
-  // Server (NestJS) – use the new flat config (eslint.config.mjs)
+  // Server (NestJS) – uses the legacy .eslintrc.js (no flat config exists yet)
   // Includes src/, tests/, and any .ts/.js files
   'server/**/*.{ts,js}': (filenames) => {
-    return `npx eslint --fix --config server/eslint.config.mjs ${filenames.join(' ')}`;
+    return `npx eslint --fix --config server/.eslintrc.js ${filenames.join(' ')}`;
   },
 
   // Other files (exclude huge package-lock.json)

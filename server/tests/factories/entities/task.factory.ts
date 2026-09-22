@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { faker } from "@faker-js/faker";
-import { Task } from "src/domain/task.entity";
+import { Task } from "../../../src/domain/task.entity";
 // This used for fixed and deterministic tests
 export const makeTask = (overrides?: Partial<Task>): Task => {
   const defaultTask: Task = {
