@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { faker } from "@faker-js/faker";
-import { Product, PRODUCT_STAGES } from "../../../src/domain/product.entity";
+import { Product } from "../../../src/domain/product.entity";
 
 // for determenistic tests, e.g. for unit tests
 export const makeProduct = (overrides: Partial<Product>): Product => {
@@ -24,7 +24,7 @@ export const makeProduct = (overrides: Partial<Product>): Product => {
 
 // For randomized tests,,,
 export const makeRandomProduct = (overrides?: Partial<Product>): Product => {
-  const productStage = faker.helpers.arrayElement(PRODUCT_STAGES);
+  //const productStage = faker.helpers.arrayElement(PRODUCT_STAGES);
   const randomProduct: Product = {
     id: faker.string.uuid(),
     boardId: faker.string.uuid(),
@@ -33,15 +33,18 @@ export const makeRandomProduct = (overrides?: Partial<Product>): Product => {
     description: faker.lorem.paragraph().slice(0, 2010),
     currentStage: faker.helpers.arrayElement([
       "draft",
-      "in-progress",
-      "completed",
-      "archived",
+      "concept",
+      "detailed-design",
+      "internal-review",
+      "floor-feedback",
+      "revision",
+      "design-released",
     ]),
     active_3d_model_url: faker.internet.url(),
     targetBudget: faker.number.float({ min: 0, max: 10000, precision: 0.01 }),
     ownerId: faker.string.uuid(),
     version: faker.number.float({ min: 0, max: 10 }),
-    archivedAt: productStage === "archived" ? faker.date.past() : null,
+    archivedAt: faker.date.past(),
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
   };

@@ -1,5 +1,6 @@
 import { makeProduct } from "../../../tests/factories/entities/product.factory";
 import { MockAdapter } from "../../../tests/mocks/MockAdapter";
+//import { ProductStage } from "../../domain/product.entity";
 import { ProductRepository } from "./ProductRepository";
 
 describe("ProductRepository", () => {
@@ -21,7 +22,7 @@ describe("ProductRepository", () => {
     });
 
     expect(result).toEqual(row);
-    expect(adapter.calls[0].sql).toContain("INSERT INTO boards");
+    expect(adapter.calls[0].sql).toContain("INSERT INTO products");
     expect(adapter.calls[0].sql).toContain("RETURNING *");
     expect(adapter.calls[0].params).toEqual(["b1", "Widget"]);
   });
@@ -44,7 +45,7 @@ describe("ProductRepository", () => {
 
     await repo.findById("1");
 
-    expect(adapter.calls[0].sql).toContain("FROM boards");
+    expect(adapter.calls[0].sql).toContain("FROM products");
     expect(adapter.calls[0].sql).toContain("WHERE id = $1");
     expect(adapter.calls[0].params).toEqual(["1"]);
   });
@@ -67,6 +68,7 @@ describe("ProductRepository", () => {
 
     await repo.findByBoard("b1");
 
+    expect(adapter.calls[0].sql).toContain("FROM products");
     expect(adapter.calls[0].sql).toContain("WHERE board_id = $1");
     expect(adapter.calls[0].sql).toContain("ORDER BY created_at DESC");
     expect(adapter.calls[0].params).toEqual(["b1"]);
@@ -87,15 +89,68 @@ describe("ProductRepository", () => {
     expect(result).toHaveLength(2);
   });
 
+  // findBySKU test ==================
+  it("findBySKU() queries by sku name", async () => {
+    const adapter = new MockAdapter();
+    adapter.mockNextResult([makeProduct({ id: "1" })]);
+    const repo = new ProductRepository(adapter);
+
+    await repo.findBySKU("SOME_SKU");
+
+    expect(adapter.calls[0].sql).toContain("FROM products");
+    expect(adapter.calls[0].sql).toContain("WHERE sku_name = $1");
+    expect(adapter.calls[0].params).toEqual(["SOME_SKU"]);
+  });
+
+  it("findBySKU() returns null when no row matches", async () => {
+    const adapter = new MockAdapter();
+    adapter.mockNextResult([]);
+    const repo = new ProductRepository(adapter);
+
+    const result = await repo.findBySKU("missing");
+
+    expect(result).toBeNull();
+  });
+
+  // findByStages test ===============
+  it("findByStages() filters the board's products by stage", async () => {
+    const adapter = new MockAdapter();
+    const rows = [
+      makeProduct({
+        id: "1",
+        boardId: "b1",
+        currentStage: "concept",
+      }),
+      makeProduct({
+        id: "2",
+        boardId: "b1",
+        currentStage: "concept",
+      }),
+      makeProduct({
+        id: "3",
+        boardId: "b1",
+        currentStage: "draft",
+      }),
+    ];
+    adapter.mockNextResult(rows);
+    const repo = new ProductRepository(adapter);
+
+    const result = await repo.findByStages("b1", "concept");
+
+    expect(result).toHaveLength(2);
+    expect(result.every((p) => p.currentStage === "concept")).toBe(true);
+    expect(adapter.calls[0].params).toEqual(["b1"]);
+  });
+
   // update test =====================
   it("update() sets name when provided", async () => {
     const adapter = new MockAdapter();
     adapter.mockNextResult([makeProduct({ id: "1", name: "New Name" })]);
     const repo = new ProductRepository(adapter);
 
-    await repo.update("1", { name: "New Name" });
+    await repo.update("1", { name: "New Name", updatedAt: new Date() });
 
-    expect(adapter.calls[0].sql).toContain("UPDATE boards");
+    expect(adapter.calls[0].sql).toContain("UPDATE products");
     expect(adapter.calls[0].sql).toContain("name = $1");
     expect(adapter.calls[0].sql).toContain("updated_at = NOW()");
     expect(adapter.calls[0].sql).toContain("WHERE id = $2");
@@ -107,9 +162,9 @@ describe("ProductRepository", () => {
     adapter.mockNextResult([makeProduct({ id: "1" })]);
     const repo = new ProductRepository(adapter);
 
-    await repo.update("1", {});
+    await repo.update("1", { updatedAt: new Date() });
 
-    expect(adapter.calls[0].sql).toBe("SELECT * FROM boards WHERE id = $1");
+    expect(adapter.calls[0].sql).toBe("SELECT * FROM products WHERE id = $1");
     expect(adapter.calls[0].params).toEqual(["1"]);
   });
 
@@ -118,9 +173,9 @@ describe("ProductRepository", () => {
     adapter.mockNextResult([makeProduct({ id: "1" })]);
     const repo = new ProductRepository(adapter);
 
-    await repo.update("1", { name: undefined });
+    await repo.update("1", { name: undefined, updatedAt: new Date() });
 
-    expect(adapter.calls[0].sql).toBe("SELECT * FROM boards WHERE id = $1");
+    expect(adapter.calls[0].sql).toBe("SELECT * FROM products WHERE id = $1");
     expect(adapter.calls[0].params).toEqual(["1"]);
   });
 
@@ -129,10 +184,14 @@ describe("ProductRepository", () => {
     adapter.mockNextResult([]);
     const repo = new ProductRepository(adapter);
 
-    const result = await repo.update("missing", { name: "X" });
+    const result = await repo.update("missing", {
+      name: "X",
+      updatedAt: new Date(),
+    });
 
     expect(result).toBeNull();
   });
+
   // delete test =====================
   it("delete() soft-deletes by setting archived_at", async () => {
     const adapter = new MockAdapter();

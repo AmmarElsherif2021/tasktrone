@@ -73,7 +73,7 @@ export class ProductRepository {
   constructor(private readonly db: DBAdapter) {}
   async create(input: CreateProductInput): Promise<Product> {
     const row = await this.db.queryOne<Product>(
-      "INSERT INTO boards (board_id, name) VALUES ($1, $2) RETURNING *",
+      "INSERT INTO products (board_id, name) VALUES ($1, $2) RETURNING *",
       [input.boardId, input.name],
     );
     if (!row) throw new Error("Failed to create board");
@@ -81,18 +81,27 @@ export class ProductRepository {
   }
 
   async findById(id: string): Promise<Product | null> {
-    return this.db.queryOne<Product>("SELECT * FROM boards WHERE id = $1", [
+    return this.db.queryOne<Product>("SELECT * FROM products WHERE id = $1", [
       id,
     ]);
   }
 
   async findByBoard(boardId: string): Promise<Product[]> {
     return this.db.query<Product>(
-      "SELECT * FROM boards WHERE board_id = $1 ORDER BY created_at DESC",
+      "SELECT * FROM products WHERE board_id = $1 ORDER BY created_at DESC",
       [boardId],
     );
   }
-
+  async findBySKU(sku: string): Promise<Product | null> {
+    return this.db.queryOne<Product>(
+      "SELECT FROM products WHERE sku_name = $1",
+      [sku],
+    );
+  }
+  async findByStages(boardId: string, stage: ProductStage): Promise<Product[]> {
+    const products: Product[] = await this.findByBoard(boardId);
+    return products?.filter((p) => p.currentStage === stage);
+  }
   async update(
     id: string,
     changes: UpdateProductInput,
@@ -101,7 +110,7 @@ export class ProductRepository {
       return this.findById(id);
     }
     return this.db.queryOne<Product>(
-      "UPDATE boards SET name = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
+      "UPDATE products SET name = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
       [changes.name, id],
     );
   }

@@ -1,9 +1,12 @@
 // Product entity in the system owned by board
 export const PRODUCT_STAGES = [
   "draft",
-  "in-progress",
-  "completed",
-  "archived",
+  "concept",
+  "detailed-design",
+  "internal-review",
+  "floor-feedback",
+  "revision",
+  "design-released",
 ] as const;
 export type ProductStage = (typeof PRODUCT_STAGES)[number];
 export interface CreateProductInput {
