@@ -1,6 +1,14 @@
 # Tasktrone
 
-Production Kanban for modern manufacturing — a focused Kanban system that brings WIP enforcement, quality gates, equipment tracking and immutable change history to assembly-line workflows.
+## Design collaboration + BOM management + DFM review + a release-to-manufacturing gate
+
+It is a design-phase collaboration for modern manufacturing — a focused platform that brings BOM management, design review, floor/DFM feedback, and release gates to product development, with immutable change history throughout.
+
+> **v1 scope note:** the current build targets **design-phase workflows only** — BOM management,
+> design review, floor/DFM feedback, and a design-release gate. Physical production tracking
+> (equipment, work-in-progress batches, shop-floor stations) described above is the longer-term
+> vision, not what v1 ships. `WIPBatch`/`current_station` are cut from the current epic. See
+> `DECISION_LOG.md`'s "Scope Change" section for the full rationale.
 
 ## What this repo contains (short)
 
@@ -130,7 +138,7 @@ npm run dev
 
 - Hexagonal architecture is enforced: repositories depend only on DBAdapter; services depend only on repositories; controllers depend only on services.
 - TypeScript is used for the backend (NestJS) to enforce domain types; frontend is JavaScript (React) to match current codebase and speed iteration.
-- No Supabase integration yet — it is intentionally staged as a production/hosting option. The README and DECISION_LOG.md will capture migration steps if you choose Supabase later.
+- No actual database service integration yet — it is intentionally staged as a production/hosting option. The README and DECISION_LOG.md will capture migration steps if you choose Supabase later.
 - Integration tests (Postgres adapter + API) are heavier and thus run only on main/merge to keep PR feedback fast. Unit tests use MockAdapter and are run on PRs.
 
 ---

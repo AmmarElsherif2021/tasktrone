@@ -3,6 +3,10 @@
 Plain TypeScript entities and DTOs — no ORM decorators, no framework coupling. Entities describe
 what's persisted; DTOs describe what the HTTP API accepts and are validated with `class-validator`.
 
+> **Scope note:** v1 targets design-phase workflows only (see root `DECISION_LOG.md`'s "Scope
+> Change" section) — no `WIPBatch`/`current_station` entity ships in this version. `Product`,
+> `BomItem`, and the planned `AuditLog`/`EngineeringComment` entities are unaffected.
+
 ## Entities
 
 | File                                         | Fields                                                                                                                                                                                                                                                                                                          |
@@ -22,12 +26,19 @@ products — it points at the 3D asset the board renders for a given product.
 `(typeof PRODUCT_STAGES)[number]`. Both product DTOs below reference it for `@IsIn(...)`
 validation, so the allowed stages live in exactly one place.
 
+**These four values predate the design-phase-only scope decision and don't yet reflect the
+target sub-phase flow** (`Concept → Detailed Design → Internal Review → Floor/DFM Feedback →
+Revision → Design Released`, per `DECISION_LOG.md`). Reconciling `PRODUCT_STAGES` into the real
+design sub-phases is tracked under issue #48 and hasn't landed yet — don't treat the current
+four values as final.
+
 A `BomItem` is one line entry in a `Product`'s Bill of Materials — a required component or
 material, with a quantity and unit cost. It isn't cosmetic data: it's what `ProductService`'s
 phase-gate logic (issue #41) reads to block a stage transition unless a product's BOM is
 non-empty, and to compute `Σ(quantity × unitCost)` against the product's `targetBudget`, raising
 `BudgetExceededError` when it's over. So a `BomItem` is both a completeness gate and a cost-control
-unit as a product moves through Kanban stages.
+unit as a product moves through Kanban stages — under the design-phase scope, that gate now reads
+as "cleared for design release" rather than "cleared for production."
 
 ## DTOs (`./dto`)
 

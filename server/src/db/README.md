@@ -2,6 +2,11 @@
 
 Hexagonal adapter/repository split — see [../../../plan.md](../../../plan.md) for the rationale.
 
+> **Scope note:** v1 targets design-phase workflows only (see root `DECISION_LOG.md`'s "Scope
+> Change" section) — no `WIPBatchRepository` ships in this version, and the schema migration
+> (issue #49) drops the planned `wip_batches` table. `ProductRepository` and `BOMItemRepository`
+> are unaffected.
+
 ```
 Repository (query building, one per entity)
   ↓ depends on
@@ -80,6 +85,9 @@ single-field pattern for `name`.
 - `ProductRepository` — `create`/`findById`/`findByBoard`/`update`/`delete`, scoped by `boardId`.
 - `BOMItemRepository` — `create`/`findById`/`findByProduct`/`update`/`delete`, scoped by
   `productId`. `create` defaults `unitCost` to `0` when omitted rather than leaving it `NULL`.
+
+A `WIPBatchRepository` was scoped for this milestone (issue #38) but is now cut per the
+design-phase-only decision above — there's no `wip_batches` table to repository against.
 
 Unit tests (`*.spec.ts` next to each repository) use `MockAdapter` to assert the SQL/params a
 repository sends, without a database.

@@ -4,14 +4,19 @@ Business logic and use-cases for Tasktrone, a production Kanban system for moder
 manufacturing. Each service takes repository instances (not adapters, not `pg`) in its
 constructor, so unit tests mock the repository interfaces directly — no database involved.
 
+> **Scope note:** v1 targets design-phase workflows only (see root `DECISION_LOG.md`'s "Scope
+> Change" section) — no `WIPBatchService` ships in this version. `ProductService` and
+> `BOMItemService` are unaffected in shape; `ProductService`'s phase gate now reads as "cleared
+> for design release" rather than "cleared for production."
+
 The service layer spans two domains:
 
 - **Task board** (`BoardService`, `TaskService`) — the original Kanban board/task layer, with
   3D placement metadata for the board visualization prototype.
-- **Manufacturing (NPI)** (`ProductService`, `BOMItemService`) — the Product/BOM domain that
-  enforces the business rules a manufacturing line actually needs: a product can't be pushed
-  into production without a costed bill of materials, and can't reach manufacturing without a
-  validated design asset.
+- **Manufacturing/NPI design phase** (`ProductService`, `BOMItemService`) — the Product/BOM
+  domain that enforces the business rules a design workflow needs: a product can't be released
+  without a costed bill of materials, and can't clear the design gate without a validated 3D
+  design asset.
 
 ## TaskService ([`TaskService.ts`](./TaskService.ts))
 
@@ -30,9 +35,10 @@ The service layer spans two domains:
 
 ## ProductService ([`ProductService.ts`](./ProductService.ts))
 
-A `Product` represents an item moving through Tasktrone's manufacturing pipeline — from design
-through development, manufacturing, quality, and shipping (`current_stage`). This service owns
-the CRUD lifecycle for that record.
+A `Product` represents an item moving through Tasktrone's design pipeline — from concept through
+detailed design, internal review, floor/DFM feedback, revision, and design release
+(`current_stage`; the exact sub-phase names are still being finalized under issue #48). This
+service owns the CRUD lifecycle for that record.
 
 - `createProduct` — requires `boardId`, `name`, and `skuName`; a product is always scoped to a
   board so it stays visible on the Kanban view it belongs to.
@@ -44,10 +50,10 @@ the CRUD lifecycle for that record.
 
 **Not yet wired into this file:** the phase-gate logic that is Tier 3 of Epic 3 — blocking a
 stage transition unless the BOM is non-empty and `Σ(quantity × unit_cost)` is within the
-product's `target_budget`, and blocking manufacturing entry unless `active_3d_model_url` is set.
-That logic runs inside a single `DBAdapter.transaction()` alongside the repository update and the
-`AuditLog` write, and raises `PhaseGateViolationError`, `BudgetExceededError`/`BomEmptyError`, or
-`MissingAssetError`. Track it against Tier 3 rather than assuming it's covered by the methods
+product's `target_budget`, and blocking the design-release stage unless `active_3d_model_url` is
+set. That logic runs inside a single `DBAdapter.transaction()` alongside the repository update and
+the `AuditLog` write, and raises `PhaseGateViolationError`, `BudgetExceededError`/`BomEmptyError`,
+or `MissingAssetError`. Track it against Tier 3 rather than assuming it's covered by the methods
 above.
 
 ## BOMItemService ([`BOMItemService.ts`](./BOMItemService.ts))

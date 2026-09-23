@@ -1,3 +1,54 @@
+## **SCOPE CHANGE — Design-Phase-Only Pivot**
+
+**Decision:** Tasktrone v1 is scoped to design-phase workflows only. No physical production
+tracking (equipment, work-in-progress batches, shop-floor stations) ships in this version.
+
+**What this means concretely:**
+
+- The product lifecycle this app models ends at design sign-off, not physical delivery. A
+  working-draft target flow: `Concept → Detailed Design (CAD/BOM) → Internal Review →
+Floor/DFM Feedback → Revision → Design Released`. **These stage names are not finalized** —
+  treat this as a starting point for #48, not a locked enum.
+- **`WIPBatch` and `current_station` (Machining, Welding, Assembly, Inspection, Packaging,
+  Shipped) are out of scope for v1.** There's no physical batch to track a station for when
+  nothing physical is being produced yet.
+- **`BOMItem`, `AuditLog`, and `EngineeringComment` are unaffected, and become more central, not
+  less.** A Bill of Materials, an immutable change history, and spatial floor-feedback comments
+  are all design-phase artifacts already — none of them assumed physical production.
+- **`ProductService`'s phase-gate logic is unaffected in shape** (BOM non-empty, budget check,
+  3D-asset-present check). Only its terminal meaning changes: from "cleared for production" to
+  "cleared for design release."
+
+**Why:** physical shop-floor tracking needs real equipment/production telemetry to be a credible
+model — faking it risks `WIPBatch` reading as relabeled Kanban columns rather than an actual
+manufacturing system. Design collaboration + BOM management + DFM review + a release gate is an
+independently coherent scope, and it's exactly where this app's strongest existing pieces (3D
+model viewer, spatial `EngineeringComment`s, phase-gate logic) are already concentrated.
+
+**Issue impact (Epic 3: Hybrid Kanban-NPI Backend milestone):**
+
+| Issue | Title                                                                  | Disposition                                                                                                          |
+| ----- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| #38   | Create WIPBatch entity, DTO, repository, and service                   | **Closed, not planned** — cut entirely                                                                               |
+| #45   | Create WIPBatchController with routes for WIP CRUD and station updates | **Closed, not planned** — cut entirely                                                                               |
+| #49   | Update database schema for all five new tables                         | Open, scope note added — drop the `wip_batches` table                                                                |
+| #50   | Update AppModule and bootstrap() for new services/repositories         | Open, scope note added — drop WIPBatchRepository/WIPBatchService wiring                                              |
+| #48   | Define current_stage and current_station enums                         | Open, scope note added — drop `CurrentStation`; `CurrentStage` needs new design-sub-phase values (not yet finalized) |
+| #61   | Create comprehensive API contract tests for new endpoints              | Open, scope note added — drop `wip-batch.schema.json`                                                                |
+| #65   | Build ProductDetail panel (BOM, WIP, audit, comments tabs)             | **Not yet actioned** — drop the "WIP" tab whenever frontend Tier 10 work actually starts                             |
+| #67   | Create 3D model viewer (spatial comments)                              | Unaffected — becomes more central under this scope                                                                   |
+
+**Not yet decided:** the final `CurrentStage` sub-phase values for #48, and the exact wording for
+#65's tab removal (lower urgency — frontend Tier 9+ hasn't started).
+
+**Note on the rest of this document:** the tiered plan below (Tiers 1–14, the dependency map, the
+sprint plan) still refers to WIPBatch/current_station in several places (Tier 1.3, Tier 2.1,
+Tier 5.3, Tier 7.1, the dependency diagram, Sprint 1/3) and hasn't been rewritten line-by-line to
+match this pivot yet — that's a larger pass than this scope note covers. Read those references
+in light of the table above rather than at face value until the full plan gets reconciled.
+
+---
+
 ## **Dependency-Based Priority Matrix**
 
 Here's the complete issue prioritization with **blocking relationships** for 57 open issues:
